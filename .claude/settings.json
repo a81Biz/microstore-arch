@@ -24,7 +24,11 @@
       "Bash(npm update *)",
       "Bash(npm run *)",
       "Bash(node -e \"const d=[];process.stdin.on\\('data',c=>d.push\\(c\\)\\);process.stdin.on\\('end',\\(\\)=>{const v=JSON.parse\\(d.join\\(''\\)\\);const v5=v.filter\\(x=>x.startsWith\\('5.'\\) && !x.includes\\('-'\\)\\);console.log\\('Astro 5.x stable:',v5.slice\\(-5\\).join\\(', '\\)\\);}\\);\")",
-      "Bash(node -e \"const d=[];process.stdin.on\\('data',c=>d.push\\(c\\)\\);process.stdin.on\\('end',\\(\\)=>{const v=JSON.parse\\(d.join\\(''\\)\\);const v4=v.filter\\(x=>x.startsWith\\('4.'\\) && !x.includes\\('-'\\)\\);console.log\\('@astrojs/react 4.x stable:',v4.slice\\(-5\\).join\\(', '\\)\\);}\\);\")"
+      "Bash(node -e \"const d=[];process.stdin.on\\('data',c=>d.push\\(c\\)\\);process.stdin.on\\('end',\\(\\)=>{const v=JSON.parse\\(d.join\\(''\\)\\);const v4=v.filter\\(x=>x.startsWith\\('4.'\\) && !x.includes\\('-'\\)\\);console.log\\('@astrojs/react 4.x stable:',v4.slice\\(-5\\).join\\(', '\\)\\);}\\);\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\" -Recurse -Force)",
+      "Bash(Select-Object FullName, Length)",
+      "Bash(Sort-Object FullName)",
+      "Bash(ConvertTo-Json)"
     ]
   }
 }
