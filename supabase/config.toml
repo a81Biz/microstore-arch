@@ -24,10 +24,6 @@ enabled = false
 [realtime]
 enabled = true
 ip_version = "IPv6"
-heartbeat_interval_ms = 30000
-max_header_length = 4096
-max_channel_name_length = 128
-max_concurrent_users = 200
 
 [studio]
 enabled = true
@@ -60,8 +56,6 @@ refresh_token_reuse_interval = 10
 enable_signup = true
 enable_anonymous_sign_ins = false
 enable_manual_linking = false
-minimum_password_length = 8
-password_requirements = ""
 
 [auth.email]
 enable_signup = true
@@ -69,8 +63,6 @@ double_confirm_changes = true
 enable_confirmations = false
 secure_password_change = false
 max_frequency = "1s"
-otp_length = 6
-otp_expiry = 3600
 
 [auth.sms]
 enable_signup = false
