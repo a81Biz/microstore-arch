@@ -209,7 +209,13 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
     displayId: '',
 
     init() {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      let cart = [];
+      try {
+        cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        if (!Array.isArray(cart)) cart = [];
+      } catch {
+        cart = [];
+      }
       if (cart.length === 0) {
         this.step = 'empty';
         return;

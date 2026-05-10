@@ -81,11 +81,14 @@ serve(async (req: Request) => {
     }
 
     // 4. Vendor con TOTP activo → solicitar código
+    // Se devuelve el refresh_token para que el cliente pueda establecer la sesión
+    // de Supabase después de verificar el TOTP, sin necesidad de localStorage.
     if (profile.role === 'vendor' && profile.totp_enabled) {
       logger.info('TOTP required', { userId: authData.user.id });
       return new Response(JSON.stringify({
         next_step: 'verify_totp',
         temp_token: authData.session.access_token,
+        refresh_token: authData.session.refresh_token,
         message: 'Ingresa el código de Google Authenticator',
       }), {
         status: 200,

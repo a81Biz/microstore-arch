@@ -5,6 +5,7 @@ export interface AuthResult {
   nextStep?: 'complete' | 'change_password' | 'verify_totp' | 'setup_totp';
   accessToken?: string;
   tempToken?: string;
+  refreshToken?: string;
   message?: string;
 }
 
@@ -21,10 +22,25 @@ export async function vendorSignIn(email: string, password: string): Promise<Aut
     return { success: false, message: result.message || 'Error al iniciar sesión' };
   }
 
-  return { success: true, ...result };
+  // Si el login es completo (sin MFA), establecer sesión en el cliente Supabase
+  if (result.next_step === 'complete' && result.access_token && result.refresh_token) {
+    await supabaseClient.auth.setSession({
+      access_token: result.access_token,
+      refresh_token: result.refresh_token
+    });
+  }
+
+  return {
+    success: true,
+    nextStep: result.next_step,
+    tempToken: result.temp_token,
+    refreshToken: result.refresh_token,
+    accessToken: result.access_token,
+    message: result.message
+  };
 }
 
-export async function verifyTOTP(tempToken: string, totpCode: string): Promise<AuthResult> {
+export async function verifyTOTP(tempToken: string, totpCode: string, refreshToken?: string): Promise<AuthResult> {
   const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/verify-totp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -37,7 +53,15 @@ export async function verifyTOTP(tempToken: string, totpCode: string): Promise<A
     return { success: false, message: result.message };
   }
 
-  return { success: true, ...result };
+  // Establecer sesión en el cliente Supabase para evitar cualquier almacenamiento manual
+  if (result.access_token && refreshToken) {
+    await supabaseClient.auth.setSession({
+      access_token: result.access_token,
+      refresh_token: refreshToken
+    });
+  }
+
+  return { success: true, accessToken: result.access_token };
 }
 
 export async function setupTOTP(tempToken: string) {
@@ -84,5 +108,9 @@ export async function changePassword(tempToken: string, newPassword: string): Pr
 
 export async function signOut(): Promise<void> {
   await supabaseClient.auth.signOut();
-  localStorage.removeItem('auth_token');
+}
+
+export async function getVendorAuthHeader(): Promise<string> {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  return session ? `Bearer ${session.access_token}` : '';
 }

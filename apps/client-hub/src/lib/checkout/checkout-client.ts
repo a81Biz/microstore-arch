@@ -1,3 +1,5 @@
+import { supabaseClient } from '../supabase-client';
+
 export interface CheckoutResult {
   success: boolean;
   orderId?: string;
@@ -28,15 +30,28 @@ export interface HeyBancoInstructions {
   clabe: string;
 }
 
-function getAuthToken(): string {
-  return localStorage.getItem('auth_token') || '';
+export interface ShippingAddress {
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}
+
+async function getAuthHeader(): Promise<string> {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  return session ? `Bearer ${session.access_token}` : '';
 }
 
 export async function createOrder(
   items: Array<{ productId: string; quantity: number; name?: string; price?: number }>,
-  shippingAddress: any,
+  shippingAddress: ShippingAddress,
   paymentMethod: string
 ): Promise<CheckoutResult> {
+  const authHeader = await getAuthHeader();
+  if (!authHeader) {
+    return { success: false, error: 'Debes iniciar sesión para realizar un pedido' };
+  }
+
   const payload = {
     items: items.map(i => ({
       product_id: i.productId,
@@ -54,7 +69,7 @@ export async function createOrder(
   const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/create-order`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${getAuthToken()}`,
+      'Authorization': authHeader,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(payload)
@@ -63,10 +78,7 @@ export async function createOrder(
   const data = await response.json();
 
   if (!response.ok) {
-    return {
-      success: false,
-      error: data.message || 'Error al crear orden'
-    };
+    return { success: false, error: data.message || 'Error al crear orden' };
   }
 
   return {
@@ -81,9 +93,7 @@ export async function createOrder(
 
 export async function getActivePaymentMethods(): Promise<string[]> {
   const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways/public`, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers: { 'Content-Type': 'application/json' }
   });
 
   if (!response.ok) return [];

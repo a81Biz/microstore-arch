@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient, User } from "https://esm.sh/@supabase/supabase-js@2";
 import { handleError, UnauthorizedError } from "../_shared/error-handler.ts";
 
 export abstract class BaseController {
@@ -13,7 +13,7 @@ export abstract class BaseController {
 
   abstract handle(req: Request): Promise<Response>;
 
-  protected async authenticateUser(authHeader: string) {
+  protected async authenticateUser(authHeader: string): Promise<User> {
     if (!authHeader) throw new UnauthorizedError('Token requerido');
 
     const token = authHeader.replace('Bearer ', '');
@@ -27,9 +27,10 @@ export abstract class BaseController {
     return user;
   }
 
-  protected async isAdmin(authHeader: string): Promise<boolean> {
+  // Verifica si un usuario ya autenticado es vendor con MFA.
+  // Acepta el objeto User para evitar una segunda llamada a getUser().
+  protected async isAdminUser(user: User): Promise<boolean> {
     try {
-      const user = await this.authenticateUser(authHeader);
       const { data: profile } = await this.dbAdmin
         .from('profiles')
         .select('role')
@@ -37,7 +38,7 @@ export abstract class BaseController {
         .single();
 
       const isVendor = profile?.role === 'vendor';
-      // app_metadata solo puede ser modificado por service role — inmutable para el usuario
+      // app_metadata solo puede modificarse vía service_role — inmutable para el usuario
       const isMfaVerified = user.app_metadata?.mfa_verified === true;
 
       return isVendor && isMfaVerified;
@@ -46,7 +47,7 @@ export abstract class BaseController {
     }
   }
 
-  protected async requireAdminMFA(authHeader: string): Promise<void> {
+  protected async requireAdminMFA(authHeader: string): Promise<User> {
     const user = await this.authenticateUser(authHeader);
     const { data: profile } = await this.dbAdmin
       .from('profiles')
@@ -58,13 +59,12 @@ export abstract class BaseController {
       throw new UnauthorizedError('Acceso denegado: Solo vendors');
     }
 
-    // app_metadata.mfa_verified se establece al confirmar TOTP mediante service role.
-    // A diferencia de user_metadata, no puede ser manipulado por el usuario.
     const isMfaVerified = user.app_metadata?.mfa_verified === true;
-
     if (!isMfaVerified) {
       throw new UnauthorizedError('Acceso denegado: MFA no verificado');
     }
+
+    return user;
   }
 
   protected async checkRateLimit(
@@ -81,29 +81,51 @@ export abstract class BaseController {
     });
 
     if (error) {
-      console.error('Rate limit check failed:', error);
-      return true;
+      // Fail-closed: si no podemos verificar el rate limit, denegamos por seguridad
+      return false;
     }
 
     return data as boolean;
   }
 
+  private getCorsOrigin(requestOrigin: string | null): string {
+    const raw = Deno.env.get('ALLOWED_ORIGINS') ?? '';
+    const allowed = raw.split(',').map(o => o.trim()).filter(Boolean);
+
+    if (allowed.length === 0) {
+      // En desarrollo sin env configurada, permitir localhost únicamente
+      const devOrigins = ['http://localhost:4321', 'http://localhost:5173', 'http://localhost:5174'];
+      return requestOrigin && devOrigins.includes(requestOrigin) ? requestOrigin : devOrigins[0];
+    }
+
+    return requestOrigin && allowed.includes(requestOrigin) ? requestOrigin : allowed[0];
+  }
+
   start() {
     serve(async (req: Request) => {
-      try {
-        if (req.method === 'OPTIONS') {
-          return new Response('ok', {
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-              'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-            },
-          });
-        }
+      const corsOrigin = this.getCorsOrigin(req.headers.get('Origin'));
+      const corsHeaders = {
+        'Access-Control-Allow-Origin': corsOrigin,
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+        'Vary': 'Origin',
+      };
 
-        return await this.handle(req);
+      if (req.method === 'OPTIONS') {
+        return new Response('ok', { headers: corsHeaders });
+      }
+
+      try {
+        const response = await this.handle(req);
+        // Inyectar headers CORS en cada respuesta para centralizar el control
+        const headers = new Headers(response.headers);
+        Object.entries(corsHeaders).forEach(([k, v]) => headers.set(k, v));
+        return new Response(response.body, { status: response.status, headers });
       } catch (error) {
-        return handleError(error);
+        const errResponse = handleError(error);
+        const headers = new Headers(errResponse.headers);
+        Object.entries(corsHeaders).forEach(([k, v]) => headers.set(k, v));
+        return new Response(errResponse.body, { status: errResponse.status, headers });
       }
     });
   }

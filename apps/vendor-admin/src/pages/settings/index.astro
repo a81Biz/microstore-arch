@@ -11,6 +11,10 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       </div>
     </header>
 
+    <template x-if="authError">
+      <div class="alert alert-danger" x-text="authError"></div>
+    </template>
+
     <template x-if="loading">
       <div class="loading-state">
         <div class="spinner"></div>
@@ -18,7 +22,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       </div>
     </template>
 
-    <template x-if="!loading">
+    <template x-if="!loading && !authError">
       <div class="gateways-list">
         <template x-for="gateway in gateways" :key="gateway.gateway">
           <div class="gateway-card" :class="{ active: gateway.is_enabled }">
@@ -27,11 +31,11 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                 <div class="gateway-icon" x-text="getGatewayIcon(gateway.gateway)"></div>
                 <div>
                   <h2 x-text="getGatewayName(gateway.gateway)"></h2>
-                  <span class="status-badge" :class="gateway.is_enabled ? 'status-on' : 'status-off'" 
+                  <span class="status-badge" :class="gateway.is_enabled ? 'status-on' : 'status-off'"
                         x-text="gateway.is_enabled ? 'Activo' : 'Inactivo'"></span>
                 </div>
               </div>
-              
+
               <div class="gateway-actions">
                 <button @click="toggleForm(gateway.gateway)" class="btn-secondary" x-text="showForm === gateway.gateway ? 'Cerrar' : 'Configurar'"></button>
                 <label class="switch">
@@ -50,15 +54,15 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                       <div class="form-contents">
                         <div class="form-group">
                           <label>Publishable Key</label>
-                          <input type="password" x-model="credentials.stripe.publishableKey" placeholder="pk_test_..." />
+                          <input type="password" x-model="credentials.stripe.publishableKey" placeholder="pk_live_..." autocomplete="off" />
                         </div>
                         <div class="form-group">
                           <label>Secret Key</label>
-                          <input type="password" x-model="credentials.stripe.secretKey" placeholder="sk_test_..." />
+                          <input type="password" x-model="credentials.stripe.secretKey" placeholder="sk_live_..." autocomplete="off" />
                         </div>
                         <div class="form-group">
                           <label>Webhook Secret</label>
-                          <input type="password" x-model="credentials.stripe.webhookSecret" placeholder="whsec_..." />
+                          <input type="password" x-model="credentials.stripe.webhookSecret" placeholder="whsec_..." autocomplete="off" />
                         </div>
                       </div>
                     </template>
@@ -67,11 +71,11 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                       <div class="form-contents">
                         <div class="form-group">
                           <label>Client ID</label>
-                          <input type="password" x-model="credentials.paypal.clientId" />
+                          <input type="password" x-model="credentials.paypal.clientId" autocomplete="off" />
                         </div>
                         <div class="form-group">
                           <label>Secret</label>
-                          <input type="password" x-model="credentials.paypal.secret" />
+                          <input type="password" x-model="credentials.paypal.secret" autocomplete="off" />
                         </div>
                       </div>
                     </template>
@@ -80,7 +84,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                       <div class="form-contents">
                         <div class="form-group">
                           <label>Access Token</label>
-                          <input type="password" x-model="credentials.mercadopago.accessToken" placeholder="APP_USR-..." />
+                          <input type="password" x-model="credentials.mercadopago.accessToken" placeholder="APP_USR-..." autocomplete="off" />
                         </div>
                       </div>
                     </template>
@@ -89,11 +93,14 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                       <div class="form-contents">
                         <div class="form-group">
                           <label>API Key (Opcional)</label>
-                          <input type="password" x-model="credentials.hey_banco.apiKey" />
+                          <input type="password" x-model="credentials.hey_banco.apiKey" autocomplete="off" />
                         </div>
                         <div class="form-group">
-                          <label>Número de CLABE</label>
-                          <input type="text" x-model="credentials.hey_banco.clabe" placeholder="012 345 678901234567" />
+                          <label>Número de CLABE (18 dígitos)</label>
+                          <input type="text" x-model="credentials.hey_banco.clabe"
+                                 placeholder="Ej: 021180040800000001"
+                                 pattern="\d{18}" title="La CLABE debe tener exactamente 18 dígitos"
+                                 maxlength="18" inputmode="numeric" />
                         </div>
                       </div>
                     </template>
@@ -107,7 +114,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                   </template>
 
                   <div class="form-footer">
-                    <p class="security-note">🔒 Tus credenciales se encriptan mediante pgsodium antes de guardarse.</p>
+                    <p class="security-note">🔒 Tus credenciales se encriptan antes de guardarse.</p>
                     <button type="submit" class="btn-primary" :disabled="savingGateway === gateway.gateway">
                       <span x-show="savingGateway !== gateway.gateway">Guardar Cambios</span>
                       <span x-show="savingGateway === gateway.gateway">Guardando...</span>
@@ -124,9 +131,12 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 </VendorAdminLayout>
 
 <script>
+  import { getVendorAuthHeader } from '../../lib/auth/auth-client';
+
   window.paymentSettings = () => ({
     gateways: [],
     loading: true,
+    authError: '',
     showForm: null,
     savingGateway: null,
     saveMessage: {},
@@ -140,26 +150,35 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 
     async loadGateways() {
       this.loading = true;
+      this.authError = '';
       try {
-        const token = localStorage.getItem('auth_token');
+        const authHeader = await getVendorAuthHeader();
+        if (!authHeader) {
+          this.authError = 'Sesión expirada. Por favor inicia sesión nuevamente.';
+          return;
+        }
         const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': authHeader }
         });
 
-        if (response.ok) {
-          this.gateways = await response.json();
-          // Si no hay nada, inicializar (mock para el demo)
-          if (this.gateways.length === 0) {
-            this.gateways = [
-              { gateway: 'stripe', is_enabled: false },
-              { gateway: 'paypal', is_enabled: false },
-              { gateway: 'mercadopago', is_enabled: false },
-              { gateway: 'hey_banco', is_enabled: false }
-            ];
-          }
+        if (response.status === 401) {
+          this.authError = 'No tienes permiso para ver esta página.';
+          return;
         }
-      } catch (err) {
-        console.error('Error loading gateways:', err);
+
+        if (response.ok) {
+          const data = await response.json();
+          this.gateways = Array.isArray(data) && data.length > 0
+            ? data
+            : [
+                { gateway: 'stripe', is_enabled: false },
+                { gateway: 'paypal', is_enabled: false },
+                { gateway: 'mercadopago', is_enabled: false },
+                { gateway: 'hey_banco', is_enabled: false }
+              ];
+        }
+      } catch {
+        this.authError = 'Error de red al cargar pasarelas. Verifica tu conexión.';
       } finally {
         this.loading = false;
       }
@@ -182,23 +201,33 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     },
 
     async toggleGateway(gateway) {
-      const token = localStorage.getItem('auth_token');
+      const newState = !gateway.is_enabled;
       try {
-        await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways`, {
+        const authHeader = await getVendorAuthHeader();
+        const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': authHeader,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             gateway: gateway.gateway,
-            is_enabled: !gateway.is_enabled,
-            credentials: {} // Solo cambiar estado
+            is_enabled: newState,
+            credentials: {}
           })
         });
-        gateway.is_enabled = !gateway.is_enabled;
-      } catch (err) {
-        console.error('Error toggling gateway:', err);
+
+        if (!response.ok) {
+          const data = await response.json();
+          // Mostrar error visible al usuario — no modificar el estado UI si falló
+          this.saveError[gateway.gateway] = data.message || 'Error al cambiar estado del gateway';
+          return;
+        }
+
+        // Solo actualizar la UI DESPUÉS de confirmar éxito
+        gateway.is_enabled = newState;
+      } catch {
+        this.saveError[gateway.gateway] = 'Error de red al conectar con la API';
       }
     },
 
@@ -208,11 +237,11 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       this.saveError[gateway] = '';
 
       try {
-        const token = localStorage.getItem('auth_token');
+        const authHeader = await getVendorAuthHeader();
         const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': authHeader,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
@@ -224,15 +253,16 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 
         if (response.ok) {
           this.saveMessage[gateway] = 'Configuración guardada exitosamente';
-          this.gateways.find(g => g.gateway === gateway).is_enabled = true;
-          // Limpiar campos por seguridad
-          Object.keys(this.credentials[gateway]).forEach(k => this.credentials[gateway][k] = '');
+          const gw = this.gateways.find(g => g.gateway === gateway);
+          if (gw) gw.is_enabled = true;
+          // Limpiar campos sensibles después de guardar
+          Object.keys(this.credentials[gateway]).forEach(k => { this.credentials[gateway][k] = ''; });
           setTimeout(() => { this.showForm = null; }, 2000);
         } else {
           const data = await response.json();
           this.saveError[gateway] = data.message || 'Error al guardar';
         }
-      } catch (err) {
+      } catch {
         this.saveError[gateway] = 'Error de red al conectar con la API';
       } finally {
         this.savingGateway = null;
@@ -262,7 +292,6 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 
   .gateway-actions { display: flex; align-items: center; gap: 1.5rem; }
 
-  /* Toggle Switch */
   .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e7eb; transition: .4s; border-radius: 24px; }

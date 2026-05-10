@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Supabase Stack (corre CLI internamente para levantar DB, Auth, Storage, Functions)
   supabase:
-    image: supabase/cli:latest
+    image: supabase/cli:1.207.9
     container_name: microstore-supabase
     command: start
     ports:

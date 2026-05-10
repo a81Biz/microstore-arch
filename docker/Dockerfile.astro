@@ -1,17 +1,23 @@
 FROM node:22-alpine
 
+# Correr como usuario no-root para minimizar superficie de ataque
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 WORKDIR /app
 
-# Copiar manifiestos para caché de npm
-COPY package.json package-lock.json* ./
+# Copiar manifiestos para cache de npm
+COPY package.json package-lock.json ./
 COPY apps/storefront/package.json ./apps/storefront/
 COPY apps/client-hub/package.json ./apps/client-hub/
 COPY apps/vendor-admin/package.json ./apps/vendor-admin/
 COPY packages/core/package.json ./packages/core/
 COPY packages/config-eslint/package.json ./packages/config-eslint/
 
-# Instalar dependencias de workspaces
-RUN npm ci --ignore-scripts || npm install
+# npm ci falla de forma explícita si package-lock.json está desincronizado — sin fallback
+RUN npm ci --ignore-scripts
+
+RUN chown -R appuser:appgroup /app
+USER appuser
 
 EXPOSE 4321
 

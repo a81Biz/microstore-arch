@@ -16,70 +16,73 @@ jobs:
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci
       - run: npm run lint
+      - run: npm run typecheck
       - run: npm run test:core
+      - run: npm audit --audit-level=high
 
   deploy:
     needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with: { node-version: '22', cache: 'npm' }
-      
+
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
-      
+
       - name: Install Dependencies
         run: npm ci
-      
+
       - name: Build Storefront
         run: cd apps/storefront && npm run build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           PUBLIC_STOREFRONT_URL: ${{ secrets.PUBLIC_STOREFRONT_URL }}
-      
+
       - name: Build Client Hub
         run: cd apps/client-hub && npm run build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           PUBLIC_API_BASE: ${{ secrets.SUPABASE_URL }}/functions/v1
-      
+
       - name: Build Vendor Admin
         run: cd apps/vendor-admin && npm run build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           PUBLIC_API_BASE: ${{ secrets.SUPABASE_URL }}/functions/v1
-      
+
       - name: Deploy Storefront to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           workingDirectory: apps/storefront
           command: pages deploy dist --project-name micro-store-storefront
-      
+
       - name: Deploy Client Hub to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           workingDirectory: apps/client-hub
           command: pages deploy dist --project-name micro-store-client-hub
-      
+
       - name: Deploy Vendor Admin to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           workingDirectory: apps/vendor-admin
           command: pages deploy dist --project-name micro-store-vendor-admin
-      
+
       - name: Deploy Edge Functions
         run: supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
-      
+
       - name: Run Database Migrations
         run: supabase db push
-      
-      - name: Health Check
+
+      - name: Health Check (retry 5x con backoff)
         run: |
-          sleep 10
-          curl -f "${{ secrets.SUPABASE_URL }}/functions/v1/health" || exit 1
+          curl --retry 5 --retry-delay 10 --retry-connrefused --fail \
+            "${{ secrets.SUPABASE_URL }}/functions/v1/health" \
+            || (echo "Health check failed after 5 attempts" && exit 1)

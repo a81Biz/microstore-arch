@@ -28,7 +28,8 @@
       "Bash(Get-ChildItem -Path \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\" -Recurse -Force)",
       "Bash(Select-Object FullName, Length)",
       "Bash(Sort-Object FullName)",
-      "Bash(ConvertTo-Json)"
+      "Bash(ConvertTo-Json)",
+      "Bash(git -C \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\" status --short)"
     ]
   }
 }

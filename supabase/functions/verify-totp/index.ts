@@ -1,17 +1,10 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { TOTP, Secret } from 'npm:otpauth';
 import { createLogger } from "../_shared/logger.ts";
-import { handleError, UnauthorizedError } from "../_shared/error-handler.ts";
+import { handleError, UnauthorizedError, BusinessError } from "../_shared/error-handler.ts";
 
 const logger = createLogger('verify-totp');
-
-async function verifyTOTPToken(secret: string, token: string): Promise<boolean> {
-  // Simulación para desarrollo (en producción usar otplib o librería TOTP de Deno)
-  if (!/^\d{6}$/.test(token)) {
-    return false;
-  }
-  return token === '123456';
-}
 
 serve(async (req: Request) => {
   try {
@@ -19,6 +12,10 @@ serve(async (req: Request) => {
 
     if (!temp_token || !totp_code) {
       throw new UnauthorizedError('Token temporal y código TOTP requeridos');
+    }
+
+    if (!/^\d{6}$/.test(String(totp_code))) {
+      throw new BusinessError('INVALID_TOTP_FORMAT', 'El código TOTP debe tener exactamente 6 dígitos', 400);
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -29,42 +26,61 @@ serve(async (req: Request) => {
     const { data: { user }, error: verifyError } = await supabaseAdmin.auth.getUser(temp_token);
 
     if (verifyError || !user) {
-      throw new UnauthorizedError('Token temporal inválido');
+      throw new UnauthorizedError('Token temporal inválido o expirado');
     }
 
-    // 2. Obtener secreto TOTP del perfil
+    // 2. Verificar que el usuario es vendor — clientes no pasan por este flujo
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('totp_secret, totp_enabled, role')
       .eq('id', user.id)
       .single();
 
-    if (profileError || !profile || !profile.totp_enabled || !profile.totp_secret) {
+    if (profileError || !profile) {
+      throw new UnauthorizedError('Perfil no encontrado');
+    }
+
+    if (profile.role !== 'vendor') {
+      throw new UnauthorizedError('Solo vendors pueden verificar TOTP');
+    }
+
+    if (!profile.totp_enabled || !profile.totp_secret) {
       throw new UnauthorizedError('TOTP no configurado para este usuario');
     }
 
-    // 3. Verificar código TOTP
-    const isValid = await verifyTOTPToken(profile.totp_secret, totp_code);
+    // 3. Verificar código TOTP criptográficamente contra el secret único del usuario
+    const secret = Secret.fromBase32(profile.totp_secret);
+    const totp = new TOTP({
+      issuer: 'Micro-Store',
+      label: user.email!,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30,
+      secret,
+    });
 
-    if (!isValid) {
-      logger.warn('Invalid TOTP code', { userId: user.id });
+    const delta = totp.validate({ token: String(totp_code), window: 1 });
+
+    if (delta === null) {
+      logger.warn('Invalid TOTP code attempt', { userId: user.id });
       throw new UnauthorizedError('Código TOTP inválido');
     }
 
-    // 4. Marcar sesión como verificada vía metadata (enfoque para Free Tier)
+    // 4. Marcar MFA como verificado en app_metadata (solo service role puede escribir esto,
+    //    a diferencia de user_metadata que el propio usuario puede modificar desde el cliente)
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       user.id,
       {
-        user_metadata: { mfa_verified: true, mfa_verified_at: new Date().toISOString() }
+        app_metadata: { mfa_verified: true, mfa_verified_at: new Date().toISOString() }
       }
     );
 
     if (updateError) {
-      logger.error('Failed to update user metadata', { error: updateError });
+      logger.error('Failed to update app_metadata', { error: updateError });
       throw new Error('Error al verificar sesión MFA');
     }
 
-    logger.info('TOTP verified successfully', { userId: user.id });
+    logger.info('TOTP verified successfully', { userId: user.id, delta });
 
     return new Response(JSON.stringify({
       success: true,
