@@ -49,9 +49,6 @@ jobs:
         run: supabase start --exclude studio,inbucket,edge-runtime,imgproxy,logflare,vector
         timeout-minutes: 6
 
-      - name: Apply Migrations
-        run: supabase db reset --no-confirm
-
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
