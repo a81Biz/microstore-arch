@@ -84,6 +84,7 @@ MAGIC_STRINGS=$(grep -rnE "(^|[^a-zA-Z_])'(pending|paid|in_production|shipped|de
   | grep -v "type.*=.*'\|interface.*:\s*'\|z\.enum\|nativeEnum" \
   | grep -v "status:\s*'\|fulfillmentStatus:\s*'\|: OrderStatus\|: ItemFulfillmentStatus" \
   | grep -v "OrderStatus\.\|ItemFulfillmentStatus\." \
+  | grep -v "packages/core/src/enums/" \
   | wc -l || true)
 
 if [ "$MAGIC_STRINGS" -gt 0 ]; then
@@ -96,6 +97,7 @@ if [ "$MAGIC_STRINGS" -gt 0 ]; then
     --exclude="*.test.ts" \
     | grep -v "enum OrderStatus\|from.*enums\|import.*OrderStatus" \
     | grep -v "type.*=.*'\|interface.*:\s*'\|z\.enum" \
+    | grep -v "packages/core/src/enums/" \
     | head -5
   # No fallar el build por esto, solo advertir
   # VIOLATIONS_FOUND=$((VIOLATIONS_FOUND + 1))

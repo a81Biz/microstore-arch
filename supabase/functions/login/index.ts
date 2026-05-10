@@ -1,12 +1,12 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from "../_shared/logger.ts";
 import { handleError, UnauthorizedError, BusinessError } from "../_shared/error-handler.ts";
 
 const logger = createLogger('login');
 
 async function checkLoginRateLimit(
-  dbAdmin: ReturnType<typeof createClient>,
+  dbAdmin: SupabaseClient,
   identifier: string
 ): Promise<void> {
   const { data, error } = await dbAdmin.rpc('check_rate_limit', {

@@ -75,7 +75,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
             </div>
 
             <div class="order-actions">
-              <button @click.stop="openTrackingModal(order)" class="btn-icon" :disabled="['delivered', 'cancelled'].includes(order.status)" title="Actualizar Tracking">
+              <button @click.stop="openTrackingModal(order)" class="btn-icon" :disabled="TERMINAL_STATUSES.includes(order.status)" title="Actualizar Tracking">
                 🚚
               </button>
               <span class="arrow">→</span>
@@ -202,12 +202,14 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 
 <script>
   import { loadOrders, loadOrderDetail, updateTracking, updateOrderStatus } from '../../lib/orders/order-admin';
+  import { OrderStatus } from '@micro-store/core';
 
   window.orderAdmin = () => ({
     orders: [],
     loading: true,
     search: '',
     statusFilter: '',
+    TERMINAL_STATUSES: [OrderStatus.DELIVERED, OrderStatus.CANCELLED],
     
     showDetail: false,
     detailLoading: false,
