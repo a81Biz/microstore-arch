@@ -159,21 +159,21 @@ CREATE POLICY "Users can update own non-sensitive fields" ON profiles FOR UPDATE
 -- Políticas: products (lectura pública, escritura admin con MFA)
 CREATE POLICY "Public can read visible products" ON products FOR SELECT USING (is_visible = true);
 CREATE POLICY "Admin can manage products" ON products FOR ALL 
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor' AND (auth.jwt()->'user_metadata'->>'mfa_verified') = 'true'))
-  WITH CHECK (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor' AND (auth.jwt()->'user_metadata'->>'mfa_verified') = 'true'));
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor' AND (auth.jwt()->>'user_metadata')::jsonb ->> 'mfa_verified' = 'true'))
+  WITH CHECK (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor' AND (auth.jwt()->>'user_metadata')::jsonb ->> 'mfa_verified' = 'true'));
 
 -- Políticas: orders (cliente ve sus pedidos, admin ve todos con MFA)
 CREATE POLICY "Customers can read own orders" ON orders FOR SELECT USING (customer_id = auth.uid());
 CREATE POLICY "Admin can read all orders" ON orders FOR SELECT 
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor' AND (auth.jwt()->'user_metadata'->>'mfa_verified') = 'true'));
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor' AND (auth.jwt()->>'user_metadata')::jsonb ->> 'mfa_verified' = 'true'));
 CREATE POLICY "Admin can manage orders" ON orders FOR ALL 
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor' AND (auth.jwt()->'user_metadata'->>'mfa_verified') = 'true'));
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor' AND (auth.jwt()->>'user_metadata')::jsonb ->> 'mfa_verified' = 'true'));
 
 -- Políticas: order_items (hereda de orders vía relación)
 CREATE POLICY "Customers can read own order items" ON order_items FOR SELECT 
   USING (EXISTS (SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.customer_id = auth.uid()));
 CREATE POLICY "Admin can manage order items" ON order_items FOR ALL 
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor' AND (auth.jwt()->'user_metadata'->>'mfa_verified') = 'true'));
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor' AND (auth.jwt()->>'user_metadata')::jsonb ->> 'mfa_verified' = 'true'));
 
 -- Políticas: payment_credentials (denegar acceso directo)
 CREATE POLICY "Deny all client access to payment_credentials" ON payment_credentials FOR ALL USING (FALSE);

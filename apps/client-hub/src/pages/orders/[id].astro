@@ -128,17 +128,19 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 
   window.orderDetail = () => ({
     order: null,
+    unsubscribe: null,
     loading: true,
-    subscription: null,
 
     async init() {
       const orderId = window.location.pathname.split('/').pop();
       await this.fetchDetail(orderId);
       
       // Suscribirse a cambios en tiempo real
-      this.subscription = subscribeToOrderUpdates(orderId, (updated) => {
-        this.order = updated;
-      });
+      if (this.order) {
+        this.unsubscribe = subscribeToOrderUpdates(orderId, (updated) => {
+          this.order = updated;
+        });
+      }
     },
 
     async fetchDetail(orderId) {
@@ -183,8 +185,10 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
       return urls[carrier?.toLowerCase()] || '#';
     },
 
-    cleanup() {
-      if (this.subscription) this.subscription.unsubscribe();
+    destroyed() {
+      if (this.unsubscribe) {
+        this.unsubscribe();
+      }
     }
   });
 </script>

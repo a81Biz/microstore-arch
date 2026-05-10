@@ -130,7 +130,7 @@ class PaymentWebhookController extends BaseController {
       event_id: paymentIntentId,
       gateway: gateway,
       status: 'processed',
-      metadata: { orderId }
+      payload: { orderId }
     });
     
     // 2. Enviar email de confirmación
