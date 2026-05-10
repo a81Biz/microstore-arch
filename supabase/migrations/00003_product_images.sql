@@ -1,7 +1,6 @@
 -- Micro-Store Arch: Storage y Funciones de Productos
 -- Versión: 1.0
 
-BEGIN;
 
 -- 1. Políticas de Storage para imágenes de productos
 -- (Asumiendo que el bucket 'product-images' ya existe o se crea via Dashboard)
@@ -114,4 +113,3 @@ CREATE TRIGGER on_product_change
   BEFORE INSERT OR UPDATE OR DELETE ON products
   FOR EACH ROW EXECUTE FUNCTION notify_product_change();
 
-COMMIT;

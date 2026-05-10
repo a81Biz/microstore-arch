@@ -1,7 +1,6 @@
 -- Micro-Store Arch: Configuración de Storage y RLS
 -- Versión: 1.0
 
-BEGIN;
 
 -- 1. Crear el bucket 'product-images' si no existe
 INSERT INTO storage.buckets (id, name, public)
@@ -37,4 +36,3 @@ CREATE POLICY "Vendor MFA Delete Access" ON storage.objects FOR DELETE
     )
   );
 
-COMMIT;

@@ -1,7 +1,6 @@
 -- Micro-Store Arch: Audit Logs y Payment Transactions
 -- Agrega trazabilidad completa de operaciones críticas y ciclo de vida de pagos.
 
-BEGIN;
 
 -- ============================================================
 -- 1. Tabla audit_logs — registro inmutable de operaciones críticas
@@ -155,4 +154,3 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMIT;

@@ -6,7 +6,6 @@
 --   3. save_payment_credentials usa pgsodium sin guardar nonce → migrar a pgcrypto
 --   4. Añade get_payment_credentials para que create-order pueda leer la CLABE real
 
-BEGIN;
 
 -- ============================================================
 -- 1. Tabla vendor_whitelist — lista de emails autorizados como vendor
@@ -141,4 +140,3 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 REVOKE ALL ON FUNCTION public.get_payment_credentials(payment_gateway) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.get_payment_credentials(payment_gateway) TO service_role;
 
-COMMIT;

@@ -2,7 +2,6 @@
 -- Reemplaza user_metadata (mutable por usuario) con app_metadata (solo service role)
 -- en todas las políticas RLS y el trigger de storage.
 
-BEGIN;
 
 -- ============================================================
 -- 1. Fix RLS en tabla products
@@ -111,4 +110,3 @@ CREATE POLICY "Vendor MFA Delete Access" ON storage.objects FOR DELETE
     )
   );
 
-COMMIT;

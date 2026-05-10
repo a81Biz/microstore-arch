@@ -1,7 +1,6 @@
 -- Micro-Store Arch: Migración Inicial
 -- Versión: 1.0
 
-BEGIN;
 
 -- 1. Tipos ENUM
 DO $$ BEGIN
@@ -187,4 +186,3 @@ INSERT INTO products (slug, name, description, price, stock_quantity, is_on_dema
 ('libreta-reciclada', 'Libreta Reciclada', 'Libreta artesanal con papel reciclado', 14.99, 25, false, true)
 ON CONFLICT (slug) DO NOTHING;
 
-COMMIT;

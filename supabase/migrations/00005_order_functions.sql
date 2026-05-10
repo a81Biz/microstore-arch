@@ -1,7 +1,6 @@
 -- Micro-Store Arch: Funciones de Gestión de Pedidos
 -- Versión: 1.0
 
-BEGIN;
 
 -- 1. Función para actualizar tracking y estado de envío
 CREATE OR REPLACE FUNCTION public.update_order_tracking(
@@ -201,4 +200,3 @@ CREATE POLICY "Customers can subscribe to own orders" ON orders
   FOR SELECT
   USING (customer_id = auth.uid());
 
-COMMIT;

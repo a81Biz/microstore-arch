@@ -1,7 +1,6 @@
 -- Micro-Store Arch: Rate Limiting (SQL Pure / Cost $0)
 -- Versión: 1.1
 
-BEGIN;
 
 DROP TABLE IF EXISTS rate_limits;
 
@@ -47,4 +46,3 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMIT;

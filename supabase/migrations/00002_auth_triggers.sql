@@ -1,7 +1,6 @@
 -- Micro-Store Arch: Triggers y Funciones de Autenticación
 -- Versión: 1.0
 
-BEGIN;
 
 -- 1. Función para crear perfil automáticamente al registrarse
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -101,4 +100,3 @@ CREATE POLICY "Admin with MFA can read all profiles" ON profiles
     )
   );
 
-COMMIT;

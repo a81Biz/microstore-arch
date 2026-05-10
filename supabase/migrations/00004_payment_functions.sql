@@ -1,7 +1,6 @@
 -- Micro-Store Arch: Funciones y Procedimientos de Pago
 -- Versión: 1.0
 
-BEGIN;
 
 -- 1. Extensión para encriptación (pgcrypto es estándar y siempre disponible en Supabase)
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -204,4 +203,3 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMIT;

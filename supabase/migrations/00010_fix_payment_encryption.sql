@@ -3,7 +3,6 @@
 -- pgp_sym_encrypt (pgcrypto) incluye IV en el ciphertext — sin almacenamiento externo de nonce.
 -- Falla explícitamente si la clave no está configurada — sin fallback a plaintext.
 
-BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
@@ -47,4 +46,3 @@ COMMENT ON FUNCTION public.save_payment_credentials IS
   'Falla explícitamente si app.settings.encryption_key no está configurada. '
   'No tiene fallback a plaintext.';
 
-COMMIT;

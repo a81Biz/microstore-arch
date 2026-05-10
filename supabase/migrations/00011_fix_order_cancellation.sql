@@ -2,7 +2,6 @@
 -- Al cancelar una orden con estado paid/in_production, restaura el stock
 -- de los ítems que ya habían sido reservados (fulfillment_status = 'reserved').
 
-BEGIN;
 
 CREATE OR REPLACE FUNCTION public.update_order_status_manual(
   p_order_id UUID,
@@ -78,4 +77,3 @@ COMMENT ON FUNCTION public.update_order_status_manual IS
   'Actualiza el estado de una orden con validación de transiciones. '
   'Al cancelar órdenes pagadas/en producción, restaura automáticamente el stock reservado.';
 
-COMMIT;

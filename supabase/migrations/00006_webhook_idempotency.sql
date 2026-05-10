@@ -1,7 +1,6 @@
 -- Micro-Store Arch: Idempotencia de Webhooks
 -- Versión: 1.1
 
-BEGIN;
 
 CREATE TABLE IF NOT EXISTS webhook_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -27,4 +26,3 @@ CREATE POLICY "Admin can read webhook logs" ON webhook_logs FOR SELECT
     AND (auth.jwt()->'user_metadata'->>'mfa_verified') = 'true'
   ));
 
-COMMIT;
