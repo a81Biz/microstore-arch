@@ -69,7 +69,6 @@ export async function signUpWithEmail(email: string, password: string): Promise<
 
 export async function signOut(): Promise<void> {
   const { error } = await supabaseClient.auth.signOut();
-  localStorage.removeItem('auth_token');
   if (error) {
     throw new Error(error.message);
   }

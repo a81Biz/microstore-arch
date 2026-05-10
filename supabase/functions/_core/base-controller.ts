@@ -15,7 +15,7 @@ export abstract class BaseController {
 
   protected async authenticateUser(authHeader: string) {
     if (!authHeader) throw new UnauthorizedError('Token requerido');
-    
+
     const token = authHeader.replace('Bearer ', '');
     const url = Deno.env.get("SUPABASE_URL")!;
     const key = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -23,7 +23,7 @@ export abstract class BaseController {
 
     const { data: { user }, error } = await supabase.auth.getUser(token);
     if (error || !user) throw new UnauthorizedError('Token inválido');
-    
+
     return user;
   }
 
@@ -35,10 +35,11 @@ export abstract class BaseController {
         .select('role')
         .eq('id', user.id)
         .single();
-      
+
       const isVendor = profile?.role === 'vendor';
-      const isMfaVerified = user.user_metadata?.mfa_verified === 'true' || user.user_metadata?.mfa_verified === true;
-      
+      // app_metadata solo puede ser modificado por service role — inmutable para el usuario
+      const isMfaVerified = user.app_metadata?.mfa_verified === true;
+
       return isVendor && isMfaVerified;
     } catch {
       return false;
@@ -57,25 +58,31 @@ export abstract class BaseController {
       throw new UnauthorizedError('Acceso denegado: Solo vendors');
     }
 
-    // El JWT de Supabase en Free Tier expone user_metadata
-    const isMfaVerified = user.user_metadata?.mfa_verified === 'true' || user.user_metadata?.mfa_verified === true;
-    
+    // app_metadata.mfa_verified se establece al confirmar TOTP mediante service role.
+    // A diferencia de user_metadata, no puede ser manipulado por el usuario.
+    const isMfaVerified = user.app_metadata?.mfa_verified === true;
+
     if (!isMfaVerified) {
       throw new UnauthorizedError('Acceso denegado: MFA no verificado');
     }
   }
 
-  protected async checkRateLimit(identifier: string, endpoint: string, limit: number, windowSeconds: number): Promise<boolean> {
+  protected async checkRateLimit(
+    identifier: string,
+    endpoint: string,
+    limit: number,
+    windowSeconds: number
+  ): Promise<boolean> {
     const { data, error } = await this.dbAdmin.rpc('check_rate_limit', {
       p_identifier: identifier,
       p_endpoint: endpoint,
       p_limit: limit,
-      p_window_seconds: windowSeconds
+      p_window_seconds: windowSeconds,
     });
 
     if (error) {
       console.error('Rate limit check failed:', error);
-      return true; // Fallback a permitir si falla el check
+      return true;
     }
 
     return data as boolean;
@@ -85,15 +92,15 @@ export abstract class BaseController {
     serve(async (req: Request) => {
       try {
         if (req.method === 'OPTIONS') {
-          return new Response('ok', { 
-            headers: { 
+          return new Response('ok', {
+            headers: {
               'Access-Control-Allow-Origin': '*',
               'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-              'Access-Control-Allow-Headers': 'Authorization, Content-Type'
-            } 
+              'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+            },
           });
         }
-        
+
         return await this.handle(req);
       } catch (error) {
         return handleError(error);

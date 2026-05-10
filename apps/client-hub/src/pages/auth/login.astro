@@ -73,9 +73,8 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
         const result = await signInWithEmail(this.email, this.password);
 
         if (result.success) {
-          if (result.accessToken) {
-            localStorage.setItem('auth_token', result.accessToken);
-          }
+          // No guardar el token en localStorage — el cliente Supabase lo gestiona internamente
+          // almacenándolo de forma segura. La sesión se recupera con supabaseClient.auth.getSession()
           window.location.href = '/';
         } else {
           this.error = result.message || 'Error al iniciar sesión';

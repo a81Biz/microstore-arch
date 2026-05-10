@@ -1,9 +1,29 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createLogger } from "../_shared/logger.ts";
-import { handleError, UnauthorizedError } from "../_shared/error-handler.ts";
+import { handleError, UnauthorizedError, BusinessError } from "../_shared/error-handler.ts";
 
 const logger = createLogger('login');
+
+async function checkLoginRateLimit(
+  dbAdmin: ReturnType<typeof createClient>,
+  identifier: string
+): Promise<void> {
+  const { data, error } = await dbAdmin.rpc('check_rate_limit', {
+    p_identifier: identifier,
+    p_endpoint: 'login',
+    p_limit: 5,
+    p_window_seconds: 300,  // 5 intentos por 5 minutos
+  });
+
+  if (!error && data === false) {
+    throw new BusinessError(
+      'RATE_LIMITED',
+      'Demasiados intentos de inicio de sesión. Espera 5 minutos.',
+      429
+    );
+  }
+}
 
 serve(async (req: Request) => {
   try {
@@ -20,13 +40,19 @@ serve(async (req: Request) => {
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
+    // Rate limiting por IP + email para prevenir brute force (5 intentos / 5 min)
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const identifier = `${ip}:${email.toLowerCase()}`;
+    await checkLoginRateLimit(supabaseAdmin, identifier);
+
     // 1. Autenticar usuario
     const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
       email,
-      password
+      password,
     });
 
     if (authError || !authData.user) {
+      logger.warn('Failed login attempt', { email, ip });
       throw new UnauthorizedError('Credenciales inválidas');
     }
 
@@ -41,35 +67,33 @@ serve(async (req: Request) => {
       throw new UnauthorizedError('Perfil no encontrado');
     }
 
-    // 3. Verificar si debe cambiar contraseña (vendor primer ingreso)
+    // 3. Vendor sin contraseña cambiada → forzar cambio en primer ingreso
     if (profile.role === 'vendor' && !profile.password_changed_at) {
       logger.info('Vendor must change password', { userId: authData.user.id });
-
       return new Response(JSON.stringify({
         next_step: 'change_password',
         temp_token: authData.session.access_token,
-        message: 'Debes cambiar tu contraseña antes de continuar'
+        message: 'Debes cambiar tu contraseña antes de continuar',
       }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // 4. Verificar si requiere TOTP
+    // 4. Vendor con TOTP activo → solicitar código
     if (profile.role === 'vendor' && profile.totp_enabled) {
       logger.info('TOTP required', { userId: authData.user.id });
-
       return new Response(JSON.stringify({
         next_step: 'verify_totp',
         temp_token: authData.session.access_token,
-        message: 'Ingresa el código de Google Authenticator'
+        message: 'Ingresa el código de Google Authenticator',
       }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // 5. Login exitoso sin pasos adicionales
+    // 5. Login exitoso
     logger.info('Login successful', { userId: authData.user.id, role: profile.role });
 
     return new Response(JSON.stringify({
@@ -79,11 +103,11 @@ serve(async (req: Request) => {
       user: {
         id: authData.user.id,
         email: authData.user.email,
-        role: profile.role
-      }
+        role: profile.role,
+      },
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
 
   } catch (error) {

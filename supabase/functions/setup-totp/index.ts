@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { TOTP, Secret } from "npm:otpauth";
 import { createLogger } from "../_shared/logger.ts";
 import { handleError, UnauthorizedError } from "../_shared/error-handler.ts";
 
@@ -24,16 +25,28 @@ serve(async (req: Request) => {
       throw new UnauthorizedError('Token inválido');
     }
 
-    // 2. Generar secreto TOTP (simulado)
-    const secret = 'JBSWY3DPEHPK3PXP'; 
-    const otpauthUrl = `otpauth://totp/Micro-Store:${user.email}?secret=${secret}&issuer=Micro-Store`;
+    // 2. Generar secreto TOTP único y criptográficamente seguro (20 bytes = 160 bits)
+    const secretBytes = new Uint8Array(20);
+    crypto.getRandomValues(secretBytes);
+    const secret = new Secret({ buffer: secretBytes.buffer });
 
-    // 3. Guardar secreto temporal en el perfil
+    const totp = new TOTP({
+      issuer: 'Micro-Store',
+      label: user.email,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30,
+      secret,
+    });
+
+    const otpauthUrl = totp.toString();
+
+    // 3. Guardar secreto (base32) en el perfil — totp_enabled permanece false hasta confirmación
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .update({
-        totp_secret: secret,
-        totp_enabled: false
+        totp_secret: secret.base32,
+        totp_enabled: false,
       })
       .eq('id', user.id);
 
@@ -47,13 +60,13 @@ serve(async (req: Request) => {
     return new Response(JSON.stringify({
       success: true,
       data: {
-        secret: secret,
-        otpauth_url: otpauthUrl
+        secret: secret.base32,
+        otpauth_url: otpauthUrl,
       },
-      message: 'Escanea el código QR con Google Authenticator'
+      message: 'Escanea el código QR con Google Authenticator',
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
