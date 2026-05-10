@@ -32,9 +32,9 @@ This is an e-commerce monorepo with **npm workspaces** deploying to Cloudflare P
 
 | App | Framework | Port | Purpose |
 |-----|-----------|------|---------|
-| `storefront` | Astro 4 | 4321 | Public catalog and product browsing |
-| `client-hub` | Astro 4 + React 18 | 5173 | Customer dashboard (auth, orders, checkout) |
-| `vendor-admin` | Astro 4 + React 18 | 5174 | Vendor panel (products, orders, settings) |
+| `storefront` | Astro 5 + Alpine.js | 4321 | Public catalog and product browsing |
+| `client-hub` | Astro 5 + React 18 + Alpine.js | 5173 | Customer dashboard (auth, orders, checkout) |
+| `vendor-admin` | Astro 5 + React 18 + Alpine.js | 5174 | Vendor panel (products, orders, settings) |
 
 All apps use the **Astro + Islands pattern**: Astro handles static markup and SSR; React is used only for interactive UI components. Alpine.js is acceptable for minimal interactivity.
 
@@ -95,4 +95,4 @@ Local Supabase ports: `54321` (API), `54322` (Postgres), `54323` (Studio UI), `5
 
 - **`ci.yml`**: On push/PR → architecture check → lint → typecheck → core tests.
 - **`deploy.yml`**: On push to `main` → build all apps → deploy to Cloudflare Pages → deploy Edge Functions → run migrations → health check.
-- Node requirement: `>=20.0.0`.
+- Node requirement: `>=22.0.0` (Node 22 LTS).

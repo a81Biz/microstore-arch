@@ -41,5 +41,13 @@ E-commerce Jamstack de alto rendimiento. 100% Docker-first.
 - **Tests del Core:** `npm run test:core`
 - **Linting:** `npm run lint`
 
+## 🔧 Stack
+
+- **Node:** 22 LTS
+- **Astro:** 5.x (static output, Islands Architecture)
+- **React:** 18.x (Islands interactivos)
+- **Alpine.js:** 3.x (interactividad ligera)
+- **Supabase:** Edge Functions (Deno) + PostgreSQL
+
 ---
 © 2026 Alberto Jacinto Martínez Torres.
