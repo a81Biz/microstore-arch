@@ -46,8 +46,8 @@ jobs:
           version: 1.207.9
 
       - name: Start Supabase Local
-        run: supabase start
-        timeout-minutes: 3
+        run: supabase start --exclude studio,inbucket,edge-runtime,imgproxy,logflare,vector
+        timeout-minutes: 6
 
       - name: Apply Migrations
         run: supabase db reset --no-confirm
