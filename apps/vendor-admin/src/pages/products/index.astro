@@ -1,0 +1,485 @@
+---
+import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
+---
+
+<VendorAdminLayout title="Gestión de Productos">
+  <div class="products-page" x-data="productList()" x-init="init()">
+    <div class="page-header">
+      <div class="header-titles">
+        <h1>Productos</h1>
+        <p>Administra el inventario y visibilidad de tu catálogo</p>
+      </div>
+      <button @click="openCreateModal()" class="btn-primary">
+        <span class="icon">+</span> Nuevo Producto
+      </button>
+    </div>
+
+    <div class="stats-overview">
+      <div class="stat-card">
+        <span class="stat-label">Total Productos</span>
+        <span class="stat-value" x-text="products.length">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Visibles</span>
+        <span class="stat-value" x-text="products.filter(p => p.isVisible).length">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Sin Stock</span>
+        <span class="stat-value" x-text="products.filter(p => !p.isOnDemand && p.stockQuantity === 0).length">0</span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <template x-if="loading">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Cargando productos...</p>
+        </div>
+      </template>
+
+      <template x-if="!loading && products.length === 0">
+        <div class="empty-state">
+          <div class="empty-icon">📦</div>
+          <h3>No hay productos</h3>
+          <p>Comienza agregando tu primer producto al catálogo.</p>
+          <button @click="openCreateModal()" class="btn-primary">Crear Producto</button>
+        </div>
+      </template>
+
+      <template x-if="!loading && products.length > 0">
+        <div class="products-table-wrapper">
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th>Visible</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="product in products" :key="product.id">
+                <tr>
+                  <td>
+                    <div class="product-cell">
+                      <span class="product-name" x-text="product.name"></span>
+                      <span class="product-slug" x-text="product.slug"></span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="price-cell" x-text="'$' + product.price.toFixed(2)"></span>
+                  </td>
+                  <td>
+                    <template x-if="product.isOnDemand">
+                      <span class="badge badge--info">Bajo Pedido</span>
+                    </template>
+                    <template x-if="!product.isOnDemand">
+                      <div class="stock-cell">
+                        <span x-text="product.stockQuantity"></span>
+                        <div class="stock-indicator" :class="product.stockQuantity > 0 ? 'bg-success' : 'bg-error'"></div>
+                      </div>
+                    </template>
+                  </td>
+                  <td>
+                    <span 
+                      class="badge"
+                      :class="product.isVisible ? 'badge--success' : 'badge--error'"
+                      x-text="product.isVisible ? 'Activo' : 'Oculto'"
+                    ></span>
+                  </td>
+                  <td>
+                    <label class="switch">
+                      <input 
+                        type="checkbox" 
+                        :checked="product.isVisible"
+                        @change="toggleVisibility(product)"
+                      />
+                      <span class="slider"></span>
+                    </label>
+                  </td>
+                  <td>
+                    <div class="actions-cell">
+                      <button @click="openEditModal(product)" class="btn-icon" title="Editar">✏️</button>
+                      <button @click="deleteProduct(product.id)" class="btn-icon btn-icon-danger" title="Eliminar">🗑️</button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </template>
+    </div>
+
+    <!-- Modal Formulario -->
+    <template x-if="showModal">
+      <div class="modal-backdrop" @click.self="closeModal()">
+        <div class="modal-content shadow-xl">
+          <div class="modal-header">
+            <h2 x-text="editingProduct ? 'Editar Producto' : 'Nuevo Producto'"></h2>
+            <button @click="closeModal()" class="close-btn">&times;</button>
+          </div>
+          
+          <form @submit.prevent="saveProduct()" class="product-form">
+            <div class="form-grid">
+              <div class="form-group span-full">
+                <label for="name">Nombre del Producto</label>
+                <input type="text" id="name" x-model="form.name" required placeholder="Ej: Playera Algodón Premium" />
+              </div>
+
+              <div class="form-group span-full">
+                <label for="description">Descripción</label>
+                <textarea id="description" x-model="form.description" rows="4" placeholder="Describe las características..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="price">Precio ($)</label>
+                <input type="number" id="price" x-model="form.price" min="0" step="0.01" required />
+              </div>
+
+              <div class="form-group">
+                <label for="stock">Stock Inicial</label>
+                <input type="number" id="stock" x-model="form.stockQuantity" min="0" :disabled="form.isOnDemand" />
+              </div>
+
+              <div class="form-check-group span-full">
+                <label class="check-container">
+                  <input type="checkbox" x-model="form.isOnDemand" />
+                  <span class="checkmark"></span>
+                  <div class="check-text">
+                    <strong>Producto bajo pedido</strong>
+                    <p>No requiere stock físico inmediato</p>
+                  </div>
+                </label>
+              </div>
+
+              <div class="form-check-group span-full">
+                <label class="check-container">
+                  <input type="checkbox" x-model="form.isVisible" />
+                  <span class="checkmark"></span>
+                  <div class="check-text">
+                    <strong>Visible en tienda</strong>
+                    <p>Los clientes podrán ver este producto en el catálogo</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <template x-if="formError">
+              <div class="error-banner" x-text="formError"></div>
+            </template>
+
+            <div class="modal-footer">
+              <button type="button" @click="closeModal()" class="btn-ghost">Cancelar</button>
+              <button type="submit" class="btn-primary" :disabled="formLoading">
+                <span x-show="!formLoading" x-text="editingProduct ? 'Guardar Cambios' : 'Crear Producto'"></span>
+                <span x-show="formLoading">Procesando...</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </template>
+  </div>
+</VendorAdminLayout>
+
+<script>
+  import { 
+    loadProducts, 
+    createProduct, 
+    updateProduct, 
+    deleteProduct as deleteProductApi,
+    triggerRebuild
+  } from '../../lib/products/product-admin.ts';
+
+  window.productList = () => ({
+    products: [],
+    loading: true,
+    showModal: false,
+    editingProduct: null,
+    form: {
+      name: '',
+      description: '',
+      price: 0,
+      stockQuantity: 0,
+      isOnDemand: false,
+      isVisible: true
+    },
+    formLoading: false,
+    formError: '',
+
+    async init() {
+      await this.loadProducts();
+    },
+
+    async loadProducts() {
+      this.loading = true;
+      try {
+        this.products = await loadProducts();
+      } catch (err) {
+        console.error('Error loading products:', err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    openCreateModal() {
+      this.editingProduct = null;
+      this.resetForm();
+      this.showModal = true;
+    },
+
+    openEditModal(product) {
+      this.editingProduct = product;
+      this.form = {
+        name: product.name,
+        description: product.description || '',
+        price: product.price,
+        stockQuantity: product.stockQuantity,
+        isOnDemand: product.isOnDemand,
+        isVisible: product.isVisible
+      };
+      this.showModal = true;
+    },
+
+    closeModal() {
+      this.showModal = false;
+      this.editingProduct = null;
+      this.resetForm();
+    },
+
+    resetForm() {
+      this.form = {
+        name: '',
+        description: '',
+        price: 0,
+        stockQuantity: 0,
+        isOnDemand: false,
+        isVisible: true
+      };
+      this.formError = '';
+    },
+
+    async saveProduct() {
+      this.formLoading = true;
+      this.formError = '';
+
+      try {
+        if (this.editingProduct) {
+          await updateProduct(this.editingProduct.id, this.form);
+        } else {
+          await createProduct(this.form);
+        }
+
+        await triggerRebuild();
+        await this.loadProducts();
+        this.closeModal();
+      } catch (err) {
+        this.formError = err.message || 'Error al guardar producto';
+      } finally {
+        this.formLoading = false;
+      }
+    },
+
+    async toggleVisibility(product) {
+      try {
+        await updateProduct(product.id, { isVisible: !product.isVisible });
+        await triggerRebuild();
+        product.isVisible = !product.isVisible;
+      } catch (err) {
+        console.error('Error toggling visibility:', err);
+      }
+    },
+
+    async deleteProduct(id) {
+      if (!confirm('¿Estás seguro de eliminar este producto? Esta acción no se puede deshacer.')) return;
+
+      try {
+        await deleteProductApi(id);
+        await triggerRebuild();
+        await this.loadProducts();
+      } catch (err) {
+        alert(err.message || 'Error al eliminar producto');
+      }
+    }
+  });
+</script>
+
+<style>
+  .products-page {
+    padding: 3rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3rem;
+  }
+
+  .header-titles h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .header-titles p {
+    color: #6b7280;
+    font-size: 1rem;
+  }
+
+  .stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .stat-label { font-size: 0.875rem; color: #6b7280; font-weight: 600; }
+  .stat-value { font-size: 1.75rem; font-weight: 800; color: #111827; }
+
+  .table-container {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #f3f4f6;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .products-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .products-table th {
+    padding: 1rem 1.5rem;
+    background: #f9fafb;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #6b7280;
+    letter-spacing: 0.05em;
+  }
+
+  .products-table td {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid #f3f4f6;
+    vertical-align: middle;
+  }
+
+  .product-cell { display: flex; flex-direction: column; gap: 0.25rem; }
+  .product-name { font-weight: 600; color: #111827; }
+  .product-slug { font-size: 0.75rem; color: #9ca3af; }
+
+  .price-cell { font-weight: 700; color: #111827; }
+
+  .stock-cell { display: flex; align-items: center; gap: 0.5rem; }
+  .stock-indicator { width: 8px; height: 8px; border-radius: 50%; }
+  .bg-success { background: #10b981; }
+  .bg-error { background: #ef4444; }
+
+  .badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .badge--success { background: #ecfdf5; color: #065f46; }
+  .badge--error { background: #fef2f2; color: #991b1b; }
+  .badge--info { background: #eff6ff; color: #1e40af; }
+
+  /* Toggle Switch */
+  .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #e5e7eb; transition: .4s; border-radius: 24px;
+  }
+  .slider:before {
+    position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+    background-color: white; transition: .4s; border-radius: 50%;
+  }
+  input:checked + .slider { background-color: #16213e; }
+  input:checked + .slider:before { transform: translateX(20px); }
+
+  .actions-cell { display: flex; gap: 0.5rem; }
+  .btn-icon {
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer;
+    font-size: 1rem; transition: all 0.2s;
+  }
+  .btn-icon:hover { background: #f3f4f6; border-color: #d1d5db; }
+  .btn-icon-danger:hover { background: #fef2f2; border-color: #fecaca; }
+
+  /* Modal Styles */
+  .modal-backdrop {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center; z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+  .modal-content {
+    background: white; border-radius: 24px; width: 600px; max-width: 95vw;
+    max-height: 90vh; overflow-y: auto; padding: 0;
+  }
+  .modal-header {
+    padding: 2rem; border-bottom: 1px solid #f3f4f6; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .modal-header h2 { font-size: 1.5rem; font-weight: 800; }
+  .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9ca3af; }
+
+  .product-form { padding: 2rem; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .span-full { grid-column: span 2; }
+
+  .form-group label { display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.5rem; }
+  .form-group input, .form-group textarea {
+    width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 12px;
+    font-size: 1rem; transition: border-color 0.2s;
+  }
+  .form-group input:focus { outline: none; border-color: #16213e; }
+
+  .form-check-group { margin-top: 0.5rem; }
+  .check-container { display: flex; gap: 1rem; cursor: pointer; align-items: flex-start; }
+  .check-text strong { display: block; font-size: 0.95rem; color: #111827; }
+  .check-text p { font-size: 0.85rem; color: #6b7280; margin: 0; }
+
+  .modal-footer {
+    margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #f3f4f6;
+    display: flex; justify-content: flex-end; gap: 1rem;
+  }
+
+  .btn-primary {
+    padding: 0.75rem 1.5rem; background: #16213e; color: white; border: none;
+    border-radius: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s;
+  }
+  .btn-primary:hover { background: #0f172a; }
+  .btn-ghost { padding: 0.75rem 1.5rem; background: none; border: none; color: #6b7280; font-weight: 600; cursor: pointer; }
+
+  .error-banner {
+    background: #fef2f2; color: #991b1b; padding: 1rem; border-radius: 12px;
+    margin-top: 1.5rem; font-size: 0.875rem; font-weight: 500;
+  }
+
+  .loading-state { padding: 5rem; text-align: center; color: #6b7280; }
+  .spinner {
+    width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top: 4px solid #16213e;
+    border-radius: 50%; margin: 0 auto 1rem; animation: spin 1s linear infinite;
+  }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>

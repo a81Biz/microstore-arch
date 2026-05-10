@@ -1,0 +1,129 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+const { title, description = "Micro-Store", image } = Astro.props;
+const siteName = "Micro-Store";
+const fullTitle = `${title} | ${siteName}`;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+
+    <!-- SEO -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {image && <meta property="og:image" content={image} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    
+    <link rel="sitemap" href="/sitemap.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <header class="main-header">
+      <div class="container">
+        <a href="/" class="logo">{siteName}</a>
+        <nav>
+          <a href="/">Catálogo</a>
+          <a href="https://cliente.tienda.com">Mi Cuenta</a>
+        </nav>
+      </div>
+    </header>
+    
+    <div class="container">
+      <slot />
+    </div>
+
+    <footer class="main-footer">
+      <div class="container">
+        <p>&copy; {new Date().getFullYear()} {siteName}. Todos los derechos reservados.</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --primary: #1a1a2e;
+    --secondary: #16213e;
+    --accent: #e94560;
+    --text: #333;
+    --bg: #fff;
+    --gray: #f4f4f4;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background-color: var(--bg);
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .main-header {
+    background: var(--primary);
+    color: white;
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .main-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: white;
+  }
+
+  nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  nav a:hover {
+    color: var(--accent);
+  }
+
+  .main-footer {
+    background: var(--gray);
+    padding: 3rem 0;
+    margin-top: 4rem;
+    text-align: center;
+    color: #666;
+  }
+</style>

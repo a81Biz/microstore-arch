@@ -44,7 +44,6 @@ cd ~/Desarrollos
 git clone git@github.com:a81Biz/microstore-arch.git
 cd microstore-arch
 ```
-
 ### Fase 2: Estructura de Carpetas
 ```bash
 # Aplicaciones

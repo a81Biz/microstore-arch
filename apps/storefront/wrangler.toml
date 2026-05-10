@@ -1,0 +1,12 @@
+name = "micro-store-storefront"
+compatibility_date = "2026-05-01"
+
+[env.production]
+vars = { 
+  PUBLIC_SUPABASE_URL = "https://your-project.supabase.co",
+  PUBLIC_STOREFRONT_URL = "https://tienda.com",
+  PUBLIC_CLIENT_HUB_URL = "https://cliente.tienda.com"
+}
+
+[[env.production.routes]]
+pattern = "tienda.com/*"

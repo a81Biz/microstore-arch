@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductCard from '../components/product/ProductCard.astro';
+import { getVisibleProducts } from '../lib/catalog/catalog.ts';
+
+const products = await getVisibleProducts();
+---
+
+<BaseLayout 
+  title="Inicio" 
+  description="Catálogo de productos - Micro-Store"
+>
+  <main class="catalog-page">
+    <section class="hero">
+      <h1>Micro-Store</h1>
+      <p class="hero-subtitle">Productos de calidad, entrega rápida</p>
+    </section>
+
+    <section class="catalog-section">
+      <div class="catalog-header">
+        <h2>Nuestros Productos</h2>
+        <span class="product-count">{products.length} productos</span>
+      </div>
+
+      {products.length === 0 ? (
+        <div class="empty-state">
+          <p>No hay productos disponibles en este momento.</p>
+          <p class="empty-subtitle">Vuelve pronto para ver nuevas adiciones.</p>
+        </div>
+      ) : (
+        <div class="products-grid">
+          {products.map(product => (
+            <ProductCard product={product} />
+          ))}
+        </div>
+      )}
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .catalog-page {
+    padding: 2rem 0;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 4rem 1rem;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: white;
+    border-radius: 16px;
+    margin-bottom: 3rem;
+  }
+
+  .hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    font-weight: 800;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+  }
+
+  .catalog-section {
+    margin-bottom: 4rem;
+  }
+
+  .catalog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .catalog-header h2 {
+    font-size: 1.75rem;
+    color: #1a1a2e;
+  }
+
+  .product-count {
+    color: #666;
+    font-size: 0.95rem;
+    background: #f3f4f6;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    background: #f9fafb;
+    border-radius: 16px;
+    border: 2px dashed #e5e7eb;
+  }
+
+  .empty-state p {
+    color: #4b5563;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-subtitle {
+    font-size: 1rem;
+    color: #9ca3af;
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 3rem 1rem;
+    }
+    
+    .hero h1 {
+      font-size: 2.25rem;
+    }
+    
+    .products-grid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+  }
+</style>

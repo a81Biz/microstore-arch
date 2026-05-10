@@ -1,0 +1,269 @@
+---
+import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
+---
+
+<ClientHubLayout title="Detalle del Pedido">
+  <div class="order-detail-page" x-data="orderDetail()" x-init="init()">
+    <template x-if="loading">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando información del pedido...</p>
+      </div>
+    </template>
+
+    <template x-if="!loading && !order">
+      <div class="error-state">
+        <div class="error-icon">⚠️</div>
+        <h2>No pudimos encontrar este pedido</h2>
+        <a href="/orders" class="btn-secondary">Volver a mis pedidos</a>
+      </div>
+    </template>
+
+    <template x-if="!loading && order">
+      <div class="order-content" x-transition>
+        <nav class="breadcrumb">
+          <a href="/orders">← Volver a Mis Pedidos</a>
+        </nav>
+
+        <header class="order-header">
+          <div class="order-title">
+            <h1 x-text="order.displayId"></h1>
+            <span class="order-timestamp" x-text="'Realizado el ' + formatDate(order.createdAt)"></span>
+          </div>
+          <div class="order-status-badge">
+            <span 
+              class="status-badge-lg"
+              :class="'status--' + order.status"
+              x-text="getStatusLabel(order.status)"
+            ></span>
+          </div>
+        </header>
+
+        <!-- Timeline Visual -->
+        <section class="timeline-section card">
+          <h2 class="section-title">Progreso del Pedido</h2>
+          <div class="timeline-container">
+            <template x-for="(step, index) in order.timeline" :key="index">
+              <div class="timeline-step" :class="'timeline--' + step.status">
+                <div class="step-marker">
+                  <div class="step-icon" x-text="step.icon"></div>
+                  <template x-if="index < order.timeline.length - 1">
+                    <div class="step-line" :class="'line--' + step.status"></div>
+                  </template>
+                </div>
+                <div class="step-info">
+                  <span class="step-label" x-text="step.label"></span>
+                  <span class="step-date" x-show="step.date" x-text="formatFullDate(step.date)"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </section>
+
+        <div class="detail-grid">
+          <!-- Productos -->
+          <section class="items-section card">
+            <h2 class="section-title">Productos</h2>
+            <div class="items-list">
+              <template x-for="item in order.items" :key="item.id">
+                <div class="item-row">
+                  <div class="item-main">
+                    <span class="item-name" x-text="item.productName"></span>
+                    <span class="item-qty" x-text="'Cantidad: ' + item.quantity"></span>
+                  </div>
+                  <span class="item-total" x-text="item.unitPrice"></span>
+                </div>
+              </template>
+            </div>
+            <div class="order-summary">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span x-text="order.totalAmount"></span>
+              </div>
+              <div class="summary-row">
+                <span>Envío</span>
+                <span class="free">Gratis</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total</span>
+                <span x-text="order.totalAmount"></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Información de Envío -->
+          <div class="info-sidebar">
+            <template x-if="order.trackingId">
+              <section class="shipping-card card highlight">
+                <h2 class="section-title">Información de Envío</h2>
+                <div class="shipping-details">
+                  <div class="shipping-info-row">
+                    <span class="label">Paquetería</span>
+                    <span class="value" x-text="order.carrier.toUpperCase()"></span>
+                  </div>
+                  <div class="shipping-info-row">
+                    <span class="label">Número de Guía</span>
+                    <span class="value code" x-text="order.trackingId"></span>
+                  </div>
+                  <a :href="getTrackingUrl(order.carrier, order.trackingId)" target="_blank" class="btn-track">
+                    Rastrear Pedido ↗
+                  </a>
+                </div>
+              </section>
+            </template>
+
+            <section class="address-card card">
+              <h2 class="section-title">Dirección de Entrega</h2>
+              <p class="address-text" x-text="order.shippingAddress"></p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+</ClientHubLayout>
+
+<script>
+  import { loadOrderDetail, subscribeToOrderUpdates } from '../../lib/orders/order-client';
+
+  window.orderDetail = () => ({
+    order: null,
+    loading: true,
+    subscription: null,
+
+    async init() {
+      const orderId = window.location.pathname.split('/').pop();
+      await this.fetchDetail(orderId);
+      
+      // Suscribirse a cambios en tiempo real
+      this.subscription = subscribeToOrderUpdates(orderId, (updated) => {
+        this.order = updated;
+      });
+    },
+
+    async fetchDetail(orderId) {
+      this.loading = true;
+      try {
+        this.order = await loadOrderDetail(orderId);
+      } catch (err) {
+        console.error('Error loading order detail:', err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    formatDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString('es-MX', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+    },
+
+    formatFullDate(dateStr) {
+      return new Date(dateStr).toLocaleString('es-MX', {
+        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+      });
+    },
+
+    getStatusLabel(status) {
+      const labels = {
+        pending: 'Pendiente', paid: 'Pagado',
+        in_production: 'En Producción', shipped: 'Enviado',
+        delivered: 'Entregado', cancelled: 'Cancelado'
+      };
+      return labels[status] || status;
+    },
+
+    getTrackingUrl(carrier, trackingId) {
+      const urls = {
+        dhl: `https://www.dhl.com/mx-es/home/tracking/tracking-express.html?submit=1&tracking-id=${trackingId}`,
+        fedex: `https://www.fedex.com/fedextrack/?trknbr=${trackingId}`,
+        estafeta: `https://www.estafeta.com/Herramientas/Rastreo?trackingNumber=${trackingId}`,
+        correos_mexico: `https://www.correosdemexico.gob.mx/SSLServicios/ConsultaEnvios/ConsultaEnvio.aspx?envio=${trackingId}`
+      };
+      return urls[carrier?.toLowerCase()] || '#';
+    },
+
+    cleanup() {
+      if (this.subscription) this.subscription.unsubscribe();
+    }
+  });
+</script>
+
+<style>
+  .order-detail-page { padding: 2rem 0 5rem; }
+  .breadcrumb { margin-bottom: 2rem; }
+  .breadcrumb a { color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+  .breadcrumb a:hover { color: #4f46e5; }
+
+  .order-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; }
+  .order-title h1 { font-size: 2.5rem; font-weight: 800; color: #1e293b; margin-bottom: 0.25rem; }
+  .order-timestamp { color: #64748b; font-size: 1rem; }
+
+  .status-badge-lg { font-size: 0.875rem; font-weight: 800; text-transform: uppercase; padding: 0.5rem 1.25rem; border-radius: 12px; letter-spacing: 0.05em; }
+  .status--pending { background: #fff7ed; color: #9a3412; }
+  .status--paid { background: #f0f9ff; color: #075985; }
+  .status--in_production { background: #f5f3ff; color: #5b21b6; }
+  .status--shipped { background: #f0fdf4; color: #166534; }
+  .status--delivered { background: #f0fdf4; color: #166534; border: 2px solid #bbf7d0; }
+  .status--cancelled { background: #fef2f2; color: #991b1b; }
+
+  .card { background: white; border: 1px solid #e2e8f0; border-radius: 24px; padding: 2rem; margin-bottom: 2rem; }
+  .section-title { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem; }
+
+  /* Timeline Styles */
+  .timeline-container { display: flex; justify-content: space-between; position: relative; padding: 1rem 0; }
+  .timeline-step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 1; }
+  .step-marker { margin-bottom: 1rem; position: relative; width: 100%; display: flex; justify-content: center; }
+  .step-icon { width: 48px; height: 48px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; border: 2px solid #e2e8f0; transition: all 0.3s; }
+  .timeline--completed .step-icon { background: #f0fdf4; border-color: #22c55e; }
+  .timeline--current .step-icon { background: #f0f9ff; border-color: #3b82f6; box-shadow: 0 0 0 4px #dbeafe; animation: pulse 2s infinite; }
+  
+  .step-line { position: absolute; top: 24px; left: calc(50% + 24px); width: calc(100% - 48px); height: 2px; background: #e2e8f0; z-index: -1; }
+  .line--completed { background: #22c55e; }
+  .line--current { background: linear-gradient(to right, #3b82f6, #e2e8f0); }
+
+  .step-info { display: flex; flex-direction: column; gap: 0.25rem; }
+  .step-label { font-size: 0.875rem; font-weight: 700; color: #64748b; }
+  .timeline--completed .step-label, .timeline--current .step-label { color: #1e293b; }
+  .step-date { font-size: 0.75rem; color: #94a3b8; }
+
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+
+  .detail-grid { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start; }
+
+  .items-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+  .item-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; }
+  .item-main { display: flex; flex-direction: column; }
+  .item-name { font-weight: 700; color: #1e293b; }
+  .item-qty { font-size: 0.8rem; color: #64748b; }
+  .item-total { font-weight: 700; color: #1e293b; }
+
+  .order-summary { background: #f8fafc; padding: 1.5rem; border-radius: 16px; display: flex; flex-direction: column; gap: 0.75rem; }
+  .summary-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: #64748b; font-weight: 500; }
+  .summary-row.total { border-top: 1px solid #e2e8f0; margin-top: 0.5rem; padding-top: 1rem; font-size: 1.25rem; color: #1e293b; font-weight: 800; }
+  .free { color: #22c55e; font-weight: 700; }
+
+  .highlight { border-color: #3b82f6; background: #f0f9ff; }
+  .shipping-details { display: flex; flex-direction: column; gap: 1rem; }
+  .shipping-info-row { display: flex; flex-direction: column; gap: 0.25rem; }
+  .shipping-info-row .label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; }
+  .shipping-info-row .value { font-weight: 700; color: #1e293b; }
+  .shipping-info-row .value.code { font-family: monospace; background: #e0f2fe; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 1rem; }
+  
+  .btn-track { background: #3b82f6; color: white; text-align: center; padding: 0.75rem; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: background 0.2s; margin-top: 0.5rem; }
+  .btn-track:hover { background: #2563eb; }
+
+  .address-text { color: #475569; line-height: 1.6; }
+
+  .loading-state, .error-state { text-align: center; padding: 5rem; }
+  .spinner { width: 50px; height: 50px; border: 5px solid #f1f5f9; border-top-color: #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 968px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .timeline-container { flex-direction: column; gap: 2rem; align-items: flex-start; padding-left: 2rem; }
+    .timeline-step { flex-direction: row; text-align: left; gap: 1.5rem; width: 100%; }
+    .step-marker { width: auto; margin-bottom: 0; }
+    .step-line { left: 24px; top: 48px; width: 2px; height: calc(100% + 2rem - 48px); }
+  }
+</style>

@@ -1,0 +1,12 @@
+name = "micro-store-client-hub"
+compatibility_date = "2026-05-01"
+
+[env.production]
+vars = { 
+  PUBLIC_SUPABASE_URL = "https://your-project.supabase.co",
+  PUBLIC_API_BASE = "https://your-project.supabase.co/functions/v1",
+  PUBLIC_STOREFRONT_URL = "https://tienda.com"
+}
+
+[[env.production.routes]]
+pattern = "cliente.tienda.com/*"

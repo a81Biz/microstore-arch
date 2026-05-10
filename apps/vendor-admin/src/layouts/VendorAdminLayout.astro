@@ -1,0 +1,123 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title} | Vendor Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div class="admin-layout">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>Micro-Store</h2>
+          <span>Admin</span>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="/dashboard">Dashboard</a>
+          <a href="/products" class="active">Productos</a>
+          <a href="/orders">Pedidos</a>
+          <a href="/profile">Mi Perfil</a>
+        </nav>
+        <div class="sidebar-footer">
+          <button id="logout-btn">Cerrar Sesión</button>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <slot />
+      </main>
+    </div>
+
+    <script>
+      import { signOut } from '../lib/auth/auth-client';
+      
+      const logoutBtn = document.getElementById('logout-btn');
+      logoutBtn?.addEventListener('click', async () => {
+        await signOut();
+        window.location.href = '/auth/login';
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --primary: #16213e;
+    --secondary: #0f172a;
+    --sidebar-bg: #111827;
+    --sidebar-text: #9ca3af;
+    --sidebar-active: #fff;
+    --main-bg: #f9fafb;
+    --text-main: #111827;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--main-bg);
+    color: var(--text-main);
+  }
+
+  .admin-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    background: var(--sidebar-bg);
+    color: white;
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    padding: 0 2rem 2rem;
+  }
+
+  .sidebar-header h2 { font-size: 1.25rem; margin-bottom: 0.25rem; }
+  .sidebar-header span { font-size: 0.75rem; color: var(--sidebar-text); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .sidebar-nav { flex: 1; display: flex; flex-direction: column; }
+
+  .sidebar-nav a {
+    padding: 1rem 2rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.05); color: white; }
+  .sidebar-nav a.active { color: var(--sidebar-active); background: rgba(255,255,255,0.1); border-left: 4px solid #fff; }
+
+  .sidebar-footer { padding: 2rem; border-top: 1px solid rgba(255,255,255,0.1); }
+  
+  #logout-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--sidebar-text);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  #logout-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+
+  .main-content { padding: 0; }
+</style>

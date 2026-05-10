@@ -156,7 +156,7 @@ Sistema de e-commerce auto-contenido diseñado para operar con costo operativo t
 | RNF-06 | Las contraseñas deben almacenarse con hash (nunca texto plano) | Supabase Auth |
 | RNF-07 | Las credenciales de pasarelas deben encriptarse | pgsodium |
 | RNF-08 | La base de datos debe tener Row Level Security | RLS en todas las tablas |
-| RNF-09 | El admin requiere MFA para operaciones sensibles | TOTP |
+| RNF-09 | El admin requiere MFA para operaciones sensibles | TOTP (Implementado vía `user_metadata.mfa_verified` para compatibilidad Free Tier) |
 | RNF-10 | Headers de seguridad HTTP (CSP, X-Frame-Options, etc.) | _headers |
 | RNF-11 | Protección contra CSRF en operaciones de escritura | JWT + SameSite |
 

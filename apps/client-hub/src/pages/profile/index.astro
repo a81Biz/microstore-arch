@@ -1,0 +1,176 @@
+---
+import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
+---
+
+<ClientHubLayout title="Mi Perfil">
+  <div class="profile-container" x-data="profilePage()" x-init="loadProfile()">
+    <h1>Mi Perfil</h1>
+
+    <template x-if="loading">
+      <p class="loading-text">Cargando perfil...</p>
+    </template>
+
+    <template x-if="!loading && profile">
+      <div class="profile-card">
+        <div class="profile-info">
+          <div class="info-group">
+            <label>Email</label>
+            <p x-text="profile.email"></p>
+          </div>
+
+          <div class="info-group">
+            <label>Rol</label>
+            <p x-text="profile.role === 'customer' ? 'Cliente' : 'Vendedor'"></p>
+          </div>
+
+          <div class="info-group">
+            <label>Miembro desde</label>
+            <p x-text="new Date(profile.createdAt).toLocaleDateString('es-MX')"></p>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <a href="/orders" class="btn-primary">Ver Mis Pedidos</a>
+          <button @click="handleLogout()" class="btn-secondary">Cerrar Sesión</button>
+        </div>
+      </div>
+    </template>
+
+    <template x-if="!loading && !profile">
+      <div class="not-logged-in">
+        <p>No has iniciado sesión</p>
+        <a href="/auth/login" class="btn-primary">Iniciar Sesión</a>
+      </div>
+    </template>
+  </div>
+</ClientHubLayout>
+
+<script>
+  import { getCurrentUser, signOut } from '../../lib/auth/auth-client.ts';
+
+  window.profilePage = () => ({
+    profile: null,
+    loading: true,
+
+    async loadProfile() {
+      try {
+        const result = await getCurrentUser();
+
+        if (result) {
+          this.profile = {
+            email: result.user.email,
+            role: result.profile?.role || 'customer',
+            createdAt: result.user.created_at
+          };
+        }
+      } catch (err) {
+        console.error('Error loading profile:', err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async handleLogout() {
+      await signOut();
+      window.location.href = '/auth/login';
+    }
+  });
+</script>
+
+<style>
+  .profile-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+
+  h1 {
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    color: #1a1a2e;
+  }
+
+  .loading-text {
+    color: #666;
+    text-align: center;
+  }
+
+  .profile-card {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .info-group label {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    display: block;
+  }
+
+  .info-group p {
+    font-size: 1.125rem;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .profile-actions {
+    display: flex;
+    gap: 1rem;
+    border-top: 1px solid #eee;
+    padding-top: 1.5rem;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #1a1a2e;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: #f3f4f6;
+    color: #374151;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .btn-secondary:hover {
+    background: #e5e7eb;
+  }
+
+  .not-logged-in {
+    text-align: center;
+    padding: 3rem;
+    background: #f9fafb;
+    border-radius: 12px;
+  }
+
+  .not-logged-in p {
+    margin-bottom: 1.5rem;
+    color: #4b5563;
+    font-size: 1.1rem;
+  }
+</style>

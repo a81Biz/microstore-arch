@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # Supabase Stack (corre CLI internamente para levantar DB, Auth, Storage, Functions)
+  supabase:
+    image: supabase/cli:latest
+    container_name: microstore-supabase
+    command: start
+    ports:
+      - "54321:54321"  # API Gateway / Edge Functions
+      - "54322:5432"   # PostgreSQL
+      - "54323:3000"   # Studio
+      - "54324:54324"  # Inbucket
+    volumes:
+      - supabase-data:/root/.supabase
+      - ./supabase:/project
+    environment:
+      - SUPABASE_PROJECT_REF=local-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:54321/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [microstore-network]
+
+  storefront:
+    build: { context: ., dockerfile: docker/Dockerfile.astro }
+    container_name: microstore-storefront
+    ports: ["4321:4321"]
+    environment:
+      - PUBLIC_SUPABASE_URL=${SUPABASE_URL}
+      - PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+    volumes:
+      - ./apps/storefront:/app
+      - ./packages:/app/packages
+      - storefront_modules:/app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+    depends_on: { supabase: { condition: service_healthy } }
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks: [microstore-network]
+
+  client-hub:
+    build: { context: ., dockerfile: docker/Dockerfile.astro }
+    container_name: microstore-client-hub
+    ports: ["5173:5173"]
+    environment:
+      - PUBLIC_SUPABASE_URL=${SUPABASE_URL}
+      - PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - PUBLIC_API_BASE=http://host.docker.internal:54321/functions/v1
+    volumes:
+      - ./apps/client-hub:/app
+      - ./packages:/app/packages
+      - client_modules:/app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+    depends_on: { supabase: { condition: service_healthy } }
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks: [microstore-network]
+
+  vendor-admin:
+    build: { context: ., dockerfile: docker/Dockerfile.astro }
+    container_name: microstore-vendor-admin
+    ports: ["5174:5174"]
+    environment:
+      - PUBLIC_SUPABASE_URL=${SUPABASE_URL}
+      - PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - PUBLIC_API_BASE=http://host.docker.internal:54321/functions/v1
+    volumes:
+      - ./apps/vendor-admin:/app
+      - ./packages:/app/packages
+      - admin_modules:/app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+    depends_on: { supabase: { condition: service_healthy } }
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks: [microstore-network]
+
+volumes:
+  supabase-data: {}
+  storefront_modules: {}
+  client_modules: {}
+  admin_modules: {}
+
+networks:
+  microstore-network:
+    driver: bridge

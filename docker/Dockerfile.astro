@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar manifiestos para caché de npm
+COPY package.json package-lock.json* ./
+COPY apps/storefront/package.json ./apps/storefront/
+COPY apps/client-hub/package.json ./apps/client-hub/
+COPY apps/vendor-admin/package.json ./apps/vendor-admin/
+COPY packages/core/package.json ./packages/core/
+COPY packages/config-eslint/package.json ./packages/config-eslint/
+
+# Instalar dependencias de workspaces
+RUN npm ci --ignore-scripts || npm install
+
+EXPOSE 4321
+
+# Hot-reload habilitado vía bind-mounts en docker-compose
+CMD ["npm", "run", "dev"]

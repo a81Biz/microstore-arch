@@ -1,0 +1,373 @@
+---
+import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
+---
+
+<VendorAdminLayout title="Admin - Iniciar Sesión">
+  <div class="auth-container" x-data="vendorLoginForm()">
+    <h1>Acceso Administrativo</h1>
+
+    <!-- Paso 1: Email y Contraseña -->
+    <template x-if="step === 'login'">
+      <form @submit.prevent="handleLogin()" class="auth-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" x-model="email" required autocomplete="email" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" x-model="password" required autocomplete="current-password" />
+        </div>
+
+        <template x-if="error">
+          <p class="error-message" x-text="error"></p>
+        </template>
+
+        <button type="submit" class="btn-primary" :disabled="loading">
+          <span x-show="!loading">Ingresar</span>
+          <span x-show="loading">Verificando...</span>
+        </button>
+      </form>
+    </template>
+
+    <!-- Paso 2: Cambiar Contraseña (primer ingreso) -->
+    <template x-if="step === 'change_password'">
+      <form @submit.prevent="handleChangePassword()" class="auth-form">
+        <p class="info-text">Debes cambiar tu contraseña antes de continuar</p>
+
+        <div class="form-group">
+          <label for="new-password">Nueva Contraseña</label>
+          <input type="password" id="new-password" x-model="newPassword" required minlength="12" />
+          <small>Mínimo 12 caracteres, incluye mayúsculas, números y símbolos</small>
+        </div>
+
+        <template x-if="error">
+          <p class="error-message" x-text="error"></p>
+        </template>
+
+        <button type="submit" class="btn-primary" :disabled="loading">
+          Cambiar Contraseña
+        </button>
+      </form>
+    </template>
+
+    <!-- Paso 3: Verificar TOTP -->
+    <template x-if="step === 'verify_totp'">
+      <form @submit.prevent="handleVerifyTOTP()" class="auth-form">
+        <p class="info-text">Ingresa el código de Google Authenticator</p>
+
+        <div class="form-group">
+          <label for="totp-code">Código de 6 dígitos</label>
+          <input
+            type="text"
+            id="totp-code"
+            x-model="totpCode"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            required
+            autocomplete="one-time-code"
+          />
+        </div>
+
+        <template x-if="error">
+          <p class="error-message" x-text="error"></p>
+        </template>
+
+        <button type="submit" class="btn-primary" :disabled="loading">
+          Verificar
+        </button>
+      </form>
+    </template>
+
+    <!-- Paso 4: Configurar TOTP (primera vez) -->
+    <template x-if="step === 'setup_totp'">
+      <div class="setup-totp">
+        <p class="info-text">Configura Google Authenticator</p>
+
+        <div class="qr-container">
+          <img :src="qrCodeUrl" alt="QR Code para Google Authenticator" />
+        </div>
+
+        <p class="manual-code">Código manual: <strong x-text="secret"></strong></p>
+
+        <form @submit.prevent="handleConfirmTOTP()" class="auth-form">
+          <div class="form-group">
+            <label for="confirm-code">Código de verificación</label>
+            <input
+              type="text"
+              id="confirm-code"
+              x-model="totpCode"
+              maxlength="6"
+              required
+            />
+          </div>
+
+          <template x-if="error">
+            <p class="error-message" x-text="error"></p>
+          </template>
+
+          <button type="submit" class="btn-primary" :disabled="loading">
+            Activar
+          </button>
+        </form>
+      </div>
+    </template>
+  </div>
+</VendorAdminLayout>
+
+<script>
+  import {
+    vendorSignIn,
+    verifyTOTP,
+    setupTOTP,
+    confirmTOTP,
+    changePassword
+  } from '../../lib/auth/auth-client.ts';
+
+  window.vendorLoginForm = () => ({
+    step: 'login',
+    email: '',
+    password: '',
+    newPassword: '',
+    totpCode: '',
+    tempToken: '',
+    secret: '',
+    qrCodeUrl: '',
+    error: '',
+    loading: false,
+
+    async handleLogin() {
+      this.loading = true;
+      this.error = '';
+
+      try {
+        const result = await vendorSignIn(this.email, this.password);
+
+        if (!result.success) {
+          this.error = result.message || 'Error al iniciar sesión';
+          this.loading = false;
+          return;
+        }
+
+        this.tempToken = result.tempToken || '';
+
+        if (result.nextStep === 'change_password') {
+          this.step = 'change_password';
+        } else if (result.nextStep === 'verify_totp') {
+          this.step = 'verify_totp';
+        } else if (result.nextStep === 'setup_totp') {
+          await this.loadTOTPSetup();
+        } else {
+          localStorage.setItem('auth_token', result.access_token);
+          window.location.href = '/';
+        }
+      } catch (err) {
+        this.error = 'Error de conexión';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async handleChangePassword() {
+      this.loading = true;
+      this.error = '';
+
+      try {
+        const result = await changePassword(this.tempToken, this.newPassword);
+
+        if (result.success) {
+          this.step = 'setup_totp';
+          await this.loadTOTPSetup();
+        } else {
+          this.error = result.message || 'Error al cambiar contraseña';
+        }
+      } catch (err) {
+        this.error = 'Error de conexión';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async handleVerifyTOTP() {
+      this.loading = true;
+      this.error = '';
+
+      try {
+        const result = await verifyTOTP(this.tempToken, this.totpCode);
+
+        if (result.success) {
+          localStorage.setItem('auth_token', result.access_token);
+          window.location.href = '/';
+        } else {
+          this.error = result.message || 'Código inválido';
+        }
+      } catch (err) {
+        this.error = 'Error de conexión';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async loadTOTPSetup() {
+      try {
+        const result = await setupTOTP(this.tempToken);
+
+        if (result.success) {
+          this.secret = result.data.secret;
+          this.qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(result.data.otpauth_url)}`;
+          this.step = 'setup_totp';
+        } else {
+          this.error = result.message || 'Error al configurar TOTP';
+        }
+      } catch (err) {
+        this.error = 'Error de conexión';
+      }
+    },
+
+    async handleConfirmTOTP() {
+      this.loading = true;
+      this.error = '';
+
+      try {
+        const result = await confirmTOTP(this.tempToken, this.totpCode);
+
+        if (result.success) {
+          // Re-intentar login para obtener el token definitivo con MFA verificado
+          await this.handleLogin();
+        } else {
+          this.error = result.message || 'Código inválido';
+        }
+      } catch (err) {
+        this.error = 'Error de conexión';
+      } finally {
+        this.loading = false;
+      }
+    }
+  });
+</script>
+
+<style>
+  .auth-container {
+    max-width: 400px;
+    margin: 4rem auto;
+    padding: 2.5rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    font-size: 1.5rem;
+    color: #16213e;
+    font-weight: 700;
+  }
+
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4b5563;
+  }
+
+  .form-group input {
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #16213e;
+    ring: 2px solid rgba(22, 33, 62, 0.1);
+  }
+
+  .form-group small {
+    color: #6b7280;
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .btn-primary {
+    padding: 0.875rem;
+    background: #16213e;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: #0f172a;
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .error-message {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 0.875rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    border: 1px solid #fee2e2;
+  }
+
+  .info-text {
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 0.875rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    text-align: center;
+    border: 1px solid #dbeafe;
+    margin-bottom: 1rem;
+  }
+
+  .setup-totp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .qr-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+  }
+
+  .qr-container img {
+    width: 200px;
+    height: 200px;
+    display: block;
+  }
+
+  .manual-code {
+    font-size: 0.875rem;
+    color: #4b5563;
+    background: #f3f4f6;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+  }
+</style>

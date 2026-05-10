@@ -1,0 +1,295 @@
+---
+import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
+---
+
+<VendorAdminLayout title="Configuración de Pagos">
+  <div class="settings-page" x-data="paymentSettings()" x-init="loadGateways()">
+    <header class="settings-header">
+      <div class="header-content">
+        <h1>Métodos de Pago</h1>
+        <p>Configura y activa las pasarelas para tus clientes</p>
+      </div>
+    </header>
+
+    <template x-if="loading">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando configuración de pasarelas...</p>
+      </div>
+    </template>
+
+    <template x-if="!loading">
+      <div class="gateways-list">
+        <template x-for="gateway in gateways" :key="gateway.gateway">
+          <div class="gateway-card" :class="{ active: gateway.is_enabled }">
+            <div class="gateway-main">
+              <div class="gateway-info">
+                <div class="gateway-icon" x-text="getGatewayIcon(gateway.gateway)"></div>
+                <div>
+                  <h2 x-text="getGatewayName(gateway.gateway)"></h2>
+                  <span class="status-badge" :class="gateway.is_enabled ? 'status-on' : 'status-off'" 
+                        x-text="gateway.is_enabled ? 'Activo' : 'Inactivo'"></span>
+                </div>
+              </div>
+              
+              <div class="gateway-actions">
+                <button @click="toggleForm(gateway.gateway)" class="btn-secondary" x-text="showForm === gateway.gateway ? 'Cerrar' : 'Configurar'"></button>
+                <label class="switch">
+                  <input type="checkbox" :checked="gateway.is_enabled" @change="toggleGateway(gateway)" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Formulario de Credenciales -->
+            <template x-if="showForm === gateway.gateway">
+              <div class="credentials-container" x-transition>
+                <form @submit.prevent="saveCredentials(gateway.gateway)" class="credentials-form">
+                  <div class="form-grid">
+                    <template x-if="gateway.gateway === 'stripe'">
+                      <div class="form-contents">
+                        <div class="form-group">
+                          <label>Publishable Key</label>
+                          <input type="password" x-model="credentials.stripe.publishableKey" placeholder="pk_test_..." />
+                        </div>
+                        <div class="form-group">
+                          <label>Secret Key</label>
+                          <input type="password" x-model="credentials.stripe.secretKey" placeholder="sk_test_..." />
+                        </div>
+                        <div class="form-group">
+                          <label>Webhook Secret</label>
+                          <input type="password" x-model="credentials.stripe.webhookSecret" placeholder="whsec_..." />
+                        </div>
+                      </div>
+                    </template>
+
+                    <template x-if="gateway.gateway === 'paypal'">
+                      <div class="form-contents">
+                        <div class="form-group">
+                          <label>Client ID</label>
+                          <input type="password" x-model="credentials.paypal.clientId" />
+                        </div>
+                        <div class="form-group">
+                          <label>Secret</label>
+                          <input type="password" x-model="credentials.paypal.secret" />
+                        </div>
+                      </div>
+                    </template>
+
+                    <template x-if="gateway.gateway === 'mercadopago'">
+                      <div class="form-contents">
+                        <div class="form-group">
+                          <label>Access Token</label>
+                          <input type="password" x-model="credentials.mercadopago.accessToken" placeholder="APP_USR-..." />
+                        </div>
+                      </div>
+                    </template>
+
+                    <template x-if="gateway.gateway === 'hey_banco'">
+                      <div class="form-contents">
+                        <div class="form-group">
+                          <label>API Key (Opcional)</label>
+                          <input type="password" x-model="credentials.hey_banco.apiKey" />
+                        </div>
+                        <div class="form-group">
+                          <label>Número de CLABE</label>
+                          <input type="text" x-model="credentials.hey_banco.clabe" placeholder="012 345 678901234567" />
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+
+                  <template x-if="saveMessage[gateway.gateway]">
+                    <div class="alert alert-success" x-text="saveMessage[gateway.gateway]"></div>
+                  </template>
+                  <template x-if="saveError[gateway.gateway]">
+                    <div class="alert alert-danger" x-text="saveError[gateway.gateway]"></div>
+                  </template>
+
+                  <div class="form-footer">
+                    <p class="security-note">🔒 Tus credenciales se encriptan mediante pgsodium antes de guardarse.</p>
+                    <button type="submit" class="btn-primary" :disabled="savingGateway === gateway.gateway">
+                      <span x-show="savingGateway !== gateway.gateway">Guardar Cambios</span>
+                      <span x-show="savingGateway === gateway.gateway">Guardando...</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+    </template>
+  </div>
+</VendorAdminLayout>
+
+<script>
+  window.paymentSettings = () => ({
+    gateways: [],
+    loading: true,
+    showForm: null,
+    savingGateway: null,
+    saveMessage: {},
+    saveError: {},
+    credentials: {
+      stripe: { publishableKey: '', secretKey: '', webhookSecret: '' },
+      paypal: { clientId: '', secret: '' },
+      mercadopago: { accessToken: '' },
+      hey_banco: { apiKey: '', clabe: '' }
+    },
+
+    async loadGateways() {
+      this.loading = true;
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          this.gateways = await response.json();
+          // Si no hay nada, inicializar (mock para el demo)
+          if (this.gateways.length === 0) {
+            this.gateways = [
+              { gateway: 'stripe', is_enabled: false },
+              { gateway: 'paypal', is_enabled: false },
+              { gateway: 'mercadopago', is_enabled: false },
+              { gateway: 'hey_banco', is_enabled: false }
+            ];
+          }
+        }
+      } catch (err) {
+        console.error('Error loading gateways:', err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    getGatewayName(gateway) {
+      const names = { stripe: 'Stripe (Tarjetas)', paypal: 'PayPal', mercadopago: 'Mercado Pago', hey_banco: 'Hey Banco' };
+      return names[gateway] || gateway;
+    },
+
+    getGatewayIcon(gateway) {
+      const icons = { stripe: '💳', paypal: '🅿️', mercadopago: '🤝', hey_banco: '🏦' };
+      return icons[gateway] || '💰';
+    },
+
+    toggleForm(gateway) {
+      this.showForm = this.showForm === gateway ? null : gateway;
+      this.saveMessage[gateway] = '';
+      this.saveError[gateway] = '';
+    },
+
+    async toggleGateway(gateway) {
+      const token = localStorage.getItem('auth_token');
+      try {
+        await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            gateway: gateway.gateway,
+            is_enabled: !gateway.is_enabled,
+            credentials: {} // Solo cambiar estado
+          })
+        });
+        gateway.is_enabled = !gateway.is_enabled;
+      } catch (err) {
+        console.error('Error toggling gateway:', err);
+      }
+    },
+
+    async saveCredentials(gateway) {
+      this.savingGateway = gateway;
+      this.saveMessage[gateway] = '';
+      this.saveError[gateway] = '';
+
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            gateway,
+            is_enabled: true,
+            credentials: this.credentials[gateway]
+          })
+        });
+
+        if (response.ok) {
+          this.saveMessage[gateway] = 'Configuración guardada exitosamente';
+          this.gateways.find(g => g.gateway === gateway).is_enabled = true;
+          // Limpiar campos por seguridad
+          Object.keys(this.credentials[gateway]).forEach(k => this.credentials[gateway][k] = '');
+          setTimeout(() => { this.showForm = null; }, 2000);
+        } else {
+          const data = await response.json();
+          this.saveError[gateway] = data.message || 'Error al guardar';
+        }
+      } catch (err) {
+        this.saveError[gateway] = 'Error de red al conectar con la API';
+      } finally {
+        this.savingGateway = null;
+      }
+    }
+  });
+</script>
+
+<style>
+  .settings-page { padding: 3rem; max-width: 900px; margin: 0 auto; }
+  .settings-header { margin-bottom: 3rem; }
+  .settings-header h1 { font-size: 2.25rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem; }
+  .settings-header p { color: #6b7280; font-size: 1.1rem; }
+
+  .gateways-list { display: flex; flex-direction: column; gap: 1.5rem; }
+  .gateway-card { background: white; border-radius: 20px; border: 1px solid #e5e7eb; overflow: hidden; transition: all 0.3s; }
+  .gateway-card.active { border-color: #16213e; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+
+  .gateway-main { padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+  .gateway-info { display: flex; align-items: center; gap: 1.5rem; }
+  .gateway-icon { font-size: 2rem; width: 48px; height: 48px; background: #f3f4f6; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .gateway-info h2 { font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.25rem; }
+
+  .status-badge { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 6px; }
+  .status-on { background: #ecfdf5; color: #065f46; }
+  .status-off { background: #f3f4f6; color: #6b7280; }
+
+  .gateway-actions { display: flex; align-items: center; gap: 1.5rem; }
+
+  /* Toggle Switch */
+  .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e7eb; transition: .4s; border-radius: 24px; }
+  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+  input:checked + .slider { background-color: #16213e; }
+  input:checked + .slider:before { transform: translateX(20px); }
+
+  .credentials-container { background: #f9fafb; border-top: 1px solid #e5e7eb; padding: 2rem; }
+  .credentials-form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .form-contents { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .form-group label { font-size: 0.875rem; font-weight: 600; color: #374151; }
+  .form-group input { padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 10px; font-family: monospace; font-size: 0.95rem; }
+  .form-group input:focus { border-color: #16213e; outline: none; }
+
+  .form-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+  .security-note { font-size: 0.8rem; color: #6b7280; font-style: italic; }
+
+  .btn-primary { background: #16213e; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 10px; font-weight: 700; cursor: pointer; }
+  .btn-secondary { background: white; border: 1px solid #d1d5db; color: #374151; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
+  .btn-secondary:hover { background: #f9fafb; }
+
+  .alert { padding: 1rem; border-radius: 10px; font-size: 0.9rem; font-weight: 500; }
+  .alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+  .alert-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+  .loading-state { text-align: center; padding: 5rem; color: #6b7280; }
+  .spinner { width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top: 4px solid #16213e; border-radius: 50%; margin: 0 auto 1rem; animation: spin 1s linear infinite; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>

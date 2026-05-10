@@ -1,0 +1,49 @@
+name: Scheduled Backup
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Todos los días a las 2 AM UTC
+  workflow_dispatch:      # Permite ejecución manual
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      
+      - name: Login to Supabase
+        run: supabase login --token ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      
+      - name: Create Backup
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          supabase db dump -f "backup_$TIMESTAMP.sql" --db-url "$SUPABASE_DB_URL"
+          gzip "backup_$TIMESTAMP.sql"
+      
+      - name: Upload Backup Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup
+          path: backup_*.sql.gz
+          retention-days: 30
+      
+      - name: Notify on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '⚠️ Backup diario falló',
+              body: `El backup programado falló el ${new Date().toISOString()}. Revisar logs.`,
+              labels: ['security', 'urgent']
+            });

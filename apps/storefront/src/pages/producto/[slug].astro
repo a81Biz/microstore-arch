@@ -1,0 +1,319 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getProductBySlug, getAllProductSlugs } from '../../lib/catalog/catalog.ts';
+import { getStockBadge } from '@micro-store/core/utils';
+
+export async function getStaticPaths() {
+  const slugs = await getAllProductSlugs();
+  return slugs.map(slug => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const product = await getProductBySlug(slug as string);
+
+if (!product) {
+  return Astro.redirect('/404');
+}
+
+const badge = getStockBadge({
+  id: product.id,
+  slug: product.slug,
+  name: product.name,
+  description: product.description,
+  price: product.price,
+  stockQuantity: product.stockQuantity,
+  isOnDemand: product.isOnDemand,
+  isVisible: true,
+  lastStockChange: '',
+  createdAt: product.createdAt,
+  updatedAt: ''
+});
+---
+
+<BaseLayout 
+  title={product.name} 
+  description={product.description || `Detalle de ${product.name}`}
+  image={product.imageUrl || undefined}
+>
+  <main class="product-detail">
+    <nav class="breadcrumb">
+      <a href="/">Inicio</a>
+      <span class="separator">/</span>
+      <span class="current">{product.name}</span>
+    </nav>
+
+    <div class="product-layout">
+      <div class="product-gallery">
+        {product.imageUrl ? (
+          <div class="image-wrapper">
+            <img 
+              src={product.imageUrl} 
+              alt={product.name}
+              class="main-image"
+              width="600"
+              height="600"
+            />
+          </div>
+        ) : (
+          <div class="image-placeholder-large">
+            <span>Imagen no disponible</span>
+          </div>
+        )}
+      </div>
+
+      <div class="product-info-panel">
+        <div class="header-info">
+          <h1>{product.name}</h1>
+          <span class={`badge badge--${badge.variant}`}>
+            {badge.text}
+          </span>
+        </div>
+        
+        <p class="price-tag">${product.price.toFixed(2)}</p>
+
+        {product.description && (
+          <div class="description-section">
+            <h3>Descripción del producto</h3>
+            <p>{product.description}</p>
+          </div>
+        )}
+
+        <div class="stock-status-card">
+          {product.isOnDemand ? (
+            <div class="status-msg status-on-demand">
+              <span class="icon">ℹ️</span>
+              <div>
+                <strong>Bajo Pedido</strong>
+                <p>Este producto se fabrica o adquiere especialmente para ti.</p>
+              </div>
+            </div>
+          ) : product.stockQuantity > 0 ? (
+            <div class="status-msg status-in-stock">
+              <span class="icon">✅</span>
+              <div>
+                <strong>Disponible</strong>
+                <p>{product.stockQuantity} unidades listas para envío inmediato.</p>
+              </div>
+            </div>
+          ) : (
+            <div class="status-msg status-out-of-stock">
+              <span class="icon">❌</span>
+              <div>
+                <strong>Agotado</strong>
+                <p>Lo sentimos, no tenemos unidades disponibles actualmente.</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div class="purchase-actions">
+          <a href={`https://cliente.tienda.com/checkout?product=${product.id}`} class="btn-buy">
+            Comprar ahora
+          </a>
+          <a href="/" class="btn-back">
+            Volver al catálogo
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .product-detail {
+    padding: 2.5rem 0 5rem;
+  }
+
+  .breadcrumb {
+    margin-bottom: 2.5rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .breadcrumb a {
+    color: #1a1a2e;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .breadcrumb .separator {
+    color: #d1d5db;
+  }
+
+  .breadcrumb .current {
+    font-weight: 400;
+    color: #9ca3af;
+  }
+
+  .product-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .product-gallery {
+    border-radius: 24px;
+    overflow: hidden;
+    background: #f9fafb;
+    box-shadow: 0 4px 20px -10px rgba(0,0,0,0.1);
+  }
+
+  .image-wrapper {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+  }
+
+  .main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-placeholder-large {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 1.125rem;
+  }
+
+  .product-info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .header-info h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .badge {
+    padding: 0.4rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    width: fit-content;
+  }
+
+  .badge--success { background: #ecfdf5; color: #065f46; }
+  .badge--warning { background: #fffbeb; color: #92400e; }
+  .badge--error { background: #fef2f2; color: #991b1b; }
+  .badge--info { background: #eff6ff; color: #1e40af; }
+
+  .price-tag {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin: 0.5rem 0;
+  }
+
+  .description-section h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #374151;
+  }
+
+  .description-section p {
+    color: #4b5563;
+    line-height: 1.7;
+    font-size: 1rem;
+    white-space: pre-line;
+  }
+
+  .stock-status-card {
+    padding: 1.5rem;
+    background: #fdfdfd;
+    border: 1px solid #f3f4f6;
+    border-radius: 16px;
+  }
+
+  .status-msg {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .status-msg .icon {
+    font-size: 1.25rem;
+    padding-top: 0.1rem;
+  }
+
+  .status-msg strong {
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .status-msg p {
+    font-size: 0.9rem;
+    margin: 0;
+    color: #6b7280;
+  }
+
+  .purchase-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .btn-buy {
+    padding: 1.125rem;
+    background: #1a1a2e;
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    text-align: center;
+    transition: background 0.2s;
+  }
+
+  .btn-buy:hover {
+    background: #0f172a;
+  }
+
+  .btn-back {
+    padding: 1rem;
+    background: white;
+    color: #4b5563;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s;
+  }
+
+  .btn-back:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+  }
+
+  @media (max-width: 968px) {
+    .product-layout {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+  }
+</style>

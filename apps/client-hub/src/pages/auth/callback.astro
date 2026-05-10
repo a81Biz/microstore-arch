@@ -1,0 +1,80 @@
+---
+import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
+---
+
+<ClientHubLayout title="Verificando...">
+  <div class="callback-container" x-data="authCallback()" x-init="handleCallback()">
+    <template x-if="loading">
+      <div class="loading-state">
+        <p>Verificando autenticación...</p>
+      </div>
+    </template>
+
+    <template x-if="error">
+      <div class="error-state">
+        <p class="error-message" x-text="error"></p>
+        <a href="/auth/login" class="btn-primary">Volver al inicio de sesión</a>
+      </div>
+    </template>
+  </div>
+</ClientHubLayout>
+
+<script>
+  import { supabaseClient } from '../../lib/supabase-client.ts';
+
+  window.authCallback = () => ({
+    loading: true,
+    error: '',
+
+    async handleCallback() {
+      try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+
+        if (error || !session) {
+          this.error = 'Error al verificar la autenticación';
+          this.loading = false;
+          return;
+        }
+
+        localStorage.setItem('auth_token', session.access_token);
+        window.location.href = '/';
+      } catch (err) {
+        this.error = 'Error de conexión';
+        this.loading = false;
+      }
+    }
+  });
+</script>
+
+<style>
+  .callback-container {
+    max-width: 400px;
+    margin: 4rem auto;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .loading-state p {
+    color: #666;
+    font-size: 1.1rem;
+  }
+
+  .error-message {
+    background: #fee;
+    color: #c00;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #1a1a2e;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+</style>

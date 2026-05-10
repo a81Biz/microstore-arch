@@ -1,0 +1,25 @@
+{
+  "name": "microstore-arch",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "docker compose up --build",
+    "dev:stop": "docker compose down",
+    "dev:reset": "docker compose down -v && docker compose up --build",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:core": "cd packages/core && npm run test",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "check:architecture": "bash scripts/check-architecture.sh",
+    "prepare": "husky install"
+  },
+  "workspaces": ["apps/*", "packages/*"],
+  "devDependencies": {
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": { "node": ">=20.0.0" }
+}

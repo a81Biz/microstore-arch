@@ -1,0 +1,389 @@
+---
+import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
+---
+
+<VendorAdminLayout title="Gestión de Pedidos">
+  <div class="orders-admin-page" x-data="orderAdmin()" x-init="init()">
+    <header class="admin-header">
+      <div class="title-area">
+        <h1>Pedidos</h1>
+        <p>Gestiona el cumplimiento y logística de ventas</p>
+      </div>
+    </header>
+
+    <div class="filters-panel card">
+      <div class="search-box">
+        <span class="icon">🔍</span>
+        <input 
+          type="text" 
+          placeholder="Buscar por ID o email del cliente..." 
+          x-model="search"
+          @input.debounce.300ms="fetchOrders()"
+        />
+      </div>
+      <div class="filter-group">
+        <label>Estado</label>
+        <select x-model="statusFilter" @change="fetchOrders()">
+          <option value="">Todos los estados</option>
+          <option value="pending">Pendientes</option>
+          <option value="paid">Pagados</option>
+          <option value="in_production">En Producción</option>
+          <option value="shipped">Enviados</option>
+          <option value="delivered">Entregados</option>
+          <option value="cancelled">Cancelados</option>
+        </select>
+      </div>
+    </div>
+
+    <template x-if="loading">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando pedidos...</p>
+      </div>
+    </template>
+
+    <template x-if="!loading && orders.length === 0">
+      <div class="empty-state">
+        <p>No se encontraron pedidos con los filtros seleccionados.</p>
+      </div>
+    </template>
+
+    <template x-if="!loading && orders.length > 0">
+      <div class="orders-list">
+        <template x-for="order in orders" :key="order.id">
+          <div class="order-row card" @click="openDetail(order.id)">
+            <div class="order-main-info">
+              <span class="order-id" x-text="order.displayId"></span>
+              <span class="order-customer" x-text="order.customerEmail"></span>
+            </div>
+            
+            <div class="order-meta-info">
+              <span class="order-date" x-text="formatDate(order.createdAt)"></span>
+              <span class="order-items-count" x-text="order.itemsCount + ' productos'"></span>
+            </div>
+
+            <div class="order-status-info">
+              <span 
+                class="status-badge"
+                :class="'status--' + order.status"
+                x-text="getStatusLabel(order.status)"
+              ></span>
+            </div>
+
+            <div class="order-amount-info">
+              <span class="order-amount" x-text="'$' + order.totalAmount.toFixed(2)"></span>
+            </div>
+
+            <div class="order-actions">
+              <button @click.stop="openTrackingModal(order)" class="btn-icon" :disabled="['delivered', 'cancelled'].includes(order.status)" title="Actualizar Tracking">
+                🚚
+              </button>
+              <span class="arrow">→</span>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <!-- Modal de Detalle -->
+    <template x-if="showDetail">
+      <div class="modal-overlay" @click.self="showDetail = false">
+        <div class="modal modal-lg" x-transition>
+          <header class="modal-header">
+            <h2 x-text="'Pedido ' + selectedOrder?.displayId"></h2>
+            <button @click="showDetail = false" class="btn-close">×</button>
+          </header>
+
+          <div class="modal-content">
+            <template x-if="detailLoading">
+              <div class="loading-state-sm"><div class="spinner-sm"></div></div>
+            </template>
+
+            <template x-if="!detailLoading && selectedOrder">
+              <div class="detail-layout">
+                <div class="detail-main">
+                  <section class="items-section">
+                    <h3>Productos</h3>
+                    <div class="items-table">
+                      <template x-for="item in selectedOrder.items" :key="item.id">
+                        <div class="detail-item-row">
+                          <span class="item-name" x-text="item.productName"></span>
+                          <span class="item-qty" x-text="'x' + item.quantity"></span>
+                          <span class="item-price" x-text="'$' + item.unitPrice.toFixed(2)"></span>
+                        </div>
+                      </template>
+                      <div class="detail-total-row">
+                        <span>Total</span>
+                        <span x-text="'$' + selectedOrder.totalAmount.toFixed(2)"></span>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="customer-section">
+                    <h3>Cliente y Envío</h3>
+                    <p><strong>Email:</strong> <span x-text="selectedOrder.customerEmail"></span></p>
+                    <p><strong>Dirección:</strong> <span x-text="selectedOrder.shippingAddress.street + ', ' + selectedOrder.shippingAddress.city"></span></p>
+                  </section>
+                </div>
+
+                <aside class="detail-sidebar">
+                  <div class="status-change-box">
+                    <h3>Cambiar Estado</h3>
+                    <select x-model="statusUpdate" class="status-select">
+                      <option value="">Seleccionar...</option>
+                      <option value="in_production">En Producción</option>
+                      <option value="shipped">Enviado</option>
+                      <option value="delivered">Entregado</option>
+                      <option value="cancelled">Cancelar Pedido</option>
+                    </select>
+                    <button 
+                      @click="updateStatus()" 
+                      class="btn-primary" 
+                      :disabled="!statusUpdate || processingStatus"
+                    >
+                      <span x-show="!processingStatus">Actualizar</span>
+                      <span x-show="processingStatus">...</span>
+                    </button>
+                  </div>
+
+                  <template x-if="selectedOrder.trackingId">
+                    <div class="tracking-info-box">
+                      <h3>Tracking</h3>
+                      <p><strong x-text="selectedOrder.carrier.toUpperCase()"></strong></p>
+                      <p class="code" x-text="selectedOrder.trackingId"></p>
+                    </div>
+                  </template>
+                </aside>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Modal de Tracking -->
+    <template x-if="showTracking">
+      <div class="modal-overlay" @click.self="showTracking = false">
+        <div class="modal" x-transition>
+          <header class="modal-header">
+            <h2>Actualizar Guía de Envío</h2>
+            <button @click="showTracking = false" class="btn-close">×</button>
+          </header>
+          
+          <form @submit.prevent="submitTracking()" class="modal-form">
+            <div class="form-group">
+              <label>Paquetería</label>
+              <select x-model="trackingData.carrier" required>
+                <option value="">Seleccionar...</option>
+                <option value="dhl">DHL</option>
+                <option value="fedex">FedEx</option>
+                <option value="estafeta">Estafeta</option>
+                <option value="correos_mexico">Correos de México</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Número de Rastreo (Guía)</label>
+              <input type="text" x-model="trackingData.id" placeholder="Ex: 1234567890" required />
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" @click="showTracking = false" class="btn-secondary">Cancelar</button>
+              <button type="submit" class="btn-primary" :disabled="processingTracking">
+                <span x-show="!processingTracking">Guardar y Notificar</span>
+                <span x-show="processingTracking">Enviando...</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </template>
+  </div>
+</VendorAdminLayout>
+
+<script>
+  import { loadOrders, loadOrderDetail, updateTracking, updateOrderStatus } from '../../lib/orders/order-admin';
+
+  window.orderAdmin = () => ({
+    orders: [],
+    loading: true,
+    search: '',
+    statusFilter: '',
+    
+    showDetail: false,
+    detailLoading: false,
+    selectedOrder: null,
+    statusUpdate: '',
+    processingStatus: false,
+
+    showTracking: false,
+    trackingData: { orderId: '', carrier: '', id: '' },
+    processingTracking: false,
+
+    async init() {
+      await this.fetchOrders();
+    },
+
+    async fetchOrders() {
+      this.loading = true;
+      try {
+        this.orders = await loadOrders({
+          status: this.statusFilter || undefined,
+          search: this.search || undefined
+        });
+      } catch (err) {
+        console.error('Error loading orders:', err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async openDetail(orderId) {
+      this.showDetail = true;
+      this.detailLoading = true;
+      try {
+        this.selectedOrder = await loadOrderDetail(orderId);
+        this.statusUpdate = '';
+      } catch (err) {
+        console.error('Error loading order detail:', err);
+      } finally {
+        this.detailLoading = false;
+      }
+    },
+
+    async updateStatus() {
+      if (!this.selectedOrder || !this.statusUpdate) return;
+      this.processingStatus = true;
+      try {
+        await updateOrderStatus(this.selectedOrder.id, this.statusUpdate);
+        await this.openDetail(this.selectedOrder.id);
+        await this.fetchOrders();
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        this.processingStatus = false;
+      }
+    },
+
+    openTrackingModal(order) {
+      this.trackingData = { 
+        orderId: order.id, 
+        carrier: order.carrier || '', 
+        id: order.trackingId || '' 
+      };
+      this.showTracking = true;
+    },
+
+    async submitTracking() {
+      this.processingTracking = true;
+      try {
+        await updateTracking(this.trackingData.orderId, this.trackingData.id, this.trackingData.carrier);
+        this.showTracking = false;
+        await this.fetchOrders();
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        this.processingTracking = false;
+      }
+    },
+
+    formatDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString('es-MX', {
+        year: 'numeric', month: 'short', day: 'numeric'
+      });
+    },
+
+    getStatusLabel(status) {
+      const labels = {
+        pending: 'Pendiente', paid: 'Pagado',
+        in_production: 'En Producción', shipped: 'Enviado',
+        delivered: 'Entregado', cancelled: 'Cancelado'
+      };
+      return labels[status] || status;
+    }
+  });
+</script>
+
+<style>
+  .orders-admin-page { padding: 2rem 0; }
+  .admin-header { margin-bottom: 2rem; }
+  .admin-header h1 { font-size: 2rem; font-weight: 800; color: #111827; }
+  .admin-header p { color: #6b7280; }
+
+  .card { background: white; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  
+  .filters-panel { display: flex; gap: 1.5rem; padding: 1.5rem; margin-bottom: 2rem; align-items: center; }
+  .search-box { flex: 1; display: flex; align-items: center; gap: 0.75rem; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 10px; padding: 0.5rem 1rem; }
+  .search-box input { flex: 1; border: none; background: transparent; padding: 0.25rem 0; font-size: 0.95rem; }
+  .search-box input:focus { outline: none; }
+  .filter-group { display: flex; align-items: center; gap: 1rem; }
+  .filter-group label { font-size: 0.875rem; font-weight: 600; color: #4b5563; }
+  .filter-group select { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid #d1d5db; font-size: 0.9rem; }
+
+  .orders-list { display: flex; flex-direction: column; gap: 1rem; }
+  .order-row { 
+    display: grid; 
+    grid-template-columns: 2fr 1.5fr 1fr 1fr 120px; 
+    padding: 1.25rem 2rem; 
+    align-items: center; 
+    cursor: pointer; 
+    transition: all 0.2s;
+  }
+  .order-row:hover { border-color: #16213e; background: #f8fafc; }
+
+  .order-id { font-weight: 700; color: #111827; display: block; }
+  .order-customer { font-size: 0.875rem; color: #6b7280; }
+  .order-date { font-size: 0.875rem; color: #374151; display: block; }
+  .order-items-count { font-size: 0.75rem; color: #9ca3af; }
+  .order-amount { font-weight: 700; color: #111827; }
+
+  .status-badge { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 6px; }
+  .status--pending { background: #fef3c7; color: #92400e; }
+  .status--paid { background: #dbeafe; color: #1e40af; }
+  .status--in_production { background: #ede9fe; color: #5b21b6; }
+  .status--shipped { background: #dcfce7; color: #166534; }
+  .status--delivered { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .status--cancelled { background: #fee2e2; color: #991b1b; }
+
+  .order-actions { display: flex; justify-content: flex-end; align-items: center; gap: 1.5rem; }
+  .btn-icon { background: none; border: none; font-size: 1.25rem; cursor: pointer; transition: transform 0.2s; opacity: 0.6; }
+  .btn-icon:hover { opacity: 1; transform: scale(1.1); }
+  .btn-icon:disabled { opacity: 0.2; cursor: not-allowed; }
+  .arrow { color: #9ca3af; }
+
+  /* Modales */
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 2rem; }
+  .modal { background: white; border-radius: 20px; width: 500px; max-width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; }
+  .modal-lg { width: 800px; }
+  .modal-header { padding: 1.5rem 2rem; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h2 { font-size: 1.25rem; font-weight: 800; }
+  .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9ca3af; }
+  .modal-content { padding: 2rem; }
+
+  .detail-layout { display: grid; grid-template-columns: 1fr 240px; gap: 2rem; }
+  .detail-main { display: flex; flex-direction: column; gap: 2rem; }
+  .detail-main h3 { font-size: 0.875rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+
+  .items-table { display: flex; flex-direction: column; gap: 0.75rem; }
+  .detail-item-row { display: flex; justify-content: space-between; font-size: 0.95rem; }
+  .detail-total-row { margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #f3f4f6; display: flex; justify-content: space-between; font-weight: 800; font-size: 1.1rem; }
+
+  .detail-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+  .status-change-box, .tracking-info-box { background: #f9fafb; padding: 1.25rem; border-radius: 12px; border: 1px solid #f3f4f6; }
+  .status-select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid #d1d5db; }
+
+  .btn-primary { width: 100%; background: #16213e; color: white; padding: 0.6rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+  .btn-primary:disabled { opacity: 0.5; }
+  .btn-secondary { background: white; border: 1px solid #d1d5db; padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+  .modal-form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .form-group label { font-size: 0.875rem; font-weight: 600; }
+  .form-group select, .form-group input { padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 10px; }
+  .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
+
+  .code { font-family: monospace; background: #e0f2fe; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem; color: #0369a1; }
+
+  .loading-state { text-align: center; padding: 4rem; }
+  .spinner { width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top-color: #16213e; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>

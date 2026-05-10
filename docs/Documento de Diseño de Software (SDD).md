@@ -377,9 +377,9 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.08) (hover cards)
 | Configurar pasarelas | ❌ | ❌ | ❌ | ✅ |
 
 ```
-Login → JWT (amr: ['pwd']) → Verificar TOTP → JWT (amr: ['pwd','mfa'])
+Login → JWT (mfa_verified: false) → Verificar TOTP → JWT (user_metadata.mfa_verified: 'true')
                                                       ↓
-                                              RLS verifica claim 'mfa'
+                                              RLS verifica metadata 'mfa_verified'
 ```
 
 > 🔧 **Recomendación:** Usar `supabase.auth.admin.generateLink()` con `service_role` para emitir JWT con claims personalizados.
@@ -390,7 +390,7 @@ const { data, error } = await supabase.auth.admin.generateLink({
   type: 'magiclink',
   email: userEmail,
   options: { 
-    data: { amr: ['pwd', 'mfa'] }
+    data: { mfa_verified: 'true' }
   }
 });
 ```

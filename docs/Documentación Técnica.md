@@ -26,7 +26,7 @@ Todas las APIs que requieren autenticación usan Bearer Token (JWT de Supabase):
 Authorization: Bearer <jwt_token>
 ```
 
-Las APIs de administración requieren adicionalmente el claim `amr: ['pwd', 'mfa']` en el JWT.
+Las APIs de administración requieren adicionalmente el claim `user_metadata.mfa_verified = 'true'` en el JWT.
 
 ---
 
@@ -73,7 +73,7 @@ curl -X POST http://localhost:54321/functions/v1/login \
 **Request Body:**
 ```json
 {
-  "temp_token": "string (JWT con claim amr: ['pwd'])",
+  "temp_token": "string (JWT con metadata mfa_verified: false)",
   "totp_code": "string (6 dígitos)"
 }
 ```
@@ -780,7 +780,7 @@ export const OrderTrackingSchema = z.object({
 | `POST/PUT/DELETE /manage-*` | 50 | 1 minuto |
 
 **Mecanismo de Implementación:**
-Usar `@supabase/rls` + contador en Redis (Upstash Free) o lógica en Edge Function con KV.
+SQL Pure mediante la función `check_rate_limit(identifier, endpoint, limit, window)`. El identificador es el `auth.uid()` para usuarios logueados o la IP para anónimos. Costo operativo $0.
 
 ---
 
