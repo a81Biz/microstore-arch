@@ -1,0 +1,98 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Commands
+
+```bash
+# Development (Docker — primary workflow)
+docker compose up --build          # Start all services
+docker compose down                # Stop services
+docker compose down -v && docker compose up --build  # Full reset
+
+# Workspace-wide
+npm run build --workspaces --if-present
+npm run lint --workspaces --if-present
+npm run typecheck --workspaces --if-present
+npm run test --workspaces --if-present
+
+# Core package only
+npm run test:core                  # Run tests in packages/core
+cd packages/core && npm run test:watch  # Watch mode
+
+# Architecture validation (runs in CI)
+bash scripts/check-architecture.sh
+```
+
+## Architecture Overview
+
+This is an e-commerce monorepo with **npm workspaces** deploying to Cloudflare Pages + Supabase.
+
+### Apps (`apps/`)
+
+| App | Framework | Port | Purpose |
+|-----|-----------|------|---------|
+| `storefront` | Astro 4 | 4321 | Public catalog and product browsing |
+| `client-hub` | Astro 4 + React 18 | 5173 | Customer dashboard (auth, orders, checkout) |
+| `vendor-admin` | Astro 4 + React 18 | 5174 | Vendor panel (products, orders, settings) |
+
+All apps use the **Astro + Islands pattern**: Astro handles static markup and SSR; React is used only for interactive UI components. Alpine.js is acceptable for minimal interactivity.
+
+### Packages (`packages/`)
+
+- **`@micro-store/core`** — Shared domain layer: TypeScript interfaces (Order, Product, User), enums (OrderStatus, ItemFulfillmentStatus, PaymentGateway, UserRole), Zod schemas, and utilities. Tested with Vitest.
+- **`@micro-store/eslint-config`** — Shared ESLint config (Astro + React + Prettier plugins).
+
+### Backend: Supabase + Edge Functions
+
+All business logic lives in Supabase Edge Functions (Deno runtime) under `supabase/functions/`:
+
+| Function | Role |
+|----------|------|
+| `create-order` | Order creation with RLS validation |
+| `manage-orders` | Read/update/delete orders |
+| `manage-products` | Product CRUD |
+| `manage-payment-gateways` | Payment config |
+| `payment-webhook` | Idempotent webhook handling |
+| `login`, `change-password`, `confirm-totp` | Auth operations |
+
+Database migrations live in `supabase/migrations/` (numbered `00001_` → `00008_`).
+
+## Architecture Rules (Enforced by CI)
+
+`scripts/check-architecture.sh` blocks PRs that violate these:
+
+1. **No HTML in `.ts` files** — markup belongs in `.astro` or `.tsx`.
+2. **No inline styles in `.astro`** — use external `.css` files.
+3. **No magic strings for order statuses** — always import from `@micro-store/core/enums`.
+4. **No direct Supabase writes in frontend** — reads go through the Supabase client (`supabase-client.ts`); all writes (insert/update/delete) must call an Edge Function.
+5. **Core package purity** — `packages/core` must not import from `astro`, `react`, or `supabase`.
+
+## Key Conventions
+
+- **TypeScript strict mode** everywhere; no `any` types.
+- **Prettier**: 100-char line width, 2-space indent, single quotes.
+- **Pre-commit hook** (Husky): runs `npm test` before every commit.
+- Enums from `@micro-store/core` are the source of truth — never hardcode status strings.
+- RLS policies are enforced at the database level; Edge Functions add a second validation layer.
+
+## Environment Variables
+
+Copy `.env.example` to `.env`. Required variables:
+
+```
+SUPABASE_URL / SUPABASE_INTERNAL_URL
+SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY
+ENCRYPTION_KEY                   # 64-char hex key for dev
+PUBLIC_STOREFRONT_URL
+PUBLIC_CLIENT_HUB_URL
+PUBLIC_VENDOR_ADMIN_URL
+```
+
+Local Supabase ports: `54321` (API), `54322` (Postgres), `54323` (Studio UI), `54324` (Inbucket email).
+
+## CI/CD
+
+- **`ci.yml`**: On push/PR → architecture check → lint → typecheck → core tests.
+- **`deploy.yml`**: On push to `main` → build all apps → deploy to Cloudflare Pages → deploy Edge Functions → run migrations → health check.
+- Node requirement: `>=20.0.0`.

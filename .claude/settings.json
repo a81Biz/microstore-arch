@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(npm audit *)",
+      "Bash(bash scripts/check-architecture.sh)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(node -e \"const p=require\\('./apps/storefront/package.json'\\); console.log\\('storefront astro:', p.dependencies?.astro || p.devDependencies?.astro\\)\")",
+      "Bash(node -e \"const p=require\\('./apps/client-hub/package.json'\\); console.log\\('client-hub astro:', p.dependencies?.astro || p.devDependencies?.astro\\)\")",
+      "Bash(node -e \"const p=require\\('./apps/vendor-admin/package.json'\\); console.log\\('vendor-admin astro:', p.dependencies?.astro || p.devDependencies?.astro\\)\")",
+      "Bash(node -e \"const p=require\\('./node_modules/astro/package.json'\\); console.log\\('astro instalado:', p.version\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const v=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\); const arr=JSON.parse\\(v\\); console.log\\(arr.filter\\(x=>x.startsWith\\('0.25'\\)\\).join\\(', '\\)\\);\")",
+      "Bash(node -e \"const d=[];process.stdin.on\\('data',c=>d.push\\(c\\)\\);process.stdin.on\\('end',\\(\\)=>{const v=JSON.parse\\(d.join\\(''\\)\\);console.log\\('0.25.x:',v.filter\\(x=>x.startsWith\\('0.25'\\)\\).join\\(', '\\)\\);console.log\\('latest:',v[v.length-1]\\);}\\)\")",
+      "Bash(node -e \"const d=[];process.stdin.on\\('data',c=>d.push\\(c\\)\\);process.stdin.on\\('end',\\(\\)=>{const v=JSON.parse\\(d.join\\(''\\)\\);const safe=v.filter\\(x=>{const[,mi,pa]=x.split\\('.'\\).map\\(Number\\);return mi>8||\\(mi===8&&pa>=3\\);}\\);console.log\\('yaml safe versions \\(>=2.8.3\\):',safe.join\\(', '\\)\\);console.log\\('latest yaml:',v[v.length-1]\\);}\\);\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.overrides, null, 2\\)\\)\")",
+      "Bash(Remove-Item package-lock.json -Force)",
+      "Bash(npm --version)",
+      "Bash(npm why *)",
+      "Bash(npm ls *)",
+      "Bash(node -e \"const p=require\\('./packages/core/package.json'\\); console.log\\('vitest in core:', p.devDependencies.vitest\\)\")",
+      "Bash(npm cache *)",
+      "Bash(npm update *)",
+      "Bash(npm run *)"
+    ]
+  }
+}
