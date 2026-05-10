@@ -42,12 +42,15 @@ jobs:
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
+        with:
+          version: 1.207.9
 
       - name: Start Supabase Local
         run: supabase start
+        timeout-minutes: 3
 
-      - name: Run Database Migrations
-        run: supabase db reset
+      - name: Apply Migrations
+        run: supabase db reset --no-confirm
 
       - name: Upload Test Results
         if: always()

@@ -3,8 +3,8 @@
 
 BEGIN;
 
--- 1. Extensión para encriptación
-CREATE EXTENSION IF NOT EXISTS pgsodium;
+-- 1. Extensión para encriptación (pgcrypto es estándar y siempre disponible en Supabase)
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- 2. Función atómica para crear orden con validación de stock
 CREATE OR REPLACE FUNCTION public.create_order_atomic(
@@ -153,6 +153,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 4. Función para encriptar credenciales de pago
+-- Usa pgcrypto (pgp_sym_encrypt) — incluye IV en el ciphertext, sin almacenamiento externo de nonce
 CREATE OR REPLACE FUNCTION public.save_payment_credentials(
   p_vendor_id UUID,
   p_gateway payment_gateway,
@@ -160,40 +161,29 @@ CREATE OR REPLACE FUNCTION public.save_payment_credentials(
 )
 RETURNS VOID AS $$
 DECLARE
+  v_key TEXT;
   v_encrypted BYTEA;
 BEGIN
-  -- Encriptar credenciales con pgsodium usando clave maestra
-  -- La clave se obtiene de una variable de entorno o vault
-  -- NOTA: pgsodium.crypto_secretbox requiere una clave de 32 bytes
-  -- En este entorno simplificado, usamos una codificación básica si no hay clave maestra configurada
-  
-  v_encrypted := pgsodium.crypto_secretbox(
-    p_credentials::TEXT::BYTEA,
-    pgsodium.crypto_secretbox_noncegen(), -- ✅ Nonce criptográficamente seguro
-    current_setting('app.encryption_key', true)::BYTEA
+  v_key := current_setting('app.settings.encryption_key', true);
+
+  IF v_key IS NULL OR length(v_key) < 32 THEN
+    RAISE EXCEPTION 'ENCRYPTION_KEY_NOT_CONFIGURED: La clave debe tener al menos 32 caracteres';
+  END IF;
+
+  v_encrypted := pgp_sym_encrypt(
+    p_credentials::TEXT,
+    v_key,
+    'compress-algo=0, cipher-algo=aes256'
   );
-  
-  -- Insertar o actualizar
+
   INSERT INTO payment_credentials (
     vendor_id, gateway, is_enabled, credentials_encrypted
   ) VALUES (
     p_vendor_id, p_gateway, TRUE, v_encrypted
   )
   ON CONFLICT (vendor_id, gateway)
-  DO UPDATE SET 
+  DO UPDATE SET
     credentials_encrypted = v_encrypted,
-    last_rotated_at = NOW(),
-    updated_at = NOW();
-EXCEPTION WHEN OTHERS THEN
-  -- Fallback si pgsodium falla por falta de configuración de clave
-  INSERT INTO payment_credentials (
-    vendor_id, gateway, is_enabled, credentials_encrypted
-  ) VALUES (
-    p_vendor_id, p_gateway, TRUE, p_credentials::TEXT::BYTEA
-  )
-  ON CONFLICT (vendor_id, gateway)
-  DO UPDATE SET 
-    credentials_encrypted = p_credentials::TEXT::BYTEA,
     last_rotated_at = NOW(),
     updated_at = NOW();
 END;

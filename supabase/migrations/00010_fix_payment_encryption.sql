@@ -1,9 +1,11 @@
 -- Micro-Store Arch: Fix Payment Encryption
--- Elimina el fallback a plaintext en save_payment_credentials.
--- Si pgsodium no está configurado correctamente, la función falla explícitamente
--- en lugar de guardar credenciales sin encriptar silenciosamente.
+-- Migra save_payment_credentials de pgsodium a pgcrypto.
+-- pgp_sym_encrypt (pgcrypto) incluye IV en el ciphertext — sin almacenamiento externo de nonce.
+-- Falla explícitamente si la clave no está configurada — sin fallback a plaintext.
 
 BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE OR REPLACE FUNCTION public.save_payment_credentials(
   p_vendor_id UUID,
@@ -12,21 +14,19 @@ CREATE OR REPLACE FUNCTION public.save_payment_credentials(
 )
 RETURNS VOID AS $$
 DECLARE
-  v_encrypted BYTEA;
   v_key TEXT;
+  v_encrypted BYTEA;
 BEGIN
-  -- Obtener clave de encriptación — falla explícitamente si no está configurada
-  v_key := current_setting('app.encryption_key', false);
+  v_key := current_setting('app.settings.encryption_key', true);
 
-  IF v_key IS NULL OR length(v_key) = 0 THEN
-    RAISE EXCEPTION 'ENCRYPTION_KEY_NOT_CONFIGURED: app.encryption_key debe estar configurada antes de guardar credenciales de pago';
+  IF v_key IS NULL OR length(v_key) < 32 THEN
+    RAISE EXCEPTION 'ENCRYPTION_KEY_NOT_CONFIGURED: app.settings.encryption_key debe tener al menos 32 caracteres';
   END IF;
 
-  -- Encriptar con pgsodium usando clave maestra — sin fallback a plaintext
-  v_encrypted := pgsodium.crypto_secretbox(
-    p_credentials::TEXT::BYTEA,
-    pgsodium.crypto_secretbox_noncegen(),
-    v_key::BYTEA
+  v_encrypted := pgp_sym_encrypt(
+    p_credentials::TEXT,
+    v_key,
+    'compress-algo=0, cipher-algo=aes256'
   );
 
   INSERT INTO payment_credentials (
@@ -43,8 +43,8 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION public.save_payment_credentials IS
-  'Guarda credenciales de pasarela encriptadas con pgsodium. '
-  'Falla explícitamente si app.encryption_key no está configurada. '
-  'No tiene fallback a plaintext — falla ruidosamente para evitar exposición silenciosa.';
+  'Guarda credenciales de pasarela encriptadas con pgcrypto (AES-256). '
+  'Falla explícitamente si app.settings.encryption_key no está configurada. '
+  'No tiene fallback a plaintext.';
 
 COMMIT;
