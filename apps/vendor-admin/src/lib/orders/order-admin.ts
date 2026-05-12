@@ -1,3 +1,5 @@
+import { API_ROUTES } from '@micro-store/core';
+
 export interface AdminOrder {
   id: string;
   displayId: string;
@@ -22,10 +24,13 @@ export interface AdminOrderDetail extends AdminOrder {
   }>;
 }
 
-function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem('auth_token');
+const base = () => import.meta.env.PUBLIC_API_BASE as string;
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const { supabaseClient } = await import('../supabase-client');
+  const { data: { session } } = await supabaseClient.auth.getSession();
   return {
-    'Authorization': `Bearer ${token || ''}`,
+    'Authorization': `Bearer ${session?.access_token || ''}`,
     'Content-Type': 'application/json'
   };
 }
@@ -35,13 +40,12 @@ export async function loadOrders(filters?: { status?: string; search?: string })
   if (filters?.status) params.set('status', filters.status);
   if (filters?.search) params.set('search', filters.search);
 
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-orders?${params}`, {
-    headers: getAuthHeaders()
+  const response = await fetch(`${base()}${API_ROUTES.admin.orders}?${params}`, {
+    headers: await getAuthHeaders()
   });
 
   if (!response.ok) throw new Error('Error al cargar pedidos');
-  
-  // Mapeo de la respuesta del RPC search_orders
+
   const data = await response.json();
   return data.map((o: any) => ({
     id: o.id,
@@ -58,13 +62,13 @@ export async function loadOrders(filters?: { status?: string; search?: string })
 }
 
 export async function loadOrderDetail(orderId: string): Promise<AdminOrderDetail> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-orders/${orderId}`, {
-    headers: getAuthHeaders()
+  const response = await fetch(`${base()}${API_ROUTES.admin.orders}/${orderId}`, {
+    headers: await getAuthHeaders()
   });
 
   if (!response.ok) throw new Error('Error al cargar detalle');
   const o = await response.json();
-  
+
   return {
     id: o.id,
     displayId: o.display_id,
@@ -88,9 +92,9 @@ export async function loadOrderDetail(orderId: string): Promise<AdminOrderDetail
 }
 
 export async function updateTracking(orderId: string, trackingId: string, carrier: string): Promise<void> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-orders/${orderId}/tracking`, {
+  const response = await fetch(`${base()}${API_ROUTES.admin.orders}/${orderId}/tracking`, {
     method: 'PATCH',
-    headers: getAuthHeaders(),
+    headers: await getAuthHeaders(),
     body: JSON.stringify({ trackingId, carrier })
   });
 
@@ -101,9 +105,9 @@ export async function updateTracking(orderId: string, trackingId: string, carrie
 }
 
 export async function updateOrderStatus(orderId: string, status: string): Promise<void> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-orders/${orderId}/status`, {
+  const response = await fetch(`${base()}${API_ROUTES.admin.orders}/${orderId}/status`, {
     method: 'PATCH',
-    headers: getAuthHeaders(),
+    headers: await getAuthHeaders(),
     body: JSON.stringify({ status })
   });
 

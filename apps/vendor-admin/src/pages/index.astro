@@ -1,0 +1,129 @@
+---
+import VendorAdminLayout from '../layouts/VendorAdminLayout.astro';
+---
+
+<VendorAdminLayout title="Dashboard">
+  <div class="dashboard" x-data="dashboard()" x-init="init()">
+    <template x-if="loading">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando...</p>
+      </div>
+    </template>
+
+    <template x-if="!loading">
+      <div class="dashboard-content">
+        <div class="page-header">
+          <h1>Dashboard</h1>
+          <p>Bienvenido al panel de administración</p>
+        </div>
+
+        <div class="quick-links">
+          <a href="/products" class="quick-card">
+            <div class="quick-card-icon">📦</div>
+            <div class="quick-card-body">
+              <h3>Productos</h3>
+              <p>Gestiona tu catálogo de productos</p>
+            </div>
+            <span class="arrow">→</span>
+          </a>
+
+          <a href="/orders" class="quick-card">
+            <div class="quick-card-icon">🛒</div>
+            <div class="quick-card-body">
+              <h3>Pedidos</h3>
+              <p>Revisa y administra los pedidos</p>
+            </div>
+            <span class="arrow">→</span>
+          </a>
+
+          <a href="/settings" class="quick-card">
+            <div class="quick-card-icon">⚙️</div>
+            <div class="quick-card-body">
+              <h3>Configuración</h3>
+              <p>Pasarelas de pago y ajustes</p>
+            </div>
+            <span class="arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </template>
+  </div>
+</VendorAdminLayout>
+
+<script>
+  import { supabaseClient } from '../lib/supabase-client';
+
+  window.dashboard = () => ({
+    loading: true,
+
+    async init() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        window.location.href = '/auth/login';
+        return;
+      }
+      this.loading = false;
+    }
+  });
+</script>
+
+<style>
+  .dashboard { padding: 3rem; }
+
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    gap: 1rem;
+    color: #6b7280;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #16213e;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .page-header { margin-bottom: 3rem; }
+  .page-header h1 { font-size: 2rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem; }
+  .page-header p { color: #6b7280; }
+
+  .quick-links { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+
+  .quick-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: white;
+    border: 1px solid #f3f4f6;
+    border-radius: 20px;
+    padding: 1.75rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .quick-card:hover {
+    border-color: #16213e;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px -4px rgba(0,0,0,0.1);
+  }
+
+  .quick-card-icon { font-size: 2rem; line-height: 1; }
+
+  .quick-card-body { flex: 1; }
+  .quick-card-body h3 { font-size: 1.1rem; font-weight: 700; color: #111827; margin-bottom: 0.25rem; }
+  .quick-card-body p { font-size: 0.875rem; color: #6b7280; }
+
+  .arrow { color: #9ca3af; font-size: 1.25rem; transition: transform 0.2s; }
+  .quick-card:hover .arrow { transform: translateX(4px); color: #16213e; }
+</style>

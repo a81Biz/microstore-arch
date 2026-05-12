@@ -24,10 +24,10 @@ const { title } = Astro.props;
           <span>Admin</span>
         </div>
         <nav class="sidebar-nav">
-          <a href="/dashboard">Dashboard</a>
-          <a href="/products" class="active">Productos</a>
-          <a href="/orders">Pedidos</a>
-          <a href="/profile">Mi Perfil</a>
+          <a href="/" class:list={[{ active: Astro.url.pathname === '/' }]}>Dashboard</a>
+          <a href="/products" class:list={[{ active: Astro.url.pathname.startsWith('/products') }]}>Productos</a>
+          <a href="/orders" class:list={[{ active: Astro.url.pathname.startsWith('/orders') }]}>Pedidos</a>
+          <a href="/settings" class:list={[{ active: Astro.url.pathname.startsWith('/settings') }]}>Configuración</a>
         </nav>
         <div class="sidebar-footer">
           <button id="logout-btn">Cerrar Sesión</button>

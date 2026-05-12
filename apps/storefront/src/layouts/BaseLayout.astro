@@ -39,7 +39,7 @@ const fullTitle = `${title} | ${siteName}`;
         <a href="/" class="logo">{siteName}</a>
         <nav>
           <a href="/">Catálogo</a>
-          <a href="https://cliente.tienda.com">Mi Cuenta</a>
+          <a href={import.meta.env.PUBLIC_CLIENT_HUB_URL || 'http://client.localhost'}>Mi Cuenta</a>
         </nav>
       </div>
     </header>

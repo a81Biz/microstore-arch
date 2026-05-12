@@ -14,7 +14,11 @@ export class UnauthorizedError extends AppError {
   }
 }
 
-export class BusinessError extends AppError {}
+export class BusinessError extends AppError {
+  constructor(code: string, message: string, status: number = 400) {
+    super(message, status, code);
+  }
+}
 
 export const handleError = (error: unknown): Response => {
   if (error instanceof AppError) {

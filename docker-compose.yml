@@ -1,87 +1,420 @@
-version: '3.8'
+# =============================================================================
+# Micro-Store Arch — Docker Compose (stack completo de desarrollo local)
+#
+# Acceso (un solo terminal: docker compose up):
+#   http://localhost          → Storefront (catálogo público)
+#   http://client.localhost   → Client Hub (panel de cliente)
+#   http://admin.localhost    → Vendor Admin (panel de vendedor)
+#   http://localhost:8000     → Supabase API (REST + Auth + Realtime)
+#   http://localhost:8323     → Supabase Studio (administración de BD)
+#   http://localhost:8025     → Inbucket (correos de prueba)
+#
+# Prerequisito en Windows (una sola vez, cmd como Administrador):
+#   notepad C:\Windows\System32\drivers\etc\hosts
+#   Añadir:
+#     127.0.0.1  client.localhost
+#     127.0.0.1  admin.localhost
+#
+# Uso:
+#   cp .env.example .env                       # primera vez
+#   docker compose up -d                       # arrancar todo
+#   docker compose down -v && docker compose up # reset completo (borra BD)
+# =============================================================================
 
 services:
-  # Supabase Stack (corre CLI internamente para levantar DB, Auth, Storage, Functions)
-  supabase:
-    image: supabase/cli:1.207.9
-    container_name: microstore-supabase
-    command: start
-    ports:
-      - "54321:54321"  # API Gateway / Edge Functions
-      - "54322:5432"   # PostgreSQL
-      - "54323:3000"   # Studio
-      - "54324:54324"  # Inbucket
-    volumes:
-      - supabase-data:/root/.supabase
-      - ./supabase:/project
-    environment:
-      - SUPABASE_PROJECT_REF=local-dev
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:54321/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    networks: [microstore-network]
 
+  # ---------------------------------------------------------------------------
+  # NGINX — Reverse proxy (único puerto 80 expuesto para las apps)
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: microstore-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - storefront
+      - client-hub
+      - vendor-admin
+    networks: [microstore-network]
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # STOREFRONT — Catálogo público (Astro + Alpine.js)
+  # ---------------------------------------------------------------------------
   storefront:
     build: { context: ., dockerfile: docker/Dockerfile.astro }
     container_name: microstore-storefront
-    ports: ["4321:4321"]
+    working_dir: /workspace/apps/storefront
+    expose: ["4321"]
     environment:
-      - PUBLIC_SUPABASE_URL=${SUPABASE_URL}
-      - PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - PUBLIC_SUPABASE_URL=http://api.localhost
+      - PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjEzNTMxOTg1LCJleHAiOjQ3NjkyMDU5ODV9.9oDfITnetRe3EYQzDh9CmgUFEJkLgHsGeKT8s1tHtvM}
+      - SUPABASE_URL=http://supabase-kong:8000
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA}
+      - PUBLIC_CLIENT_HUB_URL=http://client.localhost
     volumes:
-      - ./apps/storefront:/app
-      - ./packages:/app/packages
-      - storefront_modules:/app/node_modules
-    command: npm run dev -- --host 0.0.0.0
-    depends_on: { supabase: { condition: service_healthy } }
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - .:/workspace
+      - storefront_modules:/workspace/node_modules
+    command: >
+      sh -c "
+        [ ! -f /workspace/node_modules/.package-lock.json ] && npm ci --ignore-scripts;
+        npm run dev -- --host 0.0.0.0
+      "
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
     networks: [microstore-network]
+    restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
+  # CLIENT HUB — Panel de cliente (Astro + React + Alpine.js)
+  # ---------------------------------------------------------------------------
   client-hub:
     build: { context: ., dockerfile: docker/Dockerfile.astro }
     container_name: microstore-client-hub
-    ports: ["5173:5173"]
+    working_dir: /workspace/apps/client-hub
+    expose: ["5173"]
     environment:
-      - PUBLIC_SUPABASE_URL=${SUPABASE_URL}
-      - PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - PUBLIC_API_BASE=http://host.docker.internal:54321/functions/v1
+      - PUBLIC_SUPABASE_URL=http://api.localhost
+      - PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjEzNTMxOTg1LCJleHAiOjQ3NjkyMDU5ODV9.9oDfITnetRe3EYQzDh9CmgUFEJkLgHsGeKT8s1tHtvM}
+      - SUPABASE_URL=http://supabase-kong:8000
+      - PUBLIC_API_BASE=http://api.localhost
+      - PUBLIC_STOREFRONT_URL=http://localhost
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA}
     volumes:
-      - ./apps/client-hub:/app
-      - ./packages:/app/packages
-      - client_modules:/app/node_modules
-    command: npm run dev -- --host 0.0.0.0
-    depends_on: { supabase: { condition: service_healthy } }
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - .:/workspace
+      - client_modules:/workspace/node_modules
+    command: >
+      sh -c "
+        [ ! -f /workspace/node_modules/.package-lock.json ] && npm ci --ignore-scripts;
+        npm run dev -- --host 0.0.0.0
+      "
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
     networks: [microstore-network]
+    restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
+  # VENDOR ADMIN — Panel de vendedor (Astro + React + Alpine.js)
+  # ---------------------------------------------------------------------------
   vendor-admin:
     build: { context: ., dockerfile: docker/Dockerfile.astro }
     container_name: microstore-vendor-admin
-    ports: ["5174:5174"]
+    working_dir: /workspace/apps/vendor-admin
+    expose: ["5174"]
     environment:
-      - PUBLIC_SUPABASE_URL=${SUPABASE_URL}
-      - PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - PUBLIC_API_BASE=http://host.docker.internal:54321/functions/v1
+      - PUBLIC_SUPABASE_URL=http://api.localhost
+      - PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjEzNTMxOTg1LCJleHAiOjQ3NjkyMDU5ODV9.9oDfITnetRe3EYQzDh9CmgUFEJkLgHsGeKT8s1tHtvM}
+      - SUPABASE_URL=http://supabase-kong:8000
+      - PUBLIC_API_BASE=http://api.localhost
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA}
     volumes:
-      - ./apps/vendor-admin:/app
-      - ./packages:/app/packages
-      - admin_modules:/app/node_modules
-    command: npm run dev -- --host 0.0.0.0
-    depends_on: { supabase: { condition: service_healthy } }
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - .:/workspace
+      - vendor_modules:/workspace/node_modules
+    command: >
+      sh -c "
+        [ ! -f /workspace/node_modules/.package-lock.json ] && npm ci --ignore-scripts;
+        npm run dev -- --host 0.0.0.0
+      "
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
     networks: [microstore-network]
+    restart: unless-stopped
+
+  # ===========================================================================
+  # SUPABASE STACK
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — Supabase Postgres con schemas auth/storage/realtime integrados.
+  # Las migraciones del proyecto se aplican via el servicio db-migrate (abajo),
+  # NO mediante initdb.d, para no pisar los scripts internos de la imagen.
+  # ---------------------------------------------------------------------------
+  supabase-db:
+    image: supabase/postgres:15.8.1.032
+    container_name: microstore-supabase-db
+    command:
+      - postgres
+      - -c
+      - listen_addresses=*
+      - -c
+      - "app.settings.encryption_key=${ENCRYPTION_KEY:-local-dev-key-not-for-production-use-only-aabbccdd}"
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: supabase_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-supabase123}
+      POSTGRES_DB: postgres
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+    volumes:
+      - supabase_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U supabase_admin -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+    networks: [microstore-network]
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # DB Migrate — Aplica las migraciones del proyecto sobre la BD de Supabase.
+  # Corre una sola vez (restart: no). Todos los servicios que usen tablas
+  # propias deben depender de este servicio con service_completed_successfully.
+  # ---------------------------------------------------------------------------
+  db-migrate:
+    image: postgres:15-alpine
+    container_name: microstore-db-migrate
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    volumes:
+      - ./supabase/migrations:/migrations:ro
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-supabase123}
+    command:
+      - sh
+      - -c
+      - |
+        echo "=== Aplicando migraciones del proyecto ==="
+        for f in $$(ls /migrations/*.sql | sort); do
+          echo "-> $$(basename $$f)"
+          psql -h supabase-db -U supabase_admin -d postgres -f "$$f" 2>&1
+        done
+        echo "=== Migraciones completadas ==="
+    networks: [microstore-network]
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # GoTrue — Autenticación (JWT, signup, login, MFA)
+  # ---------------------------------------------------------------------------
+  supabase-auth:
+    image: supabase/gotrue:v2.151.0
+    container_name: microstore-supabase-auth
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://localhost:8000
+      GOTRUE_API_EXTERNAL_URL: http://localhost:8000
+      GOTRUE_DB_DRIVER: postgres
+      DATABASE_URL: postgres://supabase_admin:${POSTGRES_PASSWORD:-supabase123}@supabase-db:5432/postgres
+      GOTRUE_DATABASE_URL: postgres://supabase_admin:${POSTGRES_PASSWORD:-supabase123}@supabase-db:5432/postgres
+      GOTRUE_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_SITE_URL: http://localhost
+      GOTRUE_URI_ALLOW_LIST: "http://localhost,http://client.localhost,http://admin.localhost"
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_SMTP_HOST: inbucket
+      GOTRUE_SMTP_PORT: 2500
+      GOTRUE_SMTP_ADMIN_EMAIL: noreply@micro-store.local
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    networks: [microstore-network]
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # PostgREST — API REST auto-generada desde el schema public
+  # ---------------------------------------------------------------------------
+  supabase-rest:
+    image: postgrest/postgrest:v12.2.0
+    container_name: microstore-supabase-rest
+    environment:
+      PGRST_DB_URI: postgres://supabase_admin:${POSTGRES_PASSWORD:-supabase123}@supabase-db:5432/postgres
+      PGRST_DB_SCHEMAS: public,storage
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    networks: [microstore-network]
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Realtime — WebSockets (suscripción reactiva a cambios en BD)
+  # ---------------------------------------------------------------------------
+  supabase-realtime:
+    image: supabase/realtime:v2.28.32
+    container_name: microstore-supabase-realtime
+    command:
+      - "sh"
+      - "-c"
+      - "/app/bin/migrate && /app/bin/realtime eval 'Realtime.Release.seeds(Realtime.Repo)' && /app/bin/server"
+    environment:
+      DB_HOST: supabase-db
+      DB_PORT: 5432
+      DB_USER: supabase_admin
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-supabase123}
+      DB_NAME: postgres
+      DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
+      DB_ENC_KEY: "supabase-key-dev"
+      DB_SSL: "false"
+      API_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      PORT: 4000
+      REPLICATION_MODE: RLS
+      REPLICATION_POLL_INTERVAL: 100
+      SECURE_CHANNELS: "true"
+      SLOT_NAME: supabase_realtime_rls
+      TEMPORARY_SLOT: "true"
+      SECRET_KEY_BASE: "aaaabbbbccccddddeeeeffffgggghhhhiiiijjjjkkkkllllmmmmnnnnoooopppp"
+      FLY_APP_NAME: microstore-realtime
+      ERL_AFLAGS: "-proto_dist inet_tcp"
+      DNS_NODES: "''"
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    networks: [microstore-network]
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Postgres Meta — API de metadatos (usada por Studio)
+  # ---------------------------------------------------------------------------
+  supabase-meta:
+    image: supabase/postgres-meta:v0.84.2
+    container_name: microstore-supabase-meta
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: supabase-db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: supabase_admin
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD:-supabase123}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    networks: [microstore-network]
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Supabase Studio — UI de administración de BD y Auth
+  # ---------------------------------------------------------------------------
+  supabase-studio:
+    image: supabase/studio:2026.04.13-sha-e95f1cc
+    container_name: microstore-supabase-studio
+    ports:
+      - "8323:3000"
+    healthcheck:
+      disable: true
+    environment:
+      STUDIO_PG_META_URL: http://supabase-meta:8080
+      SUPABASE_URL: http://supabase-kong:8000
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjEzNTMxOTg1LCJleHAiOjQ3NjkyMDU5ODV9.9oDfITnetRe3EYQzDh9CmgUFEJkLgHsGeKT8s1tHtvM}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA}
+    depends_on:
+      - supabase-meta
+      - supabase-kong
+    networks: [microstore-network]
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Kong — API Gateway (unifica Auth + REST + Realtime en :8000)
+  # ---------------------------------------------------------------------------
+  supabase-kong:
+    image: kong:2.8.1
+    container_name: microstore-supabase-kong
+    ports:
+      - "8000:8000"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl
+    volumes:
+      - ./supabase/kong.yml:/var/lib/kong/kong.yml:ro
+    networks: [microstore-network]
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # DB Seed — Crea el usuario admin en GoTrue via Admin API (una sola vez).
+  # Corre después de que GoTrue está listo. Idempotente: si el usuario ya
+  # existe, no hace nada.
+  # ---------------------------------------------------------------------------
+  db-seed:
+    image: curlimages/curl:latest
+    container_name: microstore-db-seed
+    environment:
+      SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA}
+    command:
+      - sh
+      - -c
+      - |
+        echo "=== Esperando GoTrue ==="
+        until curl -sf http://supabase-auth:9999/health >/dev/null 2>&1; do sleep 3; done
+        echo "=== Verificando usuario admin ==="
+        EXISTING=$$(curl -sf -H "Authorization: Bearer $$SERVICE_ROLE_KEY" http://supabase-auth:9999/admin/users | grep -c "admin@tienda.com" || echo "0")
+        if [ "$$EXISTING" = "0" ]; then
+          curl -sf -X POST http://supabase-auth:9999/admin/users \
+            -H "Authorization: Bearer $$SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"email":"admin@tienda.com","password":"Admin1234!","email_confirm":true}' \
+            && echo "=== Admin creado: admin@tienda.com / Admin1234! ===" \
+            || echo "Error al crear admin"
+        else
+          echo "=== Admin ya existe ==="
+        fi
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    networks: [microstore-network]
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # Supabase Edge Runtime — Ejecuta las Edge Functions (Deno) localmente.
+  # Enrutado por Kong: localhost:8000/functions/v1/{nombre-función}
+  # ---------------------------------------------------------------------------
+  supabase-functions:
+    image: supabase/edge-runtime:v1.67.4
+    container_name: microstore-supabase-functions
+    volumes:
+      - ./supabase/functions:/home/deno/functions:ro
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      SUPABASE_URL: http://supabase-kong:8000
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjEzNTMxOTg1LCJleHAiOjQ3NjkyMDU5ODV9.9oDfITnetRe3EYQzDh9CmgUFEJkLgHsGeKT8s1tHtvM}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-local-dev-key-not-for-production-use-only-aabbccdd}
+      VERIFY_JWT: "false"
+      DISABLE_TOTP: "true"
+      ALLOWED_ORIGINS: "http://localhost,http://client.localhost,http://admin.localhost"
+    command:
+      - start
+      - --main-service
+      - /home/deno/functions/main
+      - --port
+      - "9000"
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    networks: [microstore-network]
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Inbucket — Servidor de correo local (captura emails de GoTrue)
+  # UI: http://localhost:8025  |  SMTP: puerto 2500 interno
+  # ---------------------------------------------------------------------------
+  inbucket:
+    image: inbucket/inbucket:3.0.3
+    container_name: microstore-inbucket
+    ports:
+      - "8025:9000"
+    networks: [microstore-network]
+    restart: unless-stopped
 
 volumes:
-  supabase-data: {}
+  supabase_db_data: {}
   storefront_modules: {}
   client_modules: {}
-  admin_modules: {}
+  vendor_modules: {}
 
 networks:
   microstore-network:

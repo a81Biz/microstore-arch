@@ -1,4 +1,5 @@
 import { supabaseClient } from '../supabase-client';
+import { API_ROUTES } from '@micro-store/core';
 
 export interface CheckoutResult {
   success: boolean;
@@ -66,7 +67,7 @@ export async function createOrder(
     payment_method: paymentMethod
   };
 
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/create-order`, {
+  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.client.createOrder}`, {
     method: 'POST',
     headers: {
       'Authorization': authHeader,
@@ -92,7 +93,7 @@ export async function createOrder(
 }
 
 export async function getActivePaymentMethods(): Promise<string[]> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways/public`, {
+  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.client.paymentGateways}`, {
     headers: { 'Content-Type': 'application/json' }
   });
 

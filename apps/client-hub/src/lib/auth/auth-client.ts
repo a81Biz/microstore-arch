@@ -1,4 +1,5 @@
 import { supabaseClient } from '../supabase-client';
+import { API_ROUTES } from '@micro-store/core';
 
 export interface AuthResult {
   success: boolean;
@@ -19,7 +20,7 @@ export interface TOTPSetupData {
 }
 
 export async function signInWithEmail(email: string, password: string): Promise<AuthResult> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/login`, {
+  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.admin.login}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
@@ -88,7 +89,7 @@ export async function getCurrentUser() {
 }
 
 export async function verifyTOTP(tempToken: string, totpCode: string): Promise<AuthResult> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/verify-totp`, {
+  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.admin.verifyTotp}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ temp_token: tempToken, totp_code: totpCode })
@@ -104,7 +105,7 @@ export async function verifyTOTP(tempToken: string, totpCode: string): Promise<A
 }
 
 export async function setupTOTP(tempToken: string): Promise<{ success: boolean; data?: TOTPSetupData; message?: string }> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/setup-totp`, {
+  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.admin.setupTotp}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ temp_token: tempToken })
@@ -120,7 +121,7 @@ export async function setupTOTP(tempToken: string): Promise<{ success: boolean; 
 }
 
 export async function confirmTOTP(tempToken: string, totpCode: string): Promise<AuthResult> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/confirm-totp`, {
+  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.admin.confirmTotp}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ temp_token: tempToken, totp_code: totpCode })
@@ -136,7 +137,7 @@ export async function confirmTOTP(tempToken: string, totpCode: string): Promise<
 }
 
 export async function changePassword(tempToken: string, newPassword: string): Promise<AuthResult> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/change-password`, {
+  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.admin.changePassword}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ temp_token: tempToken, new_password: newPassword })

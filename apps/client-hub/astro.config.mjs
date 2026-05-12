@@ -4,4 +4,5 @@ import alpinejs from '@astrojs/alpinejs';
 
 export default defineConfig({
   integrations: [react(), alpinejs()],
+  server: { port: 5173 },
 });

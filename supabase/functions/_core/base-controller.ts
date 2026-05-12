@@ -59,9 +59,12 @@ export abstract class BaseController {
       throw new UnauthorizedError('Acceso denegado: Solo vendors');
     }
 
-    const isMfaVerified = user.app_metadata?.mfa_verified === true;
-    if (!isMfaVerified) {
-      throw new UnauthorizedError('Acceso denegado: MFA no verificado');
+    const disableTotp = Deno.env.get("DISABLE_TOTP") === "true";
+    if (!disableTotp) {
+      const isMfaVerified = user.app_metadata?.mfa_verified === true;
+      if (!isMfaVerified) {
+        throw new UnauthorizedError('Acceso denegado: MFA no verificado');
+      }
     }
 
     return user;
@@ -93,8 +96,7 @@ export abstract class BaseController {
     const allowed = raw.split(',').map(o => o.trim()).filter(Boolean);
 
     if (allowed.length === 0) {
-      // En desarrollo sin env configurada, permitir localhost únicamente
-      const devOrigins = ['http://localhost:4321', 'http://localhost:5173', 'http://localhost:5174'];
+      const devOrigins = ['http://localhost', 'http://client.localhost', 'http://admin.localhost', 'http://localhost:4321', 'http://localhost:5173', 'http://localhost:5174'];
       return requestOrigin && devOrigins.includes(requestOrigin) ? requestOrigin : devOrigins[0];
     }
 

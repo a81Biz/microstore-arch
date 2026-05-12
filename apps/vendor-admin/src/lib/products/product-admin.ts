@@ -1,3 +1,5 @@
+import { API_ROUTES } from '@micro-store/core';
+
 export interface ProductFormData {
   name: string;
   description: string;
@@ -20,17 +22,20 @@ export interface AdminProduct {
   updatedAt: string;
 }
 
-function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem('auth_token');
+const base = () => import.meta.env.PUBLIC_API_BASE as string;
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const { supabaseClient } = await import('../supabase-client');
+  const { data: { session } } = await supabaseClient.auth.getSession();
   return {
-    'Authorization': `Bearer ${token}`,
+    'Authorization': `Bearer ${session?.access_token || ''}`,
     'Content-Type': 'application/json'
   };
 }
 
 export async function loadProducts(): Promise<AdminProduct[]> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-products`, {
-    headers: getAuthHeaders()
+  const response = await fetch(`${base()}${API_ROUTES.admin.products}`, {
+    headers: await getAuthHeaders()
   });
 
   if (!response.ok) {
@@ -41,9 +46,9 @@ export async function loadProducts(): Promise<AdminProduct[]> {
 }
 
 export async function createProduct(data: ProductFormData): Promise<AdminProduct> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-products`, {
+  const response = await fetch(`${base()}${API_ROUTES.admin.products}`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: await getAuthHeaders(),
     body: JSON.stringify(data)
   });
 
@@ -56,9 +61,9 @@ export async function createProduct(data: ProductFormData): Promise<AdminProduct
 }
 
 export async function updateProduct(id: string, data: Partial<ProductFormData>): Promise<AdminProduct> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-products/${id}`, {
+  const response = await fetch(`${base()}${API_ROUTES.admin.products}/${id}`, {
     method: 'PUT',
-    headers: getAuthHeaders(),
+    headers: await getAuthHeaders(),
     body: JSON.stringify(data)
   });
 
@@ -71,9 +76,9 @@ export async function updateProduct(id: string, data: Partial<ProductFormData>):
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-products/${id}`, {
+  const response = await fetch(`${base()}${API_ROUTES.admin.products}/${id}`, {
     method: 'DELETE',
-    headers: getAuthHeaders()
+    headers: await getAuthHeaders()
   });
 
   if (!response.ok) {
@@ -84,7 +89,7 @@ export async function deleteProduct(id: string): Promise<void> {
 
 export async function uploadProductImage(productId: string, file: File): Promise<string> {
   const { supabaseClient } = await import('../supabase-client');
-  
+
   const fileExt = file.name.split('.').pop();
   const filePath = `${productId}/main.${fileExt}`;
 
@@ -101,13 +106,9 @@ export async function uploadProductImage(productId: string, file: File): Promise
 }
 
 export async function triggerRebuild(): Promise<void> {
-  const token = localStorage.getItem('auth_token');
-  if (!token) return;
-  
-  await fetch(`${import.meta.env.PUBLIC_API_BASE}/trigger-rebuild`, {
+  const headers = await getAuthHeaders();
+  await fetch(`${base()}/functions/v1/trigger-rebuild`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
+    headers
   });
 }

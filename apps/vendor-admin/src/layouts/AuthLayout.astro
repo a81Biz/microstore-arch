@@ -1,0 +1,66 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title} | Vendor Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div class="auth-page">
+      <div class="auth-brand">
+        <h1>Micro-Store</h1>
+        <span>Panel de Vendedor</span>
+      </div>
+      <slot />
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f9fafb;
+    color: #111827;
+    min-height: 100vh;
+  }
+
+  .auth-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .auth-brand {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .auth-brand h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .auth-brand span {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+</style>

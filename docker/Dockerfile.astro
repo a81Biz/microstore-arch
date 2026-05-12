@@ -1,11 +1,10 @@
 FROM node:22-alpine
 
-# Correr como usuario no-root para minimizar superficie de ataque
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-WORKDIR /app
+WORKDIR /workspace
 
-# Copiar manifiestos para cache de npm
+# Copiar manifiestos del workspace para cache de capas
 COPY package.json package-lock.json ./
 COPY apps/storefront/package.json ./apps/storefront/
 COPY apps/client-hub/package.json ./apps/client-hub/
@@ -13,13 +12,10 @@ COPY apps/vendor-admin/package.json ./apps/vendor-admin/
 COPY packages/core/package.json ./packages/core/
 COPY packages/config-eslint/package.json ./packages/config-eslint/
 
-# npm ci falla de forma explícita si package-lock.json está desincronizado — sin fallback
+# npm ci falla si package-lock.json está desincronizado
 RUN npm ci --ignore-scripts
 
-RUN chown -R appuser:appgroup /app
+RUN chown -R appuser:appgroup /workspace
 USER appuser
 
-EXPOSE 4321
-
-# Hot-reload habilitado vía bind-mounts en docker-compose
-CMD ["npm", "run", "dev"]
+EXPOSE 4321 5173 5174

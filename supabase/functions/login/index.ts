@@ -67,6 +67,8 @@ serve(async (req: Request) => {
       throw new UnauthorizedError('Perfil no encontrado');
     }
 
+    const disableTotp = Deno.env.get("DISABLE_TOTP") === "true";
+
     // 3. Vendor sin contraseña cambiada → forzar cambio en primer ingreso
     if (profile.role === 'vendor' && !profile.password_changed_at) {
       logger.info('Vendor must change password', { userId: authData.user.id });
@@ -80,23 +82,34 @@ serve(async (req: Request) => {
       });
     }
 
-    // 4. Vendor con TOTP activo → solicitar código
-    // Se devuelve el refresh_token para que el cliente pueda establecer la sesión
-    // de Supabase después de verificar el TOTP, sin necesidad de localStorage.
-    if (profile.role === 'vendor' && profile.totp_enabled) {
-      logger.info('TOTP required', { userId: authData.user.id });
+    if (profile.role === 'vendor' && !disableTotp) {
+      // 4. Vendor con TOTP activo → solicitar código
+      if (profile.totp_enabled) {
+        logger.info('TOTP required', { userId: authData.user.id });
+        return new Response(JSON.stringify({
+          next_step: 'verify_totp',
+          temp_token: authData.session.access_token,
+          refresh_token: authData.session.refresh_token,
+          message: 'Ingresa el código de Google Authenticator',
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // 5. Vendor sin TOTP configurado → solicitar setup
+      logger.info('TOTP setup required', { userId: authData.user.id });
       return new Response(JSON.stringify({
-        next_step: 'verify_totp',
+        next_step: 'setup_totp',
         temp_token: authData.session.access_token,
-        refresh_token: authData.session.refresh_token,
-        message: 'Ingresa el código de Google Authenticator',
+        message: 'Configura Google Authenticator para continuar',
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // 5. Login exitoso
+    // 6. Login exitoso (DISABLE_TOTP=true en dev, o rol no-vendor)
     logger.info('Login successful', { userId: authData.user.id, role: profile.role });
 
     return new Response(JSON.stringify({

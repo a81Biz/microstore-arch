@@ -132,6 +132,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 
 <script>
   import { getVendorAuthHeader } from '../../lib/auth/auth-client';
+  import { API_ROUTES } from '@micro-store/core';
 
   window.paymentSettings = () => ({
     gateways: [],
@@ -157,7 +158,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
           this.authError = 'Sesión expirada. Por favor inicia sesión nuevamente.';
           return;
         }
-        const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways`, {
+        const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.admin.paymentGateways}`, {
           headers: { 'Authorization': authHeader }
         });
 
@@ -204,7 +205,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       const newState = !gateway.is_enabled;
       try {
         const authHeader = await getVendorAuthHeader();
-        const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways`, {
+        const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.admin.paymentGateways}`, {
           method: 'POST',
           headers: {
             'Authorization': authHeader,
@@ -238,7 +239,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 
       try {
         const authHeader = await getVendorAuthHeader();
-        const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}/manage-payment-gateways`, {
+        const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.admin.paymentGateways}`, {
           method: 'POST',
           headers: {
             'Authorization': authHeader,

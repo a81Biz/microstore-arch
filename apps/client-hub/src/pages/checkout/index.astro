@@ -142,8 +142,8 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
               <p>Tu orden <strong x-text="displayId"></strong> ha sido registrada.</p>
               <p class="muted">Te hemos enviado un correo de confirmación.</p>
               <div class="success-actions">
-                <a href="/dashboard" class="btn-primary">Ver mis pedidos</a>
-                <a href="https://tienda.com" class="btn-ghost">Seguir comprando</a>
+                <a href="/orders" class="btn-primary">Ver mis pedidos</a>
+                <a href={import.meta.env.PUBLIC_STOREFRONT_URL || 'http://localhost'} class="btn-ghost">Seguir comprando</a>
               </div>
             </div>
           </template>

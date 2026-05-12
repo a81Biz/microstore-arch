@@ -1,0 +1,59 @@
+_format_version: "2.1"
+
+# =============================================================================
+# Micro-Store — Kong API Gateway (declarativo, sin BD)
+#
+#   localhost:54321/auth/v1/...      → supabase-auth:9999
+#   localhost:54321/rest/v1/...      → supabase-rest:3000
+#   localhost:54321/realtime/v1/...  → supabase-realtime:4000 (WebSocket)
+# =============================================================================
+
+services:
+
+  - name: auth-v1
+    url: http://supabase-auth:9999/
+    routes:
+      - name: auth-v1-route
+        strip_path: true
+        paths:
+          - /auth/v1
+    plugins:
+      - name: cors
+
+  - name: rest-v1
+    url: http://supabase-rest:3000/
+    routes:
+      - name: rest-v1-route
+        strip_path: true
+        paths:
+          - /rest/v1
+    plugins:
+      - name: cors
+
+  - name: realtime-v1
+    url: http://supabase-realtime:4000/socket
+    routes:
+      - name: realtime-v1-route
+        strip_path: true
+        paths:
+          - /realtime/v1
+        protocols:
+          - http
+          - https
+    plugins:
+      - name: cors
+      - name: request-transformer
+        config:
+          replace:
+            headers:
+              - "Host:realtime-dev.localhost"
+
+  - name: functions-v1
+    url: http://supabase-functions:9000/
+    routes:
+      - name: functions-v1-route
+        strip_path: true
+        paths:
+          - /functions/v1
+    plugins:
+      - name: cors

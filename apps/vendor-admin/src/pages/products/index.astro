@@ -186,13 +186,14 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 </VendorAdminLayout>
 
 <script>
-  import { 
-    loadProducts, 
-    createProduct, 
-    updateProduct, 
+  import {
+    loadProducts,
+    createProduct,
+    updateProduct,
     deleteProduct as deleteProductApi,
     triggerRebuild
   } from '../../lib/products/product-admin.ts';
+  import { supabaseClient } from '../../lib/supabase-client';
 
   window.productList = () => ({
     products: [],
@@ -211,6 +212,11 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     formError: '',
 
     async init() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        window.location.href = '/auth/login';
+        return;
+      }
       await this.loadProducts();
     },
 

@@ -203,6 +203,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 <script>
   import { loadOrders, loadOrderDetail, updateTracking, updateOrderStatus } from '../../lib/orders/order-admin';
   import { OrderStatus } from '@micro-store/core';
+  import { supabaseClient } from '../../lib/supabase-client';
 
   window.orderAdmin = () => ({
     orders: [],
@@ -222,6 +223,11 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     processingTracking: false,
 
     async init() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        window.location.href = '/auth/login';
+        return;
+      }
       await this.fetchOrders();
     },
 

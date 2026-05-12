@@ -89,7 +89,7 @@ PUBLIC_CLIENT_HUB_URL
 PUBLIC_VENDOR_ADMIN_URL
 ```
 
-Local Supabase ports: `54321` (API), `54322` (Postgres), `54323` (Studio UI), `54324` (Inbucket email).
+Local Supabase ports: `8000` (API/Kong), `54322` (Postgres), `8323` (Studio UI), `8025` (Inbucket email).
 
 ## CI/CD
 

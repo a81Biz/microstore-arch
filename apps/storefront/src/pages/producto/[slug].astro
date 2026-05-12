@@ -107,7 +107,7 @@ const badge = getStockBadge({
         </div>
 
         <div class="purchase-actions">
-          <a href={`https://cliente.tienda.com/checkout?product=${product.id}`} class="btn-buy">
+          <a href={`${import.meta.env.PUBLIC_CLIENT_HUB_URL || 'http://client.localhost'}/checkout?product=${product.id}`} class="btn-buy">
             Comprar ahora
           </a>
           <a href="/" class="btn-back">
