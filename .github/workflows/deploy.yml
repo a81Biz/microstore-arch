@@ -66,14 +66,14 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           workingDirectory: apps/client-hub
-          command: pages deploy dist --project-name micro-store-client-hub
+          command: pages deploy dist --project-name micro-store-client
 
       - name: Deploy Vendor Admin to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           workingDirectory: apps/vendor-admin
-          command: pages deploy dist --project-name micro-store-vendor-admin
+          command: pages deploy dist --project-name micro-store-admin
 
       - name: Deploy Edge Functions
         run: supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
@@ -86,3 +86,11 @@ jobs:
           curl --retry 5 --retry-delay 10 --retry-connrefused --fail \
             "${{ secrets.SUPABASE_URL }}/functions/v1/health" \
             || (echo "Health check failed after 5 attempts" && exit 1)
+
+      - name: Smoke Test
+        run: bash scripts/test/smoke-test.sh
+        env:
+          PUBLIC_STOREFRONT_URL: ${{ secrets.PUBLIC_STOREFRONT_URL }}
+          PUBLIC_CLIENT_HUB_URL: ${{ secrets.PUBLIC_CLIENT_HUB_URL }}
+          PUBLIC_VENDOR_ADMIN_URL: ${{ secrets.PUBLIC_VENDOR_ADMIN_URL }}
+          PUBLIC_API_BASE: ${{ secrets.SUPABASE_URL }}/functions/v1

@@ -1,11 +1,19 @@
-name = "micro-store-vendor-admin"
+name = "micro-store-admin"
 compatibility_date = "2026-05-01"
+compatibility_flags = ["nodejs_compat"]
+account_id = "PRODUCTION_ACCOUNT_ID_HERE"
+pages_build_output_dir = "./dist"
+
+[vars]
+PUBLIC_SUPABASE_URL = "PRODUCTION_SUPABASE_URL_HERE"
+PUBLIC_API_BASE = "PRODUCTION_SUPABASE_URL_HERE/functions/v1"
+
+[env.preview]
+vars = { PUBLIC_SUPABASE_URL = "PREVIEW_SUPABASE_URL_HERE" }
 
 [env.production]
-vars = { 
-  PUBLIC_SUPABASE_URL = "https://your-project.supabase.co",
-  PUBLIC_API_BASE = "https://your-project.supabase.co/functions/v1"
-}
+vars = { PUBLIC_SUPABASE_URL = "PRODUCTION_SUPABASE_URL_HERE" }
 
 [[env.production.routes]]
 pattern = "admin.tienda.com/*"
+zone_id = "PRODUCTION_ZONE_ID_HERE"

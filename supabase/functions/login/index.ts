@@ -16,7 +16,15 @@ async function checkLoginRateLimit(
     p_window_seconds: 300,  // 5 intentos por 5 minutos
   });
 
-  if (!error && data === false) {
+  // Fail-closed: si la BD falla no podemos verificar — denegar por seguridad
+  if (error) {
+    throw new BusinessError(
+      'RATE_LIMITED',
+      'Servicio de rate limiting no disponible. Acceso denegado por seguridad.',
+      429
+    );
+  }
+  if (data === false) {
     throw new BusinessError(
       'RATE_LIMITED',
       'Demasiados intentos de inicio de sesión. Espera 5 minutos.',
@@ -127,6 +135,12 @@ serve(async (req: Request) => {
     });
 
   } catch (error) {
-    return handleError(error);
+    const response = handleError(error);
+    if (response.status === 429) {
+      const headers = new Headers(response.headers);
+      headers.set('Retry-After', '300');
+      return new Response(response.body, { status: 429, headers });
+    }
+    return response;
   }
 });

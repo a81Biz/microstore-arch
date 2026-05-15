@@ -84,7 +84,17 @@
       "PowerShell(Get-ChildItem graphify-out\\\\obsidian | Select-Object Name | Out-String; Write-Host \"---\"; \\(Get-ChildItem graphify-out\\\\obsidian -Recurse -File\\).Count; \"files total\")",
       "Bash(Get-ChildItem -Path \"C:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\supabase\\\\functions\" -Directory)",
       "Bash(Select-Object Name)",
-      "PowerShell(cd \"C:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\apps\\\\client-hub\" && npx astro check 2>&1 | Where-Object { $_ -notmatch \"deno.land|esm.sh|supabase/functions\" } | Select-Object -First 40 | Out-String)"
+      "PowerShell(cd \"C:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\apps\\\\client-hub\" && npx astro check 2>&1 | Where-Object { $_ -notmatch \"deno.land|esm.sh|supabase/functions\" } | Select-Object -First 40 | Out-String)",
+      "PowerShell(Copy-Item graphify-out/graph.json .graphify_old.json -ErrorAction SilentlyContinue)",
+      "PowerShell(Copy-Item .graphify_incremental.json .graphify_detect.json)",
+      "PowerShell(New-Item -ItemType Directory -Force -Path graphify-out)",
+      "PowerShell(Copy-Item .graphify_detect.json graphify-out/.graphify_detect.json)",
+      "Bash(ls /mnt/c/DevOps/Desarrollos/MicroStore-Arch/graphify-out/)",
+      "Read(//mnt/c/DevOps/Desarrollos/MicroStore-Arch/**)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('scripts',{}\\), indent=2\\)\\)\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); deps=d.get\\('devDependencies',{}\\); print\\('vitest' in deps or 'vitest' in d.get\\('dependencies',{}\\)\\); print\\(deps.get\\('vitest','NOT_FOUND'\\)\\); print\\(json.dumps\\(d.get\\('workspaces',[]\\)\\)\\)\")",
+      "Bash(node_modules/.bin/vitest run *)",
+      "PowerShell(Get-ChildItem \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\scripts\\\\test\\\\\" -ErrorAction SilentlyContinue | Select-Object Name; if \\(-not \\(Test-Path \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\scripts\\\\test\\\\\"\\)\\) { \"DIR_MISSING\" } else { \"DIR_EXISTS\" })"
     ]
   }
 }

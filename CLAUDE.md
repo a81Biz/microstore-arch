@@ -2,6 +2,58 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## Graphify — Knowledge Graph Context
+
+Este repositorio tiene un grafo de conocimiento vivo en `graphify-out/`.
+
+**OBLIGATORIO antes de explorar archivos:**
+1. Lee `graphify-out/GRAPH_REPORT.md` — contiene god nodes, comunidades, conexiones sorprendentes y preguntas sugeridas.
+2. Consulta `graphify-out/graph.json` o usa `/graphify query "<pregunta>"` para localizar nodos antes de abrir archivos individuales.
+3. Ejecuta `/graphify . --update` después de cualquier cambio significativo de código para mantener el grafo actualizado.
+
+El grafo reduce el costo de exploración en ~32x. Úsalo como primer punto de entrada, no los archivos directamente.
+
+---
+
+## Protocolo de Cuota — Plan Antes de Implementar
+
+**Regla estricta:** Antes de cualquier implementación debes:
+
+1. Crear o actualizar `docs/implementation/PLAN_ACTUAL.md` con:
+   - Objetivo de la tarea
+   - Archivos que se van a modificar (máximo 2 por turno — ver Segmentación)
+   - Pasos ordenados
+   - Riesgos identificados
+2. Esperar la aprobación explícita del usuario (**ACK**) antes de escribir una sola línea de código.
+
+No existe excepción a esta regla. Cambios de una línea, refactors triviales y fixes urgentes siguen el mismo protocolo.
+
+---
+
+## Segmentación — Máximo 2 Archivos por Turno
+
+- **Prohibido** modificar más de 2 archivos en un mismo turno de conversación.
+- Si la tarea requiere modificar 3 o más archivos, divídela en sub-tareas y regístralas en `PENDING_TASKS.md` en la raíz antes de comenzar.
+- Cada sub-tarea debe tener su propio ACK.
+
+---
+
+## Persistencia — Log de Progreso
+
+Al finalizar cada tarea exitosa (tests pasan, arquitectura válida), añade una entrada al final de `docs/implementation/HISTORY.log` con el formato:
+
+```
+[YYYY-MM-DD] <título breve de la tarea>
+  Archivos: <lista de archivos modificados>
+  Resultado: <qué cambió y por qué>
+```
+
+Si `docs/implementation/` no existe, créalo antes de escribir el log.
+
+---
+
 ## Commands
 
 ```bash

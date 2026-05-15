@@ -73,6 +73,67 @@ A partir del segundo ingreso solo se piden email, contraseña nueva y el código
 
 ---
 
+## Seguridad y MFA
+
+### TOTP — Autenticación de dos factores basada en tiempo (RFC 6238)
+
+El panel de vendedor (`vendor-admin`) implementa MFA obligatorio mediante **TOTP** (Time-based One-Time Password, [RFC 6238](https://datatracker.ietf.org/doc/html/rfc6238)). Los códigos de 6 dígitos son válidos durante 30 segundos y se generan a partir de un secret único por usuario combinado con la hora Unix actual. No requieren conexión a internet ni a los servidores del sistema.
+
+El claim `app_metadata.mfa_verified: true` (inmutable para el usuario, solo modificable con `service_role`) es lo que desbloquea el acceso a recursos protegidos mediante RLS. La verificación ocurre en `verify-totp` y en cada llamada a `requireAdminMFA()` del `BaseController`.
+
+### Entorno local — validación sin dispositivo físico
+
+Durante el desarrollo, la librería [`otpauth`](https://www.npmjs.com/package/otpauth) permite generar y verificar tokens TOTP sin un dispositivo físico:
+
+```typescript
+import * as OTPAuth from 'otpauth';
+
+// El secret se obtiene del QR que muestra setup-totp en el primer ingreso
+const totp = new OTPAuth.TOTP({ secret: OTPAuth.Secret.fromBase32(secret) });
+const token = totp.generate(); // código válido ahora mismo
+```
+
+Para omitir el paso TOTP por completo en desarrollo (útil para scripts o CI):
+
+```bash
+# .env — solo en local, NUNCA en producción
+DISABLE_TOTP=true
+```
+
+Con esta variable activa, `login` no exige TOTP ni para setup ni para verify. Cualquier valor distinto de `"true"` activa el flujo completo.
+
+### Entorno de producción — Google Authenticator
+
+En producción `DISABLE_TOTP` debe estar ausente o ser `false`. Los usuarios deben:
+
+1. Instalar **Google Authenticator** (o cualquier app TOTP compatible: Authy, 1Password, Bitwarden).
+2. Escanear el **código QR** que presenta el sistema en el flujo de primer acceso.
+3. Introducir el código de 6 dígitos en cada inicio de sesión posterior.
+
+El secret TOTP se almacena cifrado en la columna `totp_secret` de la tabla `profiles`. Nunca se expone fuera del backend.
+
+### Flujo de primer acceso — credenciales de un solo uso
+
+Las credenciales iniciales del vendor (`Admin1234!` en local, o las que el administrador genere en Supabase Studio en producción) son de **un solo uso**. El sistema aplica este orden de forma obligatoria:
+
+```
+Login con credenciales → Cambio de contraseña forzado → Configuración TOTP → Acceso completo
+```
+
+- **Cambio de contraseña:** se detecta por `profiles.password_changed_at IS NULL`. Hasta que no se completa, todas las rutas del vendor-admin redirigen al formulario de cambio.
+- **Setup TOTP:** si `profiles.totp_enabled = false`, el login devuelve `next_step: 'setup_totp'` y el cliente redirige al flujo de QR.
+- **Verify TOTP:** si `totp_enabled = true` pero `app_metadata.mfa_verified` no está activo en la sesión actual, el login devuelve `next_step: 'verify_totp'`.
+
+Solo cuando los tres pasos están completos, el token lleva el claim `mfa_verified: true` y las políticas RLS permiten leer y escribir datos de vendor.
+
+### Recuperación de cuenta — protocolo Break-glass
+
+Si un vendor pierde acceso a su app de autenticación (dispositivo perdido, app desinstalada), **no existe bypass en el código**. El reset se hace mediante la CLI de Supabase con credenciales `service_role`, lo que garantiza trazabilidad en los logs de Supabase Auth.
+
+Consulta el procedimiento completo en [`docs/HANDOFF.md` → §4 Protocolo Break-glass](docs/HANDOFF.md).
+
+---
+
 ## Comandos de desarrollo
 
 ```bash

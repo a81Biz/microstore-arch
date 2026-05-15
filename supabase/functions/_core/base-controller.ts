@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient, SupabaseClient, User } from "https://esm.sh/@supabase/supabase-js@2";
-import { handleError, UnauthorizedError } from "../_shared/error-handler.ts";
+import { handleError, UnauthorizedError, BusinessError } from "../_shared/error-handler.ts";
 
 export abstract class BaseController {
   protected dbAdmin: SupabaseClient;
@@ -84,8 +84,11 @@ export abstract class BaseController {
     });
 
     if (error) {
-      // Fail-closed: si no podemos verificar el rate limit, denegamos por seguridad
-      return false;
+      throw new BusinessError(
+        'RATE_LIMITED',
+        'Servicio de rate limiting no disponible. Acceso denegado por seguridad.',
+        429
+      );
     }
 
     return data as boolean;

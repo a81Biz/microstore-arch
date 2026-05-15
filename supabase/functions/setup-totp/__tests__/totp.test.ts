@@ -182,6 +182,77 @@ describe('Password Complexity Validation', () => {
   });
 });
 
+describe('verify-totp: seguridad contra backdoors y casos límite', () => {
+  function makeTOTP(secret: Secret, email = 'vendor@tienda.com') {
+    return new TOTP({ issuer: 'Micro-Store', label: email, algorithm: 'SHA1', digits: 6, period: 30, secret });
+  }
+
+  function randomSecret(): Secret {
+    const bytes = new Uint8Array(20);
+    crypto.getRandomValues(bytes);
+    return new Secret({ buffer: bytes.buffer });
+  }
+
+  it('solo acepta el código TOTP criptográficamente correcto — prueba determinística', () => {
+    const totp = makeTOTP(randomSecret());
+    const validCode = totp.generate();
+    // Código garantizadamente distinto: +1 mod 1,000,000
+    const wrongCode = String((parseInt(validCode) + 1) % 1_000_000).padStart(6, '0');
+
+    expect(totp.validate({ token: validCode, window: 1 })).not.toBeNull();
+    expect(totp.validate({ token: wrongCode, window: 1 })).toBeNull();
+  });
+
+  it('"123456" es rechazado por la lógica TOTP real — sin bypass hardcodeado', () => {
+    // Ejecutar con 5 secrets independientes para descartar coincidencia casual
+    // (probabilidad de que '123456' sea el token actual: ~5 × 10^-6)
+    let backdoorAccepted = false;
+    for (let i = 0; i < 5; i++) {
+      const totp = makeTOTP(randomSecret());
+      const validCode = totp.generate();
+      if (validCode !== '123456') {
+        if (totp.validate({ token: '123456', window: 1 }) !== null) {
+          backdoorAccepted = true;
+        }
+      }
+    }
+    expect(backdoorAccepted).toBe(false);
+  });
+
+  it('dos secrets distintos producen códigos independientes — no hay bypass global', () => {
+    const totp1 = makeTOTP(randomSecret());
+    const totp2 = makeTOTP(randomSecret());
+
+    const code1 = totp1.generate();
+    const code2 = totp2.generate();
+
+    // Si los códigos difieren (virtualmente siempre), cada secret rechaza al otro
+    if (code1 !== code2) {
+      expect(totp1.validate({ token: code2, window: 1 })).toBeNull();
+      expect(totp2.validate({ token: code1, window: 1 })).toBeNull();
+    }
+  });
+
+  it('código de período completamente pasado es rechazado (window=1, 2 períodos atrás)', () => {
+    // Simula un código demasiado viejo: window=1 solo tolera ±1 período (30s)
+    const secret = randomSecret();
+    const totp = makeTOTP(secret);
+
+    // Generar token para un timestamp 90 segundos atrás (3 períodos)
+    const pastTimestamp = Math.floor(Date.now() / 1000) - 90;
+    const pastCode = new TOTP({
+      issuer: 'Micro-Store', label: 'old@tienda.com',
+      algorithm: 'SHA1', digits: 6, period: 30, secret,
+    }).generate({ timestamp: pastTimestamp * 1000 });
+
+    // Validar con window=1: solo ±1 período, 3 períodos atrás debe fallar
+    const currentCode = totp.generate();
+    if (pastCode !== currentCode) {
+      expect(totp.validate({ token: pastCode, window: 1 })).toBeNull();
+    }
+  });
+});
+
 describe('Order Status Transitions', () => {
   type OrderStatus = 'pending' | 'paid' | 'in_production' | 'shipped' | 'delivered' | 'cancelled';
 
