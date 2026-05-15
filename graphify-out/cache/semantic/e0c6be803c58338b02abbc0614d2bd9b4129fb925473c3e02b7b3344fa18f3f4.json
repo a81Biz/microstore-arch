@@ -1,0 +1,1 @@
+{"nodes": [{"id": "enum_user_role", "label": "UserRole Enum", "file_type": "code", "source_file": "packages/core/src/enums/user-role.ts", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}

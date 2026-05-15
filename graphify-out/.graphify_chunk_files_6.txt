@@ -1,0 +1,22 @@
+C:\DevOps\Desarrollos\MicroStore-Arch\supabase\migrations\00018_fix_payment_encryption.sql
+C:\DevOps\Desarrollos\MicroStore-Arch\supabase\migrations\00019_fix_order_cancellation.sql
+C:\DevOps\Desarrollos\MicroStore-Arch\supabase\migrations\00020_audit_payment_tables.sql
+C:\DevOps\Desarrollos\MicroStore-Arch\supabase\migrations\00021_vendor_whitelist.sql
+C:\DevOps\Desarrollos\MicroStore-Arch\supabase\migrations\00022_handle_new_user.sql
+C:\DevOps\Desarrollos\MicroStore-Arch\supabase\migrations\00023_cleanup_amr_policy.sql
+C:\DevOps\Desarrollos\MicroStore-Arch\supabase\migrations\00024_save_payment_credentials.sql
+C:\DevOps\Desarrollos\MicroStore-Arch\supabase\migrations\00025_get_payment_credentials.sql
+C:\DevOps\Desarrollos\MicroStore-Arch\supabase\migrations\00026_seed_admin_user.sql
+C:\DevOps\Desarrollos\MicroStore-Arch\CLAUDE.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docker-compose.yml
+C:\DevOps\Desarrollos\MicroStore-Arch\README.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\ARCHITECTURE.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Correcciones Finales.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Documentaci�n T�cnica.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Documento de Dise�o de Software (SDD).md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Especificaci�n de Requisitos de Software (SRS).md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Fix & Hardening Runbook.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\RUNBOOK.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Sprint 0.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Sprint 1.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Sprint 2.md

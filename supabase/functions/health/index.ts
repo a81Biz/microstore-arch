@@ -1,8 +1,11 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createLogger } from "../_shared/logger.ts";
+import { getSupabaseClient, getSupabaseAdmin } from "../_shared/supabase-client.ts";
+
+const logger = createLogger('health');
 
 serve(async (_req: Request) => {
-  const checks: Record<string, any> = {
+  const checks: Record<string, unknown> = {
     service: 'micro-store-arch',
     version: '1.0.0',
     environment: Deno.env.get('ENVIRONMENT') || 'production',
@@ -12,39 +15,33 @@ serve(async (_req: Request) => {
 
   // Verificar conexión a BD
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    
-    const { data, error } = await supabase.from('products').select('count', { count: 'exact', head: true });
-    
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.from('products').select('count', { count: 'exact', head: true });
     checks.database = error ? 'error' : 'connected';
-    checks.products_count = data || 0;
+    if (error) checks.database_error = error.message;
   } catch (err) {
     checks.database = 'error';
     checks.database_error = String(err);
   }
 
-  // Verificar estado de pasarelas
+  // Verificar estado de pasarelas (requiere service_role para leer payment_credentials)
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    
-    const { data: gateways } = await supabase
+    const supabaseAdmin = getSupabaseAdmin();
+    const { data: gateways } = await supabaseAdmin
       .from('payment_credentials')
       .select('gateway, is_enabled');
-    
     checks.payment_gateways = gateways || [];
   } catch (err) {
     checks.payment_gateways = 'error';
+    logger.warn('Failed to fetch payment gateways in health check', { error: String(err) });
   }
 
   const status = checks.database === 'error' ? 503 : 200;
+  logger.info('Health check', { status, database: checks.database });
 
   return new Response(JSON.stringify(checks, null, 2), {
     status,
-    headers: { 
+    headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-cache',
       'Access-Control-Allow-Origin': '*'

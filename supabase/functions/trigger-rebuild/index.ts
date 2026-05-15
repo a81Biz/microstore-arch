@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createLogger } from "../_shared/logger.ts";
+import { handleError, BusinessError } from "../_shared/error-handler.ts";
 
 const logger = createLogger('trigger-rebuild');
 
@@ -26,7 +27,7 @@ serve(async (req: Request) => {
 
     if (!response.ok) {
       logger.error('Failed to trigger rebuild', { status: response.status });
-      throw new Error('Failed to trigger Cloudflare rebuild');
+      throw new BusinessError('REBUILD_FAILED', 'Error al contactar Cloudflare Pages', 502);
     }
 
     logger.info('Rebuild triggered successfully');
@@ -40,13 +41,6 @@ serve(async (req: Request) => {
     });
 
   } catch (error) {
-    logger.error('Rebuild trigger failed', { error: String(error) });
-    return new Response(JSON.stringify({
-      success: false,
-      message: 'Error al iniciar rebuild'
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return handleError(error);
   }
 });

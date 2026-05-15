@@ -1,0 +1,16 @@
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Sprint 3.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Sprint 4.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\Sprint 5.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\audit\AUDITOR�A T�CNICA PROFUNDA.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\audit\AUDITOR�A-T�CNICA-2-SEGUNDA-RONDA.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\audit\REMEDIATION-2.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\audit\REMEDIATION.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\dod\Correcciones_Finales.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\dod\Fix_Hardening.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\dod\Sprint 0.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\dod\Sprint 1.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\dod\Sprint 2.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\dod\Sprint 3.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\dod\Sprint 4.md
+C:\DevOps\Desarrollos\MicroStore-Arch\docs\dod\Sprint 5.md
+C:\DevOps\Desarrollos\MicroStore-Arch\supabase\kong.yml

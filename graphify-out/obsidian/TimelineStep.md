@@ -1,0 +1,17 @@
+---
+source_file: "apps/client-hub/src/lib/orders/order-client.ts"
+type: "code"
+community: "Client Hub - Auth, Orders & Checkout"
+location: "L26"
+tags:
+  - graphify/code
+  - graphify/EXTRACTED
+  - community/Client_Hub_-_Auth_Orders__Checkout
+---
+
+# TimelineStep
+
+## Connections
+- [[order-client.ts]] - `contains` [EXTRACTED]
+
+#graphify/code #graphify/EXTRACTED #community/Client_Hub_-_Auth_Orders__Checkout

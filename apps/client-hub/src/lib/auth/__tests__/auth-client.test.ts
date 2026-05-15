@@ -1,105 +1,107 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
-
-// Mock del cliente Supabase — la sesión es gestionada internamente por el SDK
 const mockSignOut = vi.fn().mockResolvedValue({ error: null });
-const mockGetSession = vi.fn().mockResolvedValue({ data: { session: null } });
+const mockSignInWithPassword = vi.fn();
+const mockSignInWithOAuth = vi.fn().mockResolvedValue({ error: null });
+const mockSignUp = vi.fn().mockResolvedValue({ data: { user: null }, error: null });
+const mockGetUser = vi.fn().mockResolvedValue({ data: { user: null } });
+
+// Supabase mock — la sesión es gestionada internamente por el SDK
 vi.mock('../../supabase-client', () => ({
   supabaseClient: {
     auth: {
       signOut: mockSignOut,
-      getSession: mockGetSession,
-      signInWithOAuth: vi.fn().mockResolvedValue({ error: null }),
-      signUp: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
-      getUser: vi.fn().mockResolvedValue({ data: { user: null } }),
-      signInWithPassword: vi.fn(),
-    }
+      signInWithPassword: mockSignInWithPassword,
+      signInWithOAuth: mockSignInWithOAuth,
+      signUp: mockSignUp,
+      getUser: mockGetUser,
+    },
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    }),
   }
 }));
 
-vi.stubGlobal('import', {
-  meta: {
-    env: { PUBLIC_API_BASE: 'http://localhost:54321/functions/v1' }
-  }
+// window.location no existe en Node — stub mínimo
+Object.defineProperty(globalThis, 'window', {
+  value: { location: { origin: 'http://localhost' } },
+  writable: true,
 });
 
 describe('Auth Client', () => {
   beforeEach(() => {
-    mockFetch.mockReset();
     mockSignOut.mockClear();
-    mockGetSession.mockClear();
+    mockSignInWithPassword.mockReset();
+    mockSignUp.mockReset();
+    mockGetUser.mockReset();
   });
 
   describe('signInWithEmail', () => {
-    it('retorna success true con datos del usuario', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          next_step: 'complete',
-          access_token: 'test-token',
-          user: { id: '1', email: 'test@test.com', role: 'customer' }
-        })
+    it('retorna success true y establece sesión Supabase con credenciales válidas', async () => {
+      mockSignInWithPassword.mockResolvedValueOnce({
+        data: { user: { id: '1', email: 'test@test.com' }, session: {} },
+        error: null,
       });
 
       const { signInWithEmail } = await import('../auth-client');
       const result = await signInWithEmail('test@test.com', 'password123');
 
       expect(result.success).toBe(true);
-      expect(result.accessToken).toBe('test-token');
+      expect(result.nextStep).toBe('complete');
+      expect(result.user?.email).toBe('test@test.com');
+      expect(mockSignInWithPassword).toHaveBeenCalledWith({ email: 'test@test.com', password: 'password123' });
     });
 
-    it('retorna success false con mensaje de error', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: async () => ({ error: 'UNAUTHORIZED', message: 'Credenciales inválidas' })
+    it('retorna success false con mensaje de error al fallar credenciales', async () => {
+      mockSignInWithPassword.mockResolvedValueOnce({
+        data: { user: null, session: null },
+        error: { message: 'Invalid login credentials' },
       });
 
       const { signInWithEmail } = await import('../auth-client');
       const result = await signInWithEmail('test@test.com', 'wrong');
 
       expect(result.success).toBe(false);
-      expect(result.message).toContain('Credenciales inválidas');
+      expect(result.message).toBe('Invalid login credentials');
     });
   });
 
   describe('signOut', () => {
-    it('llama a supabaseClient.auth.signOut() sin tocar localStorage', async () => {
+    it('delega en supabaseClient.auth.signOut() sin manipular tokens manualmente', async () => {
       const { signOut } = await import('../auth-client');
       await signOut();
-
-      // La sesión es gestionada por el SDK de Supabase — no por localStorage
+      // La sesión es gestionada por el SDK — no por localStorage manual
       expect(mockSignOut).toHaveBeenCalledOnce();
-      // No debe haber ningún acceso a localStorage
-      expect(localStorage.getItem('auth_token')).toBeNull();
     });
   });
 
-  describe('verifyTOTP', () => {
-    it('retorna success true con token válido', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ success: true, access_token: 'verified-token' })
+  describe('signUpWithEmail', () => {
+    it('retorna success true con mensaje de verificación', async () => {
+      mockSignUp.mockResolvedValueOnce({
+        data: { user: { id: '2', email: 'nuevo@test.com' } },
+        error: null,
       });
 
-      const { verifyTOTP } = await import('../auth-client');
-      const result = await verifyTOTP('temp-token', '123456');
+      const { signUpWithEmail } = await import('../auth-client');
+      const result = await signUpWithEmail('nuevo@test.com', 'password123');
 
       expect(result.success).toBe(true);
+      expect(result.message).toContain('email');
     });
 
-    it('retorna success false con código inválido', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: async () => ({ error: 'UNAUTHORIZED', message: 'Código TOTP inválido' })
+    it('retorna success false si Supabase devuelve error', async () => {
+      mockSignUp.mockResolvedValueOnce({
+        data: { user: null },
+        error: { message: 'User already registered' },
       });
 
-      const { verifyTOTP } = await import('../auth-client');
-      const result = await verifyTOTP('temp-token', '000000');
+      const { signUpWithEmail } = await import('../auth-client');
+      const result = await signUpWithEmail('existe@test.com', 'password123');
 
       expect(result.success).toBe(false);
-      expect(result.message).toContain('Código TOTP inválido');
+      expect(result.message).toBe('User already registered');
     });
   });
 });
