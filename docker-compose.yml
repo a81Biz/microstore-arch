@@ -276,6 +276,34 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
+  # Supabase Storage — API de almacenamiento de archivos (buckets, uploads)
+  # ---------------------------------------------------------------------------
+  supabase-storage:
+    image: supabase/storage-api:v1.22.16
+    container_name: microstore-supabase-storage
+    expose: ["5000"]
+    environment:
+      ANON_KEY: ${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjEzNTMxOTg1LCJleHAiOjQ3NjkyMDU5ODV9.9oDfITnetRe3EYQzDh9CmgUFEJkLgHsGeKT8s1tHtvM}
+      SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA}
+      POSTGREST_URL: http://supabase-rest:3000
+      PGRST_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      DATABASE_URL: postgres://supabase_admin:${POSTGRES_PASSWORD:-supabase123}@supabase-db:5432/postgres
+      FILE_SIZE_LIMIT: "52428800"
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: stub
+      GLOBAL_S3_BUCKET: stub
+      ENABLE_IMAGE_TRANSFORMATION: "false"
+    volumes:
+      - storage_data:/var/lib/storage
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    networks: [microstore-network]
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
   # Postgres Meta — API de metadatos (usada por Studio)
   # ---------------------------------------------------------------------------
   supabase-meta:
@@ -418,6 +446,7 @@ volumes:
   storefront_modules: {}
   client_modules: {}
   vendor_modules: {}
+  storage_data: {}
 
 networks:
   microstore-network:

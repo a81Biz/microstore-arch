@@ -7,6 +7,7 @@ export interface ProductFormData {
   stockQuantity: number;
   isOnDemand: boolean;
   isVisible: boolean;
+  imageUrl?: string | null;
 }
 
 export interface AdminProduct {
@@ -18,6 +19,7 @@ export interface AdminProduct {
   stockQuantity: number;
   isOnDemand: boolean;
   isVisible: boolean;
+  imageUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }

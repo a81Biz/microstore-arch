@@ -57,3 +57,13 @@ services:
           - /functions/v1
     plugins:
       - name: cors
+
+  - name: storage-v1
+    url: http://supabase-storage:5000/
+    routes:
+      - name: storage-v1-route
+        strip_path: true
+        paths:
+          - /storage/v1
+    plugins:
+      - name: cors

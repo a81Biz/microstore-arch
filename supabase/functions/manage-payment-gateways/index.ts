@@ -6,6 +6,9 @@ const logger = createLogger('manage-payment-gateways');
 
 class PaymentGatewayController extends BaseController {
 
+  // sync with payment_gateway enum in migrations
+  private readonly ALL_GATEWAYS = ['stripe', 'paypal', 'mercadopago', 'hey_banco'] as const;
+
   async handle(req: Request): Promise<Response> {
     const url = new URL(req.url);
     const authHeader = req.headers.get('Authorization') || '';
@@ -21,8 +24,7 @@ class PaymentGatewayController extends BaseController {
     }
 
     // Todas las rutas de gestión requieren vendor + MFA
-    await this.requireAdminMFA(authHeader);
-    const user = await this.authenticateUser(authHeader);
+    const user = await this.requireAdminMFA(authHeader);
 
     if (method === 'GET') {
       const gateways = await this.listGateways(user.id);
@@ -45,16 +47,26 @@ class PaymentGatewayController extends BaseController {
   }
 
   private async listGateways(vendorId: string) {
-    // Solo devuelve las gateways del vendor autenticado — aislamiento garantizado
     const { data, error } = await this.dbAdmin
       .from('payment_credentials')
       .select('gateway, is_enabled, last_rotated_at, created_at')
-      .eq('vendor_id', vendorId)
-      .order('gateway');
+      .eq('vendor_id', vendorId);
 
     if (error) throw new Error('Error al cargar pasarelas');
 
-    return data;
+    const dbByGateway = new Map(
+      (data ?? []).map(row => [row.gateway, row])
+    );
+
+    return this.ALL_GATEWAYS.map(gw => {
+      const row = dbByGateway.get(gw);
+      return {
+        gateway:         gw,
+        is_enabled:      row?.is_enabled ?? false,
+        last_rotated_at: row?.last_rotated_at ?? null,
+        created_at:      row?.created_at ?? null,
+      };
+    });
   }
 
   private async saveGateway(

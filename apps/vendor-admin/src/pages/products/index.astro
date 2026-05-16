@@ -64,8 +64,13 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                 <tr>
                   <td>
                     <div class="product-cell">
-                      <span class="product-name" x-text="product.name"></span>
-                      <span class="product-slug" x-text="product.slug"></span>
+                      <template x-if="product.imageUrl">
+                        <img :src="product.imageUrl" alt="" class="product-thumb" />
+                      </template>
+                      <div>
+                        <span class="product-name" x-text="product.name"></span>
+                        <span class="product-slug" x-text="product.slug"></span>
+                      </div>
                     </div>
                   </td>
                   <td>
@@ -134,14 +139,37 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                 <textarea id="description" x-model="form.description" rows="4" placeholder="Describe las características..."></textarea>
               </div>
 
+              <div class="form-group span-full">
+                <label for="productImage">Imagen del Producto</label>
+                <input
+                  type="file"
+                  id="productImage"
+                  accept="image/jpeg,image/png,image/webp"
+                  @change="
+                    if (form.imagePreviewUrl) URL.revokeObjectURL(form.imagePreviewUrl);
+                    form.imageFile = $event.target.files[0] || null;
+                    form.imagePreviewUrl = form.imageFile ? URL.createObjectURL(form.imageFile) : null;
+                  "
+                  class="file-input"
+                />
+                <template x-if="form.imagePreviewUrl">
+                  <img :src="form.imagePreviewUrl" alt="Vista previa" class="img-preview" />
+                </template>
+                <template x-if="!form.imagePreviewUrl && editingProduct && editingProduct.imageUrl">
+                  <img :src="editingProduct.imageUrl" alt="Imagen actual" class="img-preview" />
+                </template>
+                <p class="field-hint" x-show="form.imageFile" x-text="'Archivo seleccionado: ' + form.imageFile?.name"></p>
+                <p class="field-hint" x-show="!form.imageFile && !editingProduct?.imageUrl">Formatos: JPG, PNG, WEBP · Opcional</p>
+              </div>
+
               <div class="form-group">
                 <label for="price">Precio ($)</label>
-                <input type="number" id="price" x-model="form.price" min="0" step="0.01" required />
+                <input type="number" id="price" x-model.number="form.price" min="0" step="0.01" required />
               </div>
 
               <div class="form-group">
                 <label for="stock">Stock Inicial</label>
-                <input type="number" id="stock" x-model="form.stockQuantity" min="0" :disabled="form.isOnDemand" />
+                <input type="number" id="stock" x-model.number="form.stockQuantity" min="0" :disabled="form.isOnDemand" />
               </div>
 
               <div class="form-check-group span-full">
@@ -191,6 +219,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     createProduct,
     updateProduct,
     deleteProduct as deleteProductApi,
+    uploadProductImage,
     triggerRebuild
   } from '../../lib/products/product-admin.ts';
   import { supabaseClient } from '../../lib/supabase-client';
@@ -206,7 +235,9 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       price: 0,
       stockQuantity: 0,
       isOnDemand: false,
-      isVisible: true
+      isVisible: true,
+      imageFile: null,
+      imagePreviewUrl: null
     },
     formLoading: false,
     formError: '',
@@ -245,7 +276,9 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
         price: product.price,
         stockQuantity: product.stockQuantity,
         isOnDemand: product.isOnDemand,
-        isVisible: product.isVisible
+        isVisible: product.isVisible,
+        imageFile: null,
+        imagePreviewUrl: null
       };
       this.showModal = true;
     },
@@ -257,13 +290,16 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     },
 
     resetForm() {
+      if (this.form?.imagePreviewUrl) URL.revokeObjectURL(this.form.imagePreviewUrl);
       this.form = {
         name: '',
         description: '',
         price: 0,
         stockQuantity: 0,
         isOnDemand: false,
-        isVisible: true
+        isVisible: true,
+        imageFile: null,
+        imagePreviewUrl: null
       };
       this.formError = '';
     },
@@ -273,10 +309,22 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       this.formError = '';
 
       try {
+        const { imageFile, imagePreviewUrl: _preview, ...productData } = this.form;
+
         if (this.editingProduct) {
-          await updateProduct(this.editingProduct.id, this.form);
+          const productId = this.editingProduct.id;
+          if (imageFile) {
+            const imageUrl = await uploadProductImage(productId, imageFile);
+            await updateProduct(productId, { ...productData, imageUrl });
+          } else {
+            await updateProduct(productId, productData);
+          }
         } else {
-          await createProduct(this.form);
+          const created = await createProduct(productData);
+          if (imageFile) {
+            const imageUrl = await uploadProductImage(created.id, imageFile);
+            await updateProduct(created.id, { imageUrl });
+          }
         }
 
         await triggerRebuild();
@@ -292,11 +340,13 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     async toggleVisibility(product) {
       if (product._toggling) return;
       product._toggling = true;
+      const newState = !product.isVisible;
+      product.isVisible = newState;
       try {
-        await updateProduct(product.id, { isVisible: !product.isVisible });
+        await updateProduct(product.id, { isVisible: newState });
         await triggerRebuild();
-        product.isVisible = !product.isVisible;
       } catch (err) {
+        product.isVisible = !newState;
         console.error('Error toggling visibility:', err);
       } finally {
         setTimeout(() => { product._toggling = false; }, 200);
@@ -391,9 +441,12 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     vertical-align: middle;
   }
 
-  .product-cell { display: flex; flex-direction: column; gap: 0.25rem; }
+  .product-cell { display: flex; align-items: center; gap: 0.75rem; }
+  .product-cell > div { display: flex; flex-direction: column; gap: 0.25rem; }
+  .product-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; flex-shrink: 0; border: 1px solid #f3f4f6; }
   .product-name { font-weight: 600; color: #111827; }
   .product-slug { font-size: 0.75rem; color: #9ca3af; }
+  .img-preview { width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; margin-top: 0.5rem; border: 1px solid #e5e7eb; }
 
   .price-cell { font-weight: 700; color: #111827; }
 
@@ -480,6 +533,24 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
   }
   .btn-primary:hover { background: #0f172a; }
   .btn-ghost { padding: 0.75rem 1.5rem; background: none; border: none; color: #6b7280; font-weight: 600; cursor: pointer; }
+
+  .file-input {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px dashed #d1d5db;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+    background: #f9fafb;
+  }
+  .file-input:hover { border-color: #9ca3af; background: #f3f4f6; }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 0.375rem;
+  }
 
   .error-banner {
     background: #fef2f2; color: #991b1b; padding: 1rem; border-radius: 12px;

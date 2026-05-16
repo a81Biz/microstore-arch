@@ -14,10 +14,6 @@ export interface CatalogProduct {
 }
 
 function mapToCatalogProduct(product: Product): CatalogProduct {
-  const imageUrl = product.id
-    ? `${import.meta.env.PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${product.id}/main.webp`
-    : null;
-
   return {
     id: product.id,
     slug: product.slug,
@@ -26,7 +22,7 @@ function mapToCatalogProduct(product: Product): CatalogProduct {
     price: product.price,
     stockQuantity: product.stockQuantity,
     isOnDemand: product.isOnDemand,
-    imageUrl,
+    imageUrl: (product as Record<string, unknown>).image_url as string | null ?? null,
     createdAt: product.createdAt
   };
 }

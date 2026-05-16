@@ -13,7 +13,8 @@ const CreateProductSchema = z.object({
   price: z.number().positive().max(999_999),
   stockQuantity: z.number().int().min(0),
   isOnDemand: z.boolean(),
-  isVisible: z.boolean()
+  isVisible: z.boolean(),
+  imageUrl: z.string().nullable().optional()
 });
 
 const UpdateProductSchema = z.object({
@@ -22,12 +23,29 @@ const UpdateProductSchema = z.object({
   price: z.number().positive().max(999_999).optional(),
   stockQuantity: z.number().int().min(0).optional(),
   isOnDemand: z.boolean().optional(),
-  isVisible: z.boolean().optional()
+  isVisible: z.boolean().optional(),
+  imageUrl: z.string().nullable().optional()
 }).refine(data => Object.keys(data).length > 0, {
   message: 'Al menos un campo debe ser proporcionado para actualizar'
 });
 
 class ProductController extends BaseController {
+
+  private mapProduct(row: Record<string, unknown>) {
+    return {
+      id:            row.id,
+      slug:          row.slug,
+      name:          row.name,
+      description:   row.description ?? null,
+      price:         row.price,
+      stockQuantity: row.stock_quantity,
+      isOnDemand:    row.is_on_demand,
+      isVisible:     row.is_visible,
+      imageUrl:      row.image_url ?? null,
+      createdAt:     row.created_at,
+      updatedAt:     row.updated_at,
+    };
+  }
 
   async handle(req: Request): Promise<Response> {
     const url = new URL(req.url);
@@ -96,9 +114,9 @@ class ProductController extends BaseController {
       p_is_visible: validated.isVisible
     });
 
-    if (error) throw error;
+    if (error) throw new Error(error.message ?? 'Error al crear producto');
     logger.info('Product created', { name: validated.name });
-    return product;
+    return this.mapProduct(product as Record<string, unknown>);
   }
 
   private async updateProduct(authHeader: string, productId: string, data: unknown) {
@@ -113,6 +131,7 @@ class ProductController extends BaseController {
     if (validated.stockQuantity !== undefined) updateData.stock_quantity = validated.stockQuantity;
     if (validated.isOnDemand !== undefined) updateData.is_on_demand = validated.isOnDemand;
     if (validated.isVisible !== undefined) updateData.is_visible = validated.isVisible;
+    if (validated.imageUrl !== undefined) updateData.image_url = validated.imageUrl;
     updateData.updated_at = new Date().toISOString();
 
     const { data: product, error } = await this.dbAdmin
@@ -122,8 +141,8 @@ class ProductController extends BaseController {
       .select()
       .single();
 
-    if (error) throw error;
-    return product;
+    if (error) throw new Error(error.message ?? 'Error al actualizar producto');
+    return this.mapProduct(product as Record<string, unknown>);
   }
 
   private async deleteProduct(authHeader: string, productId: string) {
@@ -143,11 +162,11 @@ class ProductController extends BaseController {
 
     const { data: products, error } = await this.dbAdmin
       .from('products')
-      .select('id, name, slug, description, price, stock_quantity, is_on_demand, is_visible, created_at, updated_at')
+      .select('id, name, slug, description, price, stock_quantity, is_on_demand, is_visible, image_url, created_at, updated_at')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return products;
+    if (error) throw new Error(error.message ?? 'Error al cargar productos');
+    return (products ?? []).map(row => this.mapProduct(row as Record<string, unknown>));
   }
 }
 

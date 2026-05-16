@@ -3,11 +3,15 @@
 
 
 -- 1. Crear el bucket 'product-images' si no existe
--- La columna 'public' no existe en supabase/postgres:15.8.1.032.
--- El acceso público se controla por RLS (política "Public Read Access" abajo).
-INSERT INTO storage.buckets (id, name)
-VALUES ('product-images', 'product-images')
-ON CONFLICT (id) DO NOTHING;
+-- db-migrate corre antes de que supabase-storage añada la columna 'public' via su migración
+-- interna 8 (add-public-to-buckets). ADD COLUMN IF NOT EXISTS es idempotente: no conflictúa
+-- con la migración interna del Storage API cuando esta corre después.
+ALTER TABLE storage.buckets
+  ADD COLUMN IF NOT EXISTS public BOOLEAN DEFAULT false;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('product-images', 'product-images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
 
 -- 2. Políticas de Seguridad para Storage
 -- Lectura pública para cualquier usuario (incluyendo anónimos)

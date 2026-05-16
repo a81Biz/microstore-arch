@@ -1,0 +1,1108 @@
+{
+  "nodes": [
+    {
+      "id": "vendor_admin_astro_config",
+      "label": "vendor-admin Astro Config",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/astro.config.mjs",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "vendor_admin_package_json",
+      "label": "vendor-admin package.json",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/package.json",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "vendor_admin_products_page",
+      "label": "vendor-admin Products Page",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "vendor_admin_settings_page",
+      "label": "vendor-admin Settings (Payment Gateways) Page",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/pages/settings/index.astro",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "diagnose_admin_sh",
+      "label": "diagnose-admin.sh Dev Script",
+      "file_type": "code",
+      "source_file": "scripts/dev/diagnose-admin.sh",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_payment_gateways_fn",
+      "label": "manage-payment-gateways Edge Function",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-payment-gateways/index.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00000b_auth_helpers",
+      "label": "Migration 00000b: auth.jwt() Helper",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00000b_auth_helpers.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00015_storage_hardening",
+      "label": "Migration 00015: Storage Hardening",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00015_storage_hardening.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00028_save_credentials",
+      "label": "Migration 00028: save_gateway_credentials_secure",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00028_save_credentials_with_key.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00029_fix_crypto",
+      "label": "Migration 00029: Fix pgcrypto Schema Qualification",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00029_fix_crypto_schema.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "claude_md",
+      "label": "CLAUDE.md Project Instructions",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_md",
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "operating_models_md",
+      "label": "OPERATING_MODELS.md: Cascading State Protocol",
+      "file_type": "document",
+      "source_file": "docs/implementation/OPERATING_MODELS.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "pending_tasks_md",
+      "label": "PENDING_TASKS.md",
+      "file_type": "document",
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plan_actual_md",
+      "label": "PLAN_ACTUAL.md",
+      "file_type": "document",
+      "source_file": "docs/implementation/PLAN_ACTUAL.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "session_summary_md",
+      "label": "SESSION_SUMMARY.md",
+      "file_type": "document",
+      "source_file": "docs/implementation/SESSION_SUMMARY.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_cascading_state_protocol",
+      "label": "Cascading State Protocol (ACK-gated workflow)",
+      "file_type": "rationale",
+      "source_file": "docs/implementation/OPERATING_MODELS.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Prevents AI from autonomously advancing phases without explicit user ACK. Ensures auditability and prevents runaway code generation. Each phase produces a single document artifact: SESSION_SUMMARY → PLAN_ACTUAL → PENDING_TASKS → HISTORY.log."
+    },
+    {
+      "id": "concept_pgcrypto_schema_fix",
+      "label": "pgcrypto extensions.* Schema Qualification Fix",
+      "file_type": "rationale",
+      "source_file": "supabase/migrations/00029_fix_crypto_schema.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "PostgREST v12 sets search_path=public per transaction. SECURITY DEFINER functions without SET search_path inherit caller search_path. pgcrypto is installed in schema 'extensions', not 'public', so pgp_sym_encrypt/decrypt are unreachable at runtime via PostgREST. Fix: fully qualify all pgcrypto calls with extensions. prefix instead of altering search_path globally."
+    },
+    {
+      "id": "concept_mfa_rls_claim",
+      "label": "mfa_verified JWT Claim as RLS Gate",
+      "file_type": "rationale",
+      "source_file": "supabase/migrations/00015_storage_hardening.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "app_metadata.mfa_verified:true is immutable by the user (only service_role can set it). RLS policies check this claim via auth.jwt()->'user_metadata'->>'mfa_verified' to enforce MFA for vendor write operations. This is the binding security contract between the auth layer and the data layer."
+    },
+    {
+      "id": "concept_toggling_guard",
+      "label": "_toggling Guard Pattern (Double-Fire Prevention)",
+      "file_type": "rationale",
+      "source_file": "apps/vendor-admin/src/pages/settings/index.astro",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Alpine.js x-for re-renders can cause @change inside <label> to fire twice due to synthetic click propagation. Adding a _toggling flag prevents duplicate POST requests when toggling a checkbox within a wrapping <label>."
+    },
+    {
+      "id": "concept_auth_jwt_selfhosted",
+      "label": "auth.jwt() Self-Hosted Polyfill",
+      "file_type": "rationale",
+      "source_file": "supabase/migrations/00000b_auth_helpers.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Supabase Cloud auto-provisions auth.jwt(). The Docker self-hosted image supabase/postgres:15.8.1.032 does not include it. Migration 00000b defines it as CREATE OR REPLACE before any migration that references it, using lexicographic ordering (00000_ < 00000b_) to guarantee it runs first."
+    },
+    {
+      "id": "concept_vendor_mfa_auth_flow",
+      "label": "Vendor MFA First-Login Flow",
+      "file_type": "rationale",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Enforces: login → forced password change (profiles.password_changed_at IS NULL) → TOTP setup (totp_enabled=false) → TOTP verify (mfa_verified claim). All three steps must complete before RLS unlocks vendor data access."
+    },
+    {
+      "id": "concept_optimistic_toggle",
+      "label": "Optimistic Toggle with Rollback Pattern",
+      "file_type": "rationale",
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "292-305",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "toggleVisibility applies isVisible=newState before the API call and rolls back on failure. Provides immediate UI feedback without waiting for the server round-trip. Applied in PT-FIX-018b / PT-FIX-020b to both products and settings pages."
+    },
+    {
+      "id": "concept_trigger_rebuild",
+      "label": "triggerRebuild After Mutations (SSG Invalidation)",
+      "file_type": "rationale",
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "282-283",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "After every product mutation (create, update, delete, toggleVisibility), triggerRebuild() is called to regenerate the storefront static pages, keeping the public catalog in sync with the DB."
+    },
+    {
+      "id": "concept_snake_camel_mapping",
+      "label": "snake_case to camelCase Field Mapping (mapProduct)",
+      "file_type": "rationale",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "32-45",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "mapProduct normalizes DB snake_case column names to camelCase for frontend consumers, keeping the API contract stable even if DB column names change. Added in PT-FIX-020a."
+    },
+    {
+      "id": "concept_all_gateways_merge",
+      "label": "ALL_GATEWAYS Constant + Map-Merge Pattern",
+      "file_type": "rationale",
+      "source_file": "supabase/functions/manage-payment-gateways/index.ts",
+      "source_location": "49-69",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "listGateways always returns exactly 4 entries by merging DB data into ALL_GATEWAYS constant, ensuring disabled/unconfigured gateways appear with is_enabled:false rather than being omitted. Added in PT-FIX-021."
+    },
+    {
+      "id": "concept_public_gateway_route",
+      "label": "Public Gateway Route (no-auth checkout endpoint)",
+      "file_type": "rationale",
+      "source_file": "supabase/functions/manage-payment-gateways/index.ts",
+      "source_location": "18-24",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "GET /manage-payment-gateways/public returns only enabled gateway names without credentials and without authentication, allowing the checkout UI to query available payment methods without exposing sensitive config."
+    },
+    {
+      "id": "fn_save_gateway_credentials_secure",
+      "label": "save_gateway_credentials_secure (PL/pgSQL)",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00028_save_credentials_with_key.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "fn_save_payment_credentials",
+      "label": "save_payment_credentials (PL/pgSQL)",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00029_fix_crypto_schema.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "fn_get_payment_credentials",
+      "label": "get_payment_credentials (PL/pgSQL)",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00029_fix_crypto_schema.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "fn_auth_jwt",
+      "label": "auth.jwt() PostgreSQL Function",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00000b_auth_helpers.sql",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_ts",
+      "label": "product-admin.ts Library",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_client_ts",
+      "label": "auth-client.ts Library",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/auth/auth-client.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "supabase_client_ts",
+      "label": "supabase-client.ts",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/supabase-client.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "micro_store_core",
+      "label": "@micro-store/core Package",
+      "file_type": "code",
+      "source_file": "packages/core",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "payment_credentials_table",
+      "label": "payment_credentials DB Table",
+      "file_type": "code",
+      "source_file": "supabase/migrations",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_products_fn",
+      "label": "manage-products Edge Function",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "create_product_schema",
+      "label": "CreateProductSchema (Zod)",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "10-17",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "update_product_schema",
+      "label": "UpdateProductSchema (Zod)",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "19-28",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "db_products_table",
+      "label": "products DB Table",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "rpc_create_product",
+      "label": "create_product (DB RPC)",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "base_controller",
+      "label": "BaseController",
+      "file_type": "code",
+      "source_file": "supabase/functions/_core/base-controller.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "pt_fix_021",
+      "label": "PT-FIX-021: Payment Gateway Config Fixes",
+      "file_type": "document",
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "14-19",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "pt_fix_020",
+      "label": "PT-FIX-020: Products Module Fixes",
+      "file_type": "document",
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "22-29",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "pt_future_022",
+      "label": "PT-FUTURE-022: Product Image Upload (SRS RF-06.6)",
+      "file_type": "document",
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "88-92",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "vendor_admin_products_page",
+      "target": "product_admin_ts",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "190-195",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_admin_products_page",
+      "target": "supabase_client_ts",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "196",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_admin_settings_page",
+      "target": "auth_client_ts",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/settings/index.astro",
+      "source_location": "134",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_admin_settings_page",
+      "target": "micro_store_core",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/settings/index.astro",
+      "source_location": "135",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_admin_settings_page",
+      "target": "manage_payment_gateways_fn",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/settings/index.astro",
+      "source_location": "161",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_payment_gateways_fn",
+      "target": "fn_save_gateway_credentials_secure",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-payment-gateways/index.ts",
+      "source_location": "99",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_payment_gateways_fn",
+      "target": "payment_credentials_table",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-payment-gateways/index.ts",
+      "source_location": "50-127",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_payment_gateways_fn",
+      "target": "base_controller",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-payment-gateways/index.ts",
+      "source_location": "7",
+      "weight": 1.0
+    },
+    {
+      "source": "fn_save_gateway_credentials_secure",
+      "target": "fn_save_payment_credentials",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00028_save_credentials_with_key.sql",
+      "source_location": "18",
+      "weight": 1.0
+    },
+    {
+      "source": "fn_save_payment_credentials",
+      "target": "payment_credentials_table",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00029_fix_crypto_schema.sql",
+      "source_location": "29-37",
+      "weight": 1.0
+    },
+    {
+      "source": "fn_get_payment_credentials",
+      "target": "payment_credentials_table",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00029_fix_crypto_schema.sql",
+      "source_location": "56-60",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00028_save_credentials",
+      "target": "fn_save_gateway_credentials_secure",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00028_save_credentials_with_key.sql",
+      "source_location": "6",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00029_fix_crypto",
+      "target": "fn_save_payment_credentials",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00029_fix_crypto_schema.sql",
+      "source_location": "8",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00029_fix_crypto",
+      "target": "fn_get_payment_credentials",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00029_fix_crypto_schema.sql",
+      "source_location": "41",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00000b_auth_helpers",
+      "target": "fn_auth_jwt",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00000b_auth_helpers.sql",
+      "source_location": "5",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00015_storage_hardening",
+      "target": "fn_auth_jwt",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00015_storage_hardening.sql",
+      "source_location": "25",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_admin_astro_config",
+      "target": "micro_store_core",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/astro.config.mjs",
+      "source_location": "9",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_admin_package_json",
+      "target": "micro_store_core",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/package.json",
+      "source_location": "17",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_fn",
+      "target": "base_controller",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "30",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_fn",
+      "target": "create_product_schema",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "103",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_fn",
+      "target": "update_product_schema",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "122",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_fn",
+      "target": "db_products_table",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "133-165",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_fn",
+      "target": "rpc_create_product",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "105",
+      "weight": 1.0
+    },
+    {
+      "source": "product_admin_ts",
+      "target": "manage_products_fn",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "189-195",
+      "weight": 1.0
+    },
+    {
+      "source": "concept_pgcrypto_schema_fix",
+      "target": "migration_00029_fix_crypto",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00029_fix_crypto_schema.sql",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_auth_jwt_selfhosted",
+      "target": "migration_00000b_auth_helpers",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00000b_auth_helpers.sql",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_mfa_rls_claim",
+      "target": "migration_00015_storage_hardening",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00015_storage_hardening.sql",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_toggling_guard",
+      "target": "vendor_admin_settings_page",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/settings/index.astro",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_toggling_guard",
+      "target": "vendor_admin_products_page",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_optimistic_toggle",
+      "target": "vendor_admin_products_page",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "292-305",
+      "weight": 1.0
+    },
+    {
+      "source": "concept_trigger_rebuild",
+      "target": "vendor_admin_products_page",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "282-283",
+      "weight": 1.0
+    },
+    {
+      "source": "concept_snake_camel_mapping",
+      "target": "manage_products_fn",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "32-45",
+      "weight": 1.0
+    },
+    {
+      "source": "concept_all_gateways_merge",
+      "target": "manage_payment_gateways_fn",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-payment-gateways/index.ts",
+      "source_location": "49-69",
+      "weight": 1.0
+    },
+    {
+      "source": "concept_public_gateway_route",
+      "target": "manage_payment_gateways_fn",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-payment-gateways/index.ts",
+      "source_location": "18-24",
+      "weight": 1.0
+    },
+    {
+      "source": "concept_cascading_state_protocol",
+      "target": "operating_models_md",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/OPERATING_MODELS.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_md",
+      "target": "concept_cascading_state_protocol",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": "153-171",
+      "weight": 1.0
+    },
+    {
+      "source": "operating_models_md",
+      "target": "session_summary_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/OPERATING_MODELS.md",
+      "source_location": "12-14",
+      "weight": 1.0
+    },
+    {
+      "source": "operating_models_md",
+      "target": "plan_actual_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/OPERATING_MODELS.md",
+      "source_location": "17-19",
+      "weight": 1.0
+    },
+    {
+      "source": "operating_models_md",
+      "target": "pending_tasks_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/OPERATING_MODELS.md",
+      "source_location": "22-24",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_md",
+      "target": "manage_payment_gateways_fn",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "14-19",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_md",
+      "target": "manage_products_fn",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "22-29",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_md",
+      "target": "vendor_admin_products_page",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "22-29",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_md",
+      "target": "product_admin_ts",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "88-92",
+      "weight": 1.0
+    },
+    {
+      "source": "pt_fix_021",
+      "target": "manage_payment_gateways_fn",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "14-19",
+      "weight": 1.0
+    },
+    {
+      "source": "pt_fix_020",
+      "target": "manage_products_fn",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "22-29",
+      "weight": 1.0
+    },
+    {
+      "source": "pt_fix_020",
+      "target": "vendor_admin_products_page",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "22-29",
+      "weight": 1.0
+    },
+    {
+      "source": "pt_future_022",
+      "target": "product_admin_ts",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "88-92",
+      "weight": 1.0
+    },
+    {
+      "source": "pt_future_022",
+      "target": "vendor_admin_products_page",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "88-92",
+      "weight": 1.0
+    },
+    {
+      "source": "concept_vendor_mfa_auth_flow",
+      "target": "readme_md",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "79-128",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_md",
+      "target": "concept_mfa_rls_claim",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "README.md",
+      "source_location": "83-84",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00028_save_credentials",
+      "target": "migration_00029_fix_crypto",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "supabase/migrations/00028_save_credentials_with_key.sql",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_pgcrypto_schema_fix",
+      "target": "concept_auth_jwt_selfhosted",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "supabase/migrations",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "vendor_admin_settings_page",
+      "target": "vendor_admin_products_page",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "apps/vendor-admin/src/pages",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "manage_products_fn",
+      "target": "manage_payment_gateways_fn",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "supabase/functions",
+      "source_location": null,
+      "weight": 0.85
+    },
+    {
+      "source": "concept_optimistic_toggle",
+      "target": "concept_toggling_guard",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": null,
+      "weight": 0.75
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "payment_credentials_encryption_chain",
+      "label": "Payment Credentials Encryption Pipeline",
+      "nodes": [
+        "manage_payment_gateways_fn",
+        "fn_save_gateway_credentials_secure",
+        "fn_save_payment_credentials",
+        "payment_credentials_table"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.95,
+      "source_file": "supabase/functions/manage-payment-gateways/index.ts"
+    },
+    {
+      "id": "vendor_admin_rls_mfa_gate",
+      "label": "Vendor Admin MFA + RLS Security Gate",
+      "nodes": [
+        "concept_mfa_rls_claim",
+        "migration_00015_storage_hardening",
+        "fn_auth_jwt",
+        "manage_payment_gateways_fn"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "supabase/migrations/00015_storage_hardening.sql"
+    },
+    {
+      "id": "product_crud_full_flow",
+      "label": "Product CRUD Full Flow (UI to DB)",
+      "nodes": [
+        "vendor_admin_products_page",
+        "product_admin_ts",
+        "manage_products_fn",
+        "db_products_table"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro"
+    }
+  ],
+  "input_tokens": 6800,
+  "output_tokens": 2100
+}

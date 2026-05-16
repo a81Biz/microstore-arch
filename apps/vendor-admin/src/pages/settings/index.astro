@@ -33,11 +33,14 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                   <h2 x-text="getGatewayName(gateway.gateway)"></h2>
                   <span class="status-badge" :class="gateway.is_enabled ? 'status-on' : 'status-off'"
                         x-text="gateway.is_enabled ? 'Activo' : 'Inactivo'"></span>
+                  <template x-if="gateway.created_at">
+                    <span class="configured-badge">Configurado ✓</span>
+                  </template>
                 </div>
               </div>
 
               <div class="gateway-actions">
-                <button @click="toggleForm(gateway.gateway)" class="btn-secondary" x-text="showForm === gateway.gateway ? 'Cerrar' : 'Configurar'"></button>
+                <button @click="toggleForm(gateway.gateway)" class="btn-secondary" x-text="showForm === gateway.gateway ? 'Cerrar' : (gateway.created_at ? 'Actualizar' : 'Configurar')"></button>
                 <label class="switch">
                   <input type="checkbox" :checked="gateway.is_enabled" @change="toggleGateway(gateway)" />
                   <span class="slider"></span>
@@ -49,6 +52,12 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
             <template x-if="showForm === gateway.gateway">
               <div class="credentials-container" x-transition>
                 <form @submit.prevent="saveCredentials(gateway.gateway)" class="credentials-form">
+                  <template x-if="gateway.created_at">
+                    <div class="info-banner">
+                      <strong>Credenciales guardadas.</strong>
+                      Ingresa nuevas credenciales para reemplazarlas. Si solo deseas cambiar el estado activo/inactivo, guarda con los campos vacíos.
+                    </div>
+                  </template>
                   <div class="form-grid">
                     <template x-if="gateway.gateway === 'stripe'">
                       <div class="form-contents">
@@ -291,6 +300,15 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
   .status-badge { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 6px; }
   .status-on { background: #ecfdf5; color: #065f46; }
   .status-off { background: #f3f4f6; color: #6b7280; }
+  .configured-badge {
+    font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem;
+    border-radius: 6px; background: #eff6ff; color: #1e40af;
+  }
+  .info-banner {
+    background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe;
+    border-radius: 10px; padding: 0.875rem 1rem;
+    font-size: 0.875rem; margin-bottom: 1rem;
+  }
 
   .gateway-actions { display: flex; align-items: center; gap: 1.5rem; }
 

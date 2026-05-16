@@ -107,7 +107,12 @@
       "Bash(MSYS_NO_PATHCONV=1 docker run --rm --network microstore-arch_microstore-network -v c:/DevOps/Desarrollos/MicroStore-Arch/supabase/migrations:/migrations:ro -e PGPASSWORD=supabase123 postgres:15-alpine psql -h microstore-supabase-db -U supabase_admin -d postgres -v ON_ERROR_STOP=on -f /migrations/00000b_auth_helpers.sql)",
       "Bash(Get-ChildItem \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\supabase\\\\migrations\\\\*.sql\")",
       "Bash(Sort-Object Name)",
-      "Bash(Select-Object -Last 5 -ExpandProperty Name)"
+      "Bash(Select-Object -Last 5 -ExpandProperty Name)",
+      "Bash(Get-Content \"C:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\docs\\\\implementation\\\\PLAN_ACTUAL.md\" -Raw)",
+      "PowerShell(Copy-Item graphify-out/graph.json .graphify_old.json)",
+      "PowerShell(python -c \"import graphify; import pkgutil; print\\([m.name for m in pkgutil.iter_modules\\(graphify.__path__\\)]\\)\")",
+      "PowerShell(python -c \"from graphify.build import help; help\\(\\)\" 2>&1)",
+      "PowerShell(python -c \"from graphify import build; import inspect; print\\(inspect.getsource\\(build\\)\\)\" 2>&1)"
     ]
   }
 }

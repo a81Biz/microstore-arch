@@ -1,7 +1,68 @@
 # Tareas Pendientes — Micro-Store Arch
 
-**Corte:** 2026-05-15 (sesión 3 · turno 7)
-**Estado general del proyecto:** Sprints 0-5 completos · PT-001–PT-019 cerradas · Sin tareas activas de alta prioridad
+**Corte:** 2026-05-16 (sesión 6 · turno 12)
+**Estado general del proyecto:** Sprints 0-5 completos · PT-001–PT-027 cerradas · Sin activas
+
+---
+
+## PRIORIDAD ALTA — Activas
+
+_Ninguna._
+
+---
+
+## ~~PT-FIX-027 · Imagen rota en storefront — `catalog.ts` usa `image_url` de DB~~ ✅ COMPLETADO 2026-05-16
+
+- `catalog.ts` — eliminada construcción manual de URL con `.webp` hardcodeado y `PUBLIC_SUPABASE_URL` vacío.
+- `mapToCatalogProduct` ahora usa `(product as Record<string, unknown>).image_url as string | null ?? null`.
+- **Verificación funcional pendiente (manual):** `docker compose down -v && up` → recargar `localhost` → imágenes visibles en catálogo.
+
+---
+
+## ~~PT-FIX-026 · Desconexión imagen de producto: DB + Edge Function + Cliente + UI~~ ✅ COMPLETADO 2026-05-16
+
+- `00031_product_image_url.sql` — `ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url TEXT`
+- `manage-products/index.ts` — `imageUrl` en schemas, `mapProduct`, `updateData`, `select`
+- `product-admin.ts` — `imageUrl` en `AdminProduct` y `ProductFormData`
+- `index.astro` — `saveProduct()` con 3 flujos · thumbnail 40×40px en tabla · `<img>` preview en modal · `URL.createObjectURL` + revoke
+- **Verificación funcional pendiente (manual):** Recargar browser → crear producto con imagen → thumbnail visible · editar → imagen existente visible · cambiar imagen → thumbnail actualizado
+
+---
+
+## ~~PT-FIX-025 · Storage bucket público + RLS sin `mfa_verified` (rev. B)~~ ✅ COMPLETADO 2026-05-16
+
+- `00015_storage_hardening.sql` — `ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS public BOOLEAN DEFAULT false` añadido antes del INSERT; INSERT usa `ON CONFLICT DO UPDATE SET public = true`.
+- `00030_storage_rls_fix.sql` — sin cambios adicionales; UPDATE salvaguarda + DROP/CREATE RLS ya correctos.
+- **Verificación funcional pendiente (manual):** `docker compose down -v && up` → `db-migrate ExitCode=0`
+  · `00015: ALTER TABLE + INSERT 0 1` · `00030: UPDATE 1 · DROP × 2 · CREATE × 2` · `public = t` · upload imagen sin 404 ni 400.
+
+---
+
+## ~~PT-FIX-024 · RLS Storage — eliminar requisito `mfa_verified` en uploads~~ ✅ COMPLETADO 2026-05-16
+
+- DROP de `"Vendor MFA Write Access"` y `"Vendor MFA Delete Access"` en `storage.objects`.
+- Nuevas políticas `"Vendor Write Access"` (INSERT) y `"Vendor Delete Access"` (DELETE) validan
+  `bucket_id = 'product-images' AND profiles.role = 'vendor'` sin exigir `mfa_verified`.
+- **Verificación funcional pendiente (manual):** `docker compose down -v && up` → `db-migrate ExitCode=0`
+  · `00030 DROP POLICY × 2` · `CREATE POLICY × 2` · upload imagen en `admin.localhost/products` → HTTP 200.
+
+---
+
+## ~~PT-FIX-021 · Correcciones de Configuración de Pasarelas (H5, H6)~~ ✅ COMPLETADO 2026-05-15
+
+- Eliminada doble llamada GoTrue en `handle()`: `requireAdminMFA` + `authenticateUser` → único `const user = await this.requireAdminMFA(authHeader)`.
+- Añadida constante `ALL_GATEWAYS = ['stripe', 'paypal', 'mercadopago', 'hey_banco']` en la clase.
+- `listGateways` refactorizado: construye Map por gateway + merge con ALL_GATEWAYS → siempre devuelve 4 elementos; `is_enabled: false` y timestamps null para los no configurados.
+- **Verificación funcional pendiente (manual):** `admin.localhost/settings` → 4 tarjetas visibles · PayPal/MercadoPago con estado real · Stripe/Hey Banco desactivados · 1 POST → HTTP 200 al guardar.
+
+---
+
+## ~~PT-FIX-020 · Correcciones del módulo de Productos (H1a, H1b, H3, H4)~~ ✅ COMPLETADO 2026-05-15
+
+- **020-A** (`manage-products/index.ts`): 3× `throw error` crudo → `throw new Error(error.message ?? '...')`. Añadido `mapProduct(row)` en `ProductController` (snake_case → camelCase). Aplicado en los 3 puntos de retorno: `listProducts`, `createProduct`, `updateProduct`.
+- **020-B** (`products/index.astro`): Optimistic update en `toggleVisibility` — `product.isVisible = newState` antes del primer await; rollback `product.isVisible = !newState` en catch.
+- **Bug anotado (no resolver aún):** H2 — `uploadProductImage` en `product-admin.ts` sin `<input type="file">` en modal. SRS RF-06.6 · Prioridad Media → PT futura.
+- **Verificación funcional pendiente (manual):** `admin.localhost/products` → badges correctos · toggle inmediato · modal editar con valores reales · POST 201 · PUT 200.
 
 ---
 
@@ -13,8 +74,6 @@
 - `save_gateway_credentials_secure` (00028) no requirió cambio — no invoca pgcrypto directamente.
 - Smoke test: `docker compose down -v && up` → `db-migrate ExitCode=0` · `00029 CREATE FUNCTION ×2` ✅
   · `db-seed admin@tienda.com` ✅.
-- **Verificación funcional pendiente (manual):** abrir `admin.localhost/settings` → guardar
-  credenciales de pasarela → DevTools Network: exactamente 1 POST → HTTP 200.
 
 **Bugs anotados (no resolver en esta PT):**
 - `wall clock duration warning` en login/change-password/setup-totp — artefacto de Edge Runtime
@@ -62,6 +121,11 @@
 
 ### PT-009 · Actualizar graphify tras cada sprint / sesión
 - **Acción:** Ejecutar `/graphify . --update` al inicio de cada sesión. Hábito operativo — no es cambio de código.
+
+### PT-FUTURE-022 · Subida de imagen de producto (SRS RF-06.6)
+- **Contexto:** `uploadProductImage` existe en `product-admin.ts` pero el modal de producto carece de `<input type="file">`. Funcionalidad incompleta.
+- **Prioridad:** Media. No bloquea ningún flujo activo.
+- **Acción:** Añadir input file en el modal de edición/creación de productos y conectarlo con `uploadProductImage`.
 
 ---
 
