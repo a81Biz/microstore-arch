@@ -40,6 +40,7 @@ Primera vez tarda ~5–8 min (descarga imágenes Docker, incluyendo el edge runt
 | URL | Descripción |
 |-----|-------------|
 | http://localhost | Storefront — catálogo público |
+| http://localhost/cart | Storefront — carrito de compras |
 | http://client.localhost | Client Hub — panel de cliente (auth, pedidos, checkout) |
 | http://admin.localhost | Vendor Admin — panel de vendedor (productos, órdenes, config) |
 | http://api.localhost | Supabase API Gateway — todas las APIs (Auth, REST, Realtime, Functions) |
@@ -206,6 +207,33 @@ Monorepo con **npm workspaces** desplegado en Cloudflare Pages + Supabase.
 | `vendor-admin` | http://admin.localhost | Astro 5 + React 18 + Alpine.js | 5174 |
 
 Todas las apps usan el **patrón Astro + Islands**: Astro para markup estático/SSR, React para islands interactivos pesados, Alpine.js para interactividad ligera.
+
+### Carrito de compras (storefront)
+
+El storefront implementa un carrito persistente basado en **Alpine.js store** (`$store.cart`):
+
+| Característica | Implementación |
+|----------------|----------------|
+| Persistencia | `localStorage` — sobrevive a recargas de página |
+| Límite | 15 SKUs distintas por sesión |
+| Cross-origin checkout | Items serializados en `?cart=encodeURIComponent(JSON.stringify(items))` para cruzar de `localhost` a `client.localhost` |
+| Páginas | `/cart` (resumen + totales) · drawer lateral (confirmación rápida al añadir) |
+
+El store se registra en `apps/storefront/src/lib/cart/cart-store.ts` y se carga en `BaseLayout.astro` via `document.addEventListener('alpine:init', ...)`. El checkout (`client-hub`) lee `?cart=` con prioridad sobre el flujo legado `?product=`.
+
+### Galería de imágenes de producto (storefront + admin)
+
+Cada producto soporta hasta **10 imágenes** gestionadas via tabla `product_images`:
+
+| Capa | Implementación |
+|------|----------------|
+| DB | `product_images` (id, product_id FK CASCADE, url, sort_order, alt_text) · migración 00032 |
+| API | `manage-products/{id}/images` POST/DELETE — valida max 10, sincroniza `products.image_url` |
+| Admin | Modal de producto con galería de thumbnails (upload múltiple, delete individual, max indicator) |
+| Storefront detalle | Galería Alpine: tira de miniaturas + imagen principal + lightbox fullscreen (Esc, ← →) |
+| Storefront card | Sin cambio — `ProductCard` sigue usando `product.imageUrl` (imagen primaria) |
+
+El campo `products.image_url` se mantiene como imagen primaria (sort_order=0) para compatibilidad con ProductCard, carrito y checkout existentes.
 
 ### Paquetes compartidos (`packages/`)
 

@@ -10,6 +10,13 @@ export interface ProductFormData {
   imageUrl?: string | null;
 }
 
+export interface AdminProductImage {
+  id: string;
+  url: string;
+  sortOrder: number;
+  altText: string | null;
+}
+
 export interface AdminProduct {
   id: string;
   slug: string;
@@ -20,6 +27,7 @@ export interface AdminProduct {
   isOnDemand: boolean;
   isVisible: boolean;
   imageUrl: string | null;
+  images: AdminProductImage[];
   createdAt: string;
   updatedAt: string;
 }
@@ -93,11 +101,11 @@ export async function uploadProductImage(productId: string, file: File): Promise
   const { supabaseClient } = await import('../supabase-client');
 
   const fileExt = file.name.split('.').pop();
-  const filePath = `${productId}/main.${fileExt}`;
+  const filePath = `${productId}/${Date.now()}.${fileExt}`;
 
   const { error } = await supabaseClient.storage
     .from('product-images')
-    .upload(filePath, file, { upsert: true });
+    .upload(filePath, file, { upsert: false });
 
   if (error) {
     throw new Error('Error al subir imagen');
@@ -105,6 +113,52 @@ export async function uploadProductImage(productId: string, file: File): Promise
 
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
   return `${supabaseUrl}/storage/v1/object/public/product-images/${filePath}`;
+}
+
+export async function addProductImage(
+  productId: string,
+  imageUrl: string,
+  altText?: string
+): Promise<AdminProductImage> {
+  const response = await fetch(`${base()}${API_ROUTES.admin.products}/${productId}/images`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify({ url: imageUrl, altText })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Error al añadir imagen');
+  }
+
+  return response.json();
+}
+
+export async function deleteProductImage(
+  productId: string,
+  imageId: string,
+  storageUrl: string
+): Promise<void> {
+  const { supabaseClient } = await import('../supabase-client');
+
+  // Delete metadata from Edge Function
+  const response = await fetch(`${base()}${API_ROUTES.admin.products}/${productId}/images/${imageId}`, {
+    method: 'DELETE',
+    headers: await getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Error al eliminar imagen');
+  }
+
+  // Remove file from Storage — extract path after /product-images/
+  const marker = '/product-images/';
+  const idx = storageUrl.indexOf(marker);
+  if (idx !== -1) {
+    const storagePath = storageUrl.slice(idx + marker.length);
+    await supabaseClient.storage.from('product-images').remove([storagePath]);
+  }
 }
 
 export async function triggerRebuild(): Promise<void> {

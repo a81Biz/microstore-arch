@@ -140,26 +140,37 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
               </div>
 
               <div class="form-group span-full">
-                <label for="productImage">Imagen del Producto</label>
-                <input
-                  type="file"
-                  id="productImage"
-                  accept="image/jpeg,image/png,image/webp"
-                  @change="
-                    if (form.imagePreviewUrl) URL.revokeObjectURL(form.imagePreviewUrl);
-                    form.imageFile = $event.target.files[0] || null;
-                    form.imagePreviewUrl = form.imageFile ? URL.createObjectURL(form.imageFile) : null;
-                  "
-                  class="file-input"
-                />
-                <template x-if="form.imagePreviewUrl">
-                  <img :src="form.imagePreviewUrl" alt="Vista previa" class="img-preview" />
-                </template>
-                <template x-if="!form.imagePreviewUrl && editingProduct && editingProduct.imageUrl">
-                  <img :src="editingProduct.imageUrl" alt="Imagen actual" class="img-preview" />
-                </template>
-                <p class="field-hint" x-show="form.imageFile" x-text="'Archivo seleccionado: ' + form.imageFile?.name"></p>
-                <p class="field-hint" x-show="!form.imageFile && !editingProduct?.imageUrl">Formatos: JPG, PNG, WEBP · Opcional</p>
+                <label>Imágenes del producto <span x-text="'(' + form.images.length + '/10)'" class="gallery-count"></span></label>
+                <div class="gallery-grid" x-show="form.images.length > 0">
+                  <template x-for="img in form.images" :key="img.id || img.url">
+                    <div class="gallery-thumb-wrap">
+                      <img :src="img.url" :alt="form.name || 'Imagen'" class="gallery-thumb" />
+                      <button
+                        type="button"
+                        class="gallery-thumb-delete"
+                        :aria-label="'Eliminar imagen'"
+                        @click="removeImage(img)"
+                      >✕</button>
+                    </div>
+                  </template>
+                </div>
+                <label
+                  class="gallery-upload-btn"
+                  :class="{ 'gallery-upload-btn--disabled': form.images.length >= 10 || uploadingImage }"
+                >
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    class="gallery-file-input"
+                    :disabled="form.images.length >= 10 || uploadingImage"
+                    @change="handleImageUpload($event)"
+                    x-ref="imageInput"
+                  />
+                  <span x-show="!uploadingImage">+ Añadir imagen</span>
+                  <span x-show="uploadingImage">Subiendo...</span>
+                </label>
+                <p class="field-hint" x-show="form.images.length === 0 && !uploadingImage">Formatos: JPG, PNG, WEBP · Opcional · Máx. 10</p>
+                <p class="field-hint" x-show="form.images.length >= 10">Límite de 10 imágenes alcanzado</p>
               </div>
 
               <div class="form-group">
@@ -220,6 +231,8 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     updateProduct,
     deleteProduct as deleteProductApi,
     uploadProductImage,
+    addProductImage,
+    deleteProductImage,
     triggerRebuild
   } from '../../lib/products/product-admin.ts';
   import { supabaseClient } from '../../lib/supabase-client';
@@ -229,6 +242,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     loading: true,
     showModal: false,
     editingProduct: null,
+    uploadingImage: false,
     form: {
       name: '',
       description: '',
@@ -236,8 +250,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       stockQuantity: 0,
       isOnDemand: false,
       isVisible: true,
-      imageFile: null,
-      imagePreviewUrl: null
+      images: []
     },
     formLoading: false,
     formError: '',
@@ -277,8 +290,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
         stockQuantity: product.stockQuantity,
         isOnDemand: product.isOnDemand,
         isVisible: product.isVisible,
-        imageFile: null,
-        imagePreviewUrl: null
+        images: (product.images || []).slice()
       };
       this.showModal = true;
     },
@@ -290,7 +302,6 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     },
 
     resetForm() {
-      if (this.form?.imagePreviewUrl) URL.revokeObjectURL(this.form.imagePreviewUrl);
       this.form = {
         name: '',
         description: '',
@@ -298,8 +309,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
         stockQuantity: 0,
         isOnDemand: false,
         isVisible: true,
-        imageFile: null,
-        imagePreviewUrl: null
+        images: []
       };
       this.formError = '';
     },
@@ -309,22 +319,12 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       this.formError = '';
 
       try {
-        const { imageFile, imagePreviewUrl: _preview, ...productData } = this.form;
+        const { images: _images, ...productData } = this.form;
 
         if (this.editingProduct) {
-          const productId = this.editingProduct.id;
-          if (imageFile) {
-            const imageUrl = await uploadProductImage(productId, imageFile);
-            await updateProduct(productId, { ...productData, imageUrl });
-          } else {
-            await updateProduct(productId, productData);
-          }
+          await updateProduct(this.editingProduct.id, productData);
         } else {
-          const created = await createProduct(productData);
-          if (imageFile) {
-            const imageUrl = await uploadProductImage(created.id, imageFile);
-            await updateProduct(created.id, { imageUrl });
-          }
+          await createProduct(productData);
         }
 
         await triggerRebuild();
@@ -334,6 +334,45 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
         this.formError = err.message || 'Error al guardar producto';
       } finally {
         this.formLoading = false;
+      }
+    },
+
+    async handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const productId = this.editingProduct?.id;
+      this.uploadingImage = true;
+      this.formError = '';
+
+      try {
+        const url = await uploadProductImage(productId || 'temp', file);
+
+        if (productId) {
+          const image = await addProductImage(productId, url);
+          this.form.images.push(image);
+        } else {
+          // For new products: store temp URL without DB entry;
+          // addProductImage will be called after createProduct resolves.
+          this.form.images.push({ id: null, url, sortOrder: this.form.images.length, altText: null });
+        }
+      } catch (err) {
+        this.formError = err.message || 'Error al subir imagen';
+      } finally {
+        this.uploadingImage = false;
+        if (this.$refs.imageInput) this.$refs.imageInput.value = '';
+      }
+    },
+
+    async removeImage(img) {
+      const productId = this.editingProduct?.id;
+      try {
+        if (productId && img.id) {
+          await deleteProductImage(productId, img.id, img.url);
+        }
+        this.form.images = this.form.images.filter(i => i !== img);
+      } catch (err) {
+        this.formError = err.message || 'Error al eliminar imagen';
       }
     },
 
@@ -556,6 +595,30 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     background: #fef2f2; color: #991b1b; padding: 1rem; border-radius: 12px;
     margin-top: 1.5rem; font-size: 0.875rem; font-weight: 500;
   }
+
+  /* Gallery styles */
+  .gallery-count { font-weight: 400; color: #9ca3af; font-size: 0.8rem; }
+  .gallery-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 0.75rem; }
+  .gallery-thumb-wrap { position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
+  .gallery-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery-thumb-delete {
+    position: absolute; top: 2px; right: 2px;
+    background: rgba(239, 68, 68, 0.85); color: white;
+    border: none; border-radius: 50%; width: 20px; height: 20px;
+    font-size: 0.65rem; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; line-height: 1;
+    transition: background 0.15s;
+  }
+  .gallery-thumb-delete:hover { background: #dc2626; }
+  .gallery-upload-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.5rem 1rem; border: 1px dashed #d1d5db; border-radius: 10px;
+    cursor: pointer; font-size: 0.875rem; color: #374151; background: #f9fafb;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .gallery-upload-btn:hover:not(.gallery-upload-btn--disabled) { border-color: #9ca3af; background: #f3f4f6; }
+  .gallery-upload-btn--disabled { opacity: 0.5; cursor: not-allowed; }
+  .gallery-file-input { display: none; }
 
   .loading-state { padding: 5rem; text-align: center; color: #6b7280; }
   .spinner {

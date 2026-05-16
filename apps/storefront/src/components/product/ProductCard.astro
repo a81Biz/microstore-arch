@@ -20,14 +20,15 @@ const badge = getStockBadge({
   createdAt: product.createdAt,
   updatedAt: ''
 });
+const isOutOfStock = badge.variant === 'error';
 ---
 
 <article class="product-card">
   <a href={`/producto/${product.slug}`} class="product-link">
     <div class="product-image">
       {product.imageUrl ? (
-        <img 
-          src={product.imageUrl} 
+        <img
+          src={product.imageUrl}
           alt={product.name}
           loading="lazy"
           width="300"
@@ -42,7 +43,7 @@ const badge = getStockBadge({
 
     <div class="product-info">
       <h3 class="product-name">{product.name}</h3>
-      
+
       {product.description && (
         <p class="product-description">{product.description.slice(0, 60)}...</p>
       )}
@@ -55,6 +56,22 @@ const badge = getStockBadge({
       </div>
     </div>
   </a>
+
+  <div class="product-card-actions">
+    <button
+      class={`btn-add-to-cart${isOutOfStock ? ' btn-add-disabled' : ''}`}
+      disabled={isOutOfStock}
+      data-product-id={product.id}
+      data-name={product.name}
+      data-price={String(product.price)}
+      data-slug={product.slug}
+      data-image={product.imageUrl ?? ''}
+      x-data
+      @click="$store.cart.add({ productId: $el.dataset.productId, name: $el.dataset.name, price: parseFloat($el.dataset.price), slug: $el.dataset.slug, imageUrl: $el.dataset.image || null }, 1); $store.cart.open = true"
+    >
+      {isOutOfStock ? 'Agotado' : '+ Agregar al carrito'}
+    </button>
+  </div>
 </article>
 
 <style>
@@ -80,7 +97,7 @@ const badge = getStockBadge({
     color: inherit;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 1;
   }
 
   .product-image {
@@ -158,23 +175,36 @@ const badge = getStockBadge({
     letter-spacing: 0.025em;
   }
 
-  .badge--success {
-    background: #ecfdf5;
-    color: #065f46;
+  .badge--success { background: #ecfdf5; color: #065f46; }
+  .badge--warning { background: #fffbeb; color: #92400e; }
+  .badge--error   { background: #fef2f2; color: #991b1b; }
+  .badge--info    { background: #eff6ff; color: #1e40af; }
+
+  /* Add to cart button */
+  .product-card-actions {
+    padding: 0 1.25rem 1.25rem;
   }
 
-  .badge--warning {
-    background: #fffbeb;
-    color: #92400e;
+  .btn-add-to-cart {
+    width: 100%;
+    padding: 0.75rem;
+    background: #1a1a2e;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
   }
 
-  .badge--error {
-    background: #fef2f2;
-    color: #991b1b;
+  .btn-add-to-cart:hover:not(:disabled) {
+    background: #0f172a;
   }
 
-  .badge--info {
-    background: #eff6ff;
-    color: #1e40af;
+  .btn-add-disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
   }
 </style>

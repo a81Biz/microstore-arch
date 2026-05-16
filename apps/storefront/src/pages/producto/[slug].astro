@@ -1,4 +1,5 @@
 ---
+export const prerender = process.env.NODE_ENV === 'production';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getProductBySlug, getAllProductSlugs } from '../../lib/catalog/catalog.ts';
 import { getStockBadge } from '@micro-store/core/utils';
@@ -28,10 +29,20 @@ const badge = getStockBadge({
   createdAt: product.createdAt,
   updatedAt: ''
 });
+
+const isOutOfStock = !product.isOnDemand && product.stockQuantity === 0;
+const maxQty = product.isOnDemand ? 99 : product.stockQuantity;
+const clientHubUrl = import.meta.env.PUBLIC_CLIENT_HUB_URL || 'http://client.localhost';
+
+const images = product.images.length > 0
+  ? product.images
+  : (product.imageUrl ? [product.imageUrl] : []);
+const hasGallery = images.length > 1;
+const imagesJson = JSON.stringify(images);
 ---
 
-<BaseLayout 
-  title={product.name} 
+<BaseLayout
+  title={product.name}
   description={product.description || `Detalle de ${product.name}`}
   image={product.imageUrl || undefined}
 >
@@ -44,14 +55,51 @@ const badge = getStockBadge({
 
     <div class="product-layout">
       <div class="product-gallery">
-        {product.imageUrl ? (
+        {hasGallery ? (
+          <div
+            class="gallery-wrap"
+            x-data="galleryStore()"
+            x-init="init()"
+            data-images={imagesJson}
+            data-product-name={product.name}
+          >
+            <div class="thumb-strip" role="list">
+              <template x-for="(url, idx) in images" :key="idx">
+                <button
+                  type="button"
+                  class="thumb-btn"
+                  role="listitem"
+                  :class="{ 'thumb-btn--active': activeIdx === idx }"
+                  @click="setActive(idx)"
+                  @mouseenter="setActive(idx)"
+                  :aria-label="'Ver imagen ' + (idx + 1) + ' de ' + images.length"
+                  :aria-current="activeIdx === idx ? 'true' : 'false'"
+                >
+                  <img :src="url" :alt="productName + ' imagen ' + (idx + 1)" width="80" height="80" loading="lazy" />
+                </button>
+              </template>
+            </div>
+            <div class="main-image-wrap" @click="openLightbox()">
+              <img
+                :src="images[activeIdx]"
+                :alt="productName"
+                width="600"
+                height="600"
+                loading="eager"
+                class="main-image"
+              />
+              <span class="zoom-hint" aria-hidden="true">🔍</span>
+            </div>
+          </div>
+        ) : images.length === 1 ? (
           <div class="image-wrapper">
-            <img 
-              src={product.imageUrl} 
+            <img
+              src={images[0]}
               alt={product.name}
               class="main-image"
               width="600"
               height="600"
+              loading="eager"
             />
           </div>
         ) : (
@@ -68,7 +116,7 @@ const badge = getStockBadge({
             {badge.text}
           </span>
         </div>
-        
+
         <p class="price-tag">${product.price.toFixed(2)}</p>
 
         {product.description && (
@@ -106,18 +154,146 @@ const badge = getStockBadge({
           )}
         </div>
 
-        <div class="purchase-actions">
-          <a href={`${import.meta.env.PUBLIC_CLIENT_HUB_URL || 'http://client.localhost'}/checkout?product=${product.id}`} class="btn-buy">
-            Comprar ahora
-          </a>
+        <!-- Quantity selector + purchase actions -->
+        <div
+          class="purchase-actions"
+          x-data={`{ qty: 1, maxQty: ${maxQty} }`}
+        >
+          {!isOutOfStock && (
+            <div class="qty-selector">
+              <button
+                class="qty-btn"
+                type="button"
+                @click="if (qty > 1) qty--"
+                aria-label="Reducir cantidad"
+              >−</button>
+              <span class="qty-val" x-text="qty">1</span>
+              <button
+                class="qty-btn"
+                type="button"
+                @click="if (qty < maxQty) qty++"
+                aria-label="Aumentar cantidad"
+              >+</button>
+            </div>
+          )}
+
+          <button
+            type="button"
+            class={`btn-add-cart${isOutOfStock ? ' btn-disabled' : ''}`}
+            disabled={isOutOfStock}
+            data-id={product.id}
+            data-name={product.name}
+            data-price={String(product.price)}
+            data-slug={product.slug}
+            data-image={product.imageUrl ?? ''}
+            @click="$store.cart.add({ productId: $el.dataset.id, name: $el.dataset.name, price: parseFloat($el.dataset.price), slug: $el.dataset.slug, imageUrl: $el.dataset.image || null }, qty); $store.cart.open = true"
+          >
+            {isOutOfStock ? 'Agotado' : 'Agregar al carrito'}
+          </button>
+
+          {!isOutOfStock && (
+            <a
+              href={`${clientHubUrl}/checkout?product=${product.id}`}
+              class="btn-buy-now"
+            >
+              Comprar ahora
+            </a>
+          )}
+
           <a href="/" class="btn-back">
-            Volver al catálogo
+            ← Volver al catálogo
           </a>
         </div>
       </div>
     </div>
   </main>
+
+  {/* Lightbox — rendered outside product-layout, controlled by galleryStore() */}
+  {hasGallery && (
+    <div
+      class="lightbox-overlay"
+      x-data="galleryStore()"
+      x-init="init()"
+      x-show="lightboxOpen"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Galería de imágenes"
+      data-images={imagesJson}
+      data-product-name={product.name}
+      @click.self="closeLightbox()"
+      @keydown.escape.window="closeLightbox()"
+      @keydown.arrow-left.window="lightboxOpen && prevImage()"
+      @keydown.arrow-right.window="lightboxOpen && nextImage()"
+      style="display:none"
+    >
+      <button class="lightbox-prev" type="button" @click="prevImage()" aria-label="Imagen anterior">‹</button>
+      <img :src="images[activeIdx]" :alt="productName" class="lightbox-img" />
+      <button class="lightbox-next" type="button" @click="nextImage()" aria-label="Imagen siguiente">›</button>
+      <button class="lightbox-close" type="button" @click="closeLightbox()" aria-label="Cerrar galería">✕</button>
+    </div>
+  )}
 </BaseLayout>
+
+<script>
+  window.galleryStore = function() {
+    return {
+      images: [],
+      productName: '',
+      activeIdx: 0,
+      lightboxOpen: false,
+
+      init() {
+        const el = this.$el;
+        try {
+          this.images = JSON.parse(el.dataset.images || '[]');
+        } catch (_) {
+          this.images = [];
+        }
+        this.productName = el.dataset.productName || '';
+
+        // Sync lightbox open state across the two x-data instances via a
+        // custom event on the document so thumbnail clicks open the lightbox.
+        this.$el.addEventListener('gallery:open-lightbox', () => {
+          this.lightboxOpen = true;
+        });
+        document.addEventListener('gallery:close', () => {
+          this.lightboxOpen = false;
+        });
+        document.addEventListener('gallery:set-active', (e) => {
+          this.activeIdx = (e as CustomEvent).detail.idx;
+        });
+      },
+
+      setActive(idx) {
+        this.activeIdx = idx;
+        document.dispatchEvent(new CustomEvent('gallery:set-active', { detail: { idx } }));
+      },
+
+      openLightbox() {
+        document.dispatchEvent(new CustomEvent('gallery:set-active', { detail: { idx: this.activeIdx } }));
+        // Find lightbox element and trigger open
+        const lightbox = document.querySelector('.lightbox-overlay');
+        if (lightbox) lightbox.dispatchEvent(new Event('gallery:open-lightbox'));
+        this.lightboxOpen = true;
+      },
+
+      closeLightbox() {
+        this.lightboxOpen = false;
+        document.dispatchEvent(new CustomEvent('gallery:close'));
+      },
+
+      prevImage() {
+        this.activeIdx = (this.activeIdx - 1 + this.images.length) % this.images.length;
+        document.dispatchEvent(new CustomEvent('gallery:set-active', { detail: { idx: this.activeIdx } }));
+      },
+
+      nextImage() {
+        this.activeIdx = (this.activeIdx + 1) % this.images.length;
+        document.dispatchEvent(new CustomEvent('gallery:set-active', { detail: { idx: this.activeIdx } }));
+      }
+    };
+  };
+</script>
 
 <style>
   .product-detail {
@@ -139,14 +315,8 @@ const badge = getStockBadge({
     font-weight: 500;
   }
 
-  .breadcrumb .separator {
-    color: #d1d5db;
-  }
-
-  .breadcrumb .current {
-    font-weight: 400;
-    color: #9ca3af;
-  }
+  .breadcrumb .separator { color: #d1d5db; }
+  .breadcrumb .current { font-weight: 400; color: #9ca3af; }
 
   .product-layout {
     display: grid;
@@ -162,6 +332,7 @@ const badge = getStockBadge({
     box-shadow: 0 4px 20px -10px rgba(0,0,0,0.1);
   }
 
+  /* Single-image layout (unchanged) */
   .image-wrapper {
     width: 100%;
     aspect-ratio: 1;
@@ -184,6 +355,141 @@ const badge = getStockBadge({
     font-size: 1.125rem;
   }
 
+  /* Gallery layout */
+  .gallery-wrap {
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 24px;
+  }
+
+  .thumb-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    max-height: 520px;
+  }
+
+  .thumb-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    overflow: hidden;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    flex-shrink: 0;
+  }
+
+  .thumb-btn:hover { border-color: #9ca3af; }
+  .thumb-btn--active { border-color: #1a1a2e; box-shadow: 0 0 0 1px #1a1a2e; }
+
+  .thumb-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .main-image-wrap {
+    position: relative;
+    cursor: zoom-in;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f9fafb;
+    aspect-ratio: 1;
+  }
+
+  .main-image-wrap .main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .zoom-hint {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.4);
+    color: white;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .main-image-wrap:hover .zoom-hint { opacity: 1; }
+
+  /* Lightbox */
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .lightbox-img {
+    max-width: 90vw;
+    max-height: 90dvh;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .lightbox-prev,
+  .lightbox-next {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    font-size: 2.5rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .lightbox-prev:hover,
+  .lightbox-next:hover { background: rgba(255,255,255,0.3); }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+
+  .lightbox-close:hover { background: rgba(255,255,255,0.3); }
+
+  /* Product info panel */
   .product-info-panel {
     display: flex;
     flex-direction: column;
@@ -215,8 +521,8 @@ const badge = getStockBadge({
 
   .badge--success { background: #ecfdf5; color: #065f46; }
   .badge--warning { background: #fffbeb; color: #92400e; }
-  .badge--error { background: #fef2f2; color: #991b1b; }
-  .badge--info { background: #eff6ff; color: #1e40af; }
+  .badge--error   { background: #fef2f2; color: #991b1b; }
+  .badge--info    { background: #eff6ff; color: #1e40af; }
 
   .price-tag {
     font-size: 2.5rem;
@@ -252,44 +558,91 @@ const badge = getStockBadge({
     align-items: flex-start;
   }
 
-  .status-msg .icon {
-    font-size: 1.25rem;
-    padding-top: 0.1rem;
-  }
+  .status-msg .icon { font-size: 1.25rem; padding-top: 0.1rem; }
+  .status-msg strong { display: block; font-size: 1rem; margin-bottom: 0.25rem; }
+  .status-msg p { font-size: 0.9rem; margin: 0; color: #6b7280; }
 
-  .status-msg strong {
-    display: block;
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .status-msg p {
-    font-size: 0.9rem;
-    margin: 0;
-    color: #6b7280;
-  }
-
+  /* Quantity selector */
   .purchase-actions {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
   }
 
-  .btn-buy {
+  .qty-selector {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    width: fit-content;
+  }
+
+  .qty-btn {
+    background: #f9fafb;
+    border: none;
+    padding: 0.65rem 1.1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #374151;
+    transition: background 0.15s;
+    line-height: 1;
+  }
+
+  .qty-btn:hover { background: #f3f4f6; }
+
+  .qty-val {
+    padding: 0.65rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    min-width: 2.5rem;
+    text-align: center;
+    border-left: 1.5px solid #e5e7eb;
+    border-right: 1.5px solid #e5e7eb;
+  }
+
+  /* Buttons */
+  .btn-add-cart {
     padding: 1.125rem;
     background: #1a1a2e;
     color: white;
-    text-decoration: none;
+    border: none;
     border-radius: 12px;
     font-size: 1.125rem;
     font-weight: 700;
-    text-align: center;
+    cursor: pointer;
     transition: background 0.2s;
+    text-align: center;
   }
 
-  .btn-buy:hover {
-    background: #0f172a;
+  .btn-add-cart:hover:not(:disabled) { background: #0f172a; }
+
+  .btn-disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+
+  .btn-buy-now {
+    padding: 1rem;
+    background: white;
+    color: #1a1a2e;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    border: 1.5px solid #1a1a2e;
+    transition: all 0.2s;
+  }
+
+  .btn-buy-now:hover {
+    background: #1a1a2e;
+    color: white;
   }
 
   .btn-back {
@@ -314,6 +667,24 @@ const badge = getStockBadge({
     .product-layout {
       grid-template-columns: 1fr;
       gap: 2.5rem;
+    }
+
+    .gallery-wrap {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+    }
+
+    .thumb-strip {
+      flex-direction: row;
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-height: none;
+      order: 2;
+      padding-bottom: 4px;
+    }
+
+    .main-image-wrap {
+      order: 1;
     }
   }
 </style>

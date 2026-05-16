@@ -27,23 +27,27 @@ const fullTitle = `${title} | ${siteName}`;
     <meta property="og:description" content={description} />
     {image && <meta property="og:image" content={image} />}
     <meta name="twitter:card" content="summary_large_image" />
-    
+
     <link rel="sitemap" href="/sitemap.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
-  <body>
+  <body x-data>
     <header class="main-header">
       <div class="container">
         <a href="/" class="logo">{siteName}</a>
         <nav>
           <a href="/">Catálogo</a>
           <a href={import.meta.env.PUBLIC_CLIENT_HUB_URL || 'http://client.localhost'}>Mi Cuenta</a>
+          <a href="/cart" class="cart-icon-link">
+            🛒
+            <span class="cart-badge" x-show="$store.cart.count > 0" x-text="$store.cart.count" x-cloak></span>
+          </a>
         </nav>
       </div>
     </header>
-    
+
     <div class="container">
       <slot />
     </div>
@@ -53,10 +57,77 @@ const fullTitle = `${title} | ${siteName}`;
         <p>&copy; {new Date().getFullYear()} {siteName}. Todos los derechos reservados.</p>
       </div>
     </footer>
+
+    <!-- Cart Drawer Overlay -->
+    <div
+      class="cart-overlay"
+      x-show="$store.cart.open"
+      x-transition:enter="overlay-enter"
+      x-transition:enter-start="overlay-enter-from"
+      x-transition:enter-end="overlay-enter-to"
+      x-transition:leave="overlay-leave"
+      x-transition:leave-start="overlay-leave-from"
+      x-transition:leave-end="overlay-leave-to"
+      @click="$store.cart.open = false"
+      x-cloak
+    ></div>
+
+    <!-- Cart Drawer Panel -->
+    <aside
+      class="cart-drawer"
+      x-show="$store.cart.open"
+      x-transition:enter="drawer-enter"
+      x-transition:enter-start="drawer-enter-from"
+      x-transition:enter-end="drawer-enter-to"
+      x-transition:leave="drawer-leave"
+      x-transition:leave-start="drawer-leave-from"
+      x-transition:leave-end="drawer-leave-to"
+      x-cloak
+    >
+      <div class="drawer-header">
+        <span class="drawer-title">✓ Añadido al carrito</span>
+        <button class="drawer-close" @click="$store.cart.open = false" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="drawer-items">
+        <template x-for="item in $store.cart.items.slice().reverse().slice(0, 3)" :key="item.productId">
+          <div class="drawer-item">
+            <div class="drawer-item-info">
+              <span class="drawer-item-name" x-text="item.name"></span>
+              <span class="drawer-item-qty" x-text="'Cantidad: ' + item.quantity"></span>
+            </div>
+            <span class="drawer-item-price" x-text="'$' + (item.price * item.quantity).toFixed(2)"></span>
+          </div>
+        </template>
+      </div>
+
+      <div class="drawer-subtotal">
+        <span>Subtotal</span>
+        <strong x-text="'$' + $store.cart.subtotal.toFixed(2)"></strong>
+      </div>
+
+      <div class="drawer-actions">
+        <button class="btn-drawer-continue" @click="$store.cart.open = false">
+          Seguir comprando
+        </button>
+        <a href="/cart" class="btn-drawer-cart" @click="$store.cart.open = false">
+          Ver carrito →
+        </a>
+      </div>
+    </aside>
   </body>
 </html>
 
+<script>
+  import { registerCartStore } from '../lib/cart/cart-store.ts';
+  document.addEventListener('alpine:init', () => {
+    registerCartStore();
+  });
+</script>
+
 <style is:global>
+  [x-cloak] { display: none !important; }
+
   :root {
     --primary: #1a1a2e;
     --secondary: #16213e;
@@ -107,16 +178,49 @@ const fullTitle = `${title} | ${siteName}`;
     color: white;
   }
 
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
   nav a {
     color: white;
     text-decoration: none;
-    margin-left: 1.5rem;
+    margin-left: 1.25rem;
     font-size: 0.9rem;
     font-weight: 500;
   }
 
   nav a:hover {
     color: var(--accent);
+  }
+
+  /* Cart icon */
+  .cart-icon-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    font-size: 1.2rem;
+    margin-left: 1.25rem;
+  }
+
+  .cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    line-height: 1;
   }
 
   .main-footer {
@@ -126,4 +230,160 @@ const fullTitle = `${title} | ${siteName}`;
     text-align: center;
     color: #666;
   }
+
+  /* ── Cart Drawer ── */
+  .cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 200;
+  }
+
+  .cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 380px;
+    max-width: 92vw;
+    background: white;
+    box-shadow: -6px 0 24px rgba(0, 0, 0, 0.12);
+    z-index: 201;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
+
+  .drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .drawer-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #059669;
+  }
+
+  .drawer-close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #6b7280;
+    padding: 0.25rem;
+    line-height: 1;
+  }
+
+  .drawer-close:hover { color: #111; }
+
+  .drawer-items {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .drawer-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f9fafb;
+  }
+
+  .drawer-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+  }
+
+  .drawer-item-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #111827;
+  }
+
+  .drawer-item-qty {
+    font-size: 0.78rem;
+    color: #9ca3af;
+  }
+
+  .drawer-item-price {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1a1a2e;
+    white-space: nowrap;
+  }
+
+  .drawer-subtotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-top: 1px solid #e5e7eb;
+    font-size: 1rem;
+    color: #374151;
+  }
+
+  .drawer-subtotal strong {
+    font-size: 1.15rem;
+    color: #1a1a2e;
+  }
+
+  .drawer-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .btn-drawer-continue {
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    color: #4b5563;
+    padding: 0.875rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .btn-drawer-continue:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+  }
+
+  .btn-drawer-cart {
+    background: var(--primary);
+    color: white;
+    padding: 0.875rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .btn-drawer-cart:hover { background: #0f172a; }
+
+  /* Drawer transitions */
+  .overlay-enter, .overlay-leave { transition: opacity 0.25s ease; }
+  .overlay-enter-from, .overlay-leave-to { opacity: 0; }
+  .overlay-enter-to, .overlay-leave-from { opacity: 1; }
+
+  .drawer-enter, .drawer-leave { transition: transform 0.3s ease, opacity 0.3s ease; }
+  .drawer-enter-from, .drawer-leave-to { transform: translateX(100%); opacity: 0; }
+  .drawer-enter-to, .drawer-leave-from { transform: translateX(0); opacity: 1; }
 </style>

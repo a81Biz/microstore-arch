@@ -1,7 +1,7 @@
 # HANDOFF — Micro-Store Arch
 
-**Corte:** 2026-05-15  
-**Estado:** Sprints 0-5 completados · Segunda auditoría remediada · En preparación para producción  
+**Corte:** 2026-05-16  
+**Estado:** Sprints 0-5 completados · PT-001–PT-029 cerradas · Sistema de carrito completo · En preparación para producción  
 **Autor:** Generado con análisis Graphify (935 nodos · 1258 aristas · 88 comunidades)
 
 ---
@@ -18,6 +18,10 @@
 | Sprint 3 | Checkout y Pagos | Creación atómica de órdenes, 4 pasarelas (Stripe · PayPal · MercadoPago · HeyBanco) |
 | Sprint 4 | Pedidos y Logística | Máquina de estados PL/pgSQL, notificaciones Realtime, tracking y fulfillment |
 | Sprint 5 | Despliegue y Cierre | Cloudflare Pages, Logflare observabilidad, smoke tests, CI/CD completo |
+
+**PT-IMG-030 (2026-05-16):** Galería de imágenes por producto — tabla `product_images` (migración 00032), hasta 10 imágenes por producto, galería Alpine en storefront con lightbox (Esc, ← →), UI admin multi-imagen con upload/delete por thumbnail.
+
+**PT-CART-029 (2026-05-16):** Sistema de carrito completo implementado — Alpine.js store persistente, botón "Agregar" en ProductCard, selector de cantidad en detalle, página `/cart`, drawer lateral, checkout multi-ítem via `?cart=`.
 
 ### Auditorías de seguridad
 
@@ -230,7 +234,97 @@ PUBLIC_VENDOR_ADMIN_URL=https://admin.tienda.com
 
 ---
 
-## 7. Próximos Pasos Recomendados
+## 7. Galería de Imágenes por Producto (PT-IMG-030)
+
+### Modelo de datos
+
+```
+products.image_url   ← imagen primaria (sort_order=0), intacto para ProductCard/cart/checkout
+product_images       ← tabla normalizada (hasta 10 por producto)
+  id UUID PK
+  product_id UUID FK → products(id) ON DELETE CASCADE
+  url TEXT NOT NULL
+  sort_order INT DEFAULT 0
+  alt_text TEXT
+  created_at TIMESTAMPTZ
+```
+
+Migración: `supabase/migrations/00032_product_images_gallery.sql`
+
+### API de imágenes
+
+| Método | Ruta | Acción |
+|--------|------|--------|
+| POST | `/manage-products/{id}/images` | Insertar imagen (máx 10); sincroniza `image_url` si es la primera |
+| DELETE | `/manage-products/{id}/images/{imageId}` | Eliminar imagen; promueve siguiente como primaria si era `image_url` |
+| GET | `/manage-products` | Listado incluye `images: [{id,url,sortOrder,altText}]` |
+
+### Archivos clave
+
+| Archivo | Rol |
+|---------|-----|
+| `supabase/migrations/00032_product_images_gallery.sql` | Tabla + índice + RLS |
+| `supabase/functions/manage-products/index.ts` | Handlers POST/DELETE + routing con pathParts[] |
+| `apps/vendor-admin/src/lib/products/product-admin.ts` | `addProductImage`, `deleteProductImage`, `AdminProduct.images[]` |
+| `apps/vendor-admin/src/pages/products/index.astro` | Galería en modal: thumbnails, upload, delete |
+| `apps/storefront/src/lib/catalog/catalog.ts` | `CatalogProduct.images[]`, query con JOIN |
+| `apps/storefront/src/pages/producto/[slug].astro` | `galleryStore()` Alpine: thumbs + main + lightbox |
+
+### Decisiones de diseño
+
+**Tabla separada vs columna array:** Se eligió tabla normalizada (`product_images`) sobre `image_urls TEXT[]`. Los arrays PostgreSQL dificultan `sort_order`, `alt_text` y DELETE directo por imagen. El JOIN es un SELECT simple con índice compuesto.
+
+**`products.image_url` como imagen primaria:** Se mantiene para compatibilidad con ProductCard, cart-store y checkout — ninguno de estos componentes cambia.
+
+**Comunicación entre instancias Alpine:** La galería (`.gallery-wrap`) y el lightbox (`.lightbox-overlay`) son dos nodos `x-data="galleryStore()"` distintos. Síncronizados via `CustomEvent` en `document` (`gallery:open-lightbox`, `gallery:close`, `gallery:set-active`).
+
+**Storage filename:** `uploadProductImage` cambiado de `main.{ext}` (sobreescribía) a `{Date.now()}.{ext}` para soportar múltiples archivos por producto en el mismo bucket.
+
+---
+
+## 8. Arquitectura del Carrito de Compras (PT-CART-029)
+
+### Flujo general
+
+```
+ProductCard / [slug].astro
+    └─ @click → $store.cart.add(item, qty)
+         └─ cart-store.ts (_save → localStorage)
+              └─ badge header reactivo (x-show count > 0)
+              └─ CartDrawer inline (x-show $store.cart.open)
+
+/cart (cart.astro)
+    └─ x-for items → controles qty / remove / subtotal
+    └─ "Proceder al pago" → $store.cart._toCheckoutUrl(clientHubUrl)
+         └─ ?cart=encodeURIComponent(JSON.stringify(items))
+
+checkout/index.astro (client-hub)
+    └─ init() lee ?cart= → JSON.parse → localStorage.setItem
+    └─ fallback: ?product= → fetch Supabase (flujo legado)
+```
+
+### Archivos clave
+
+| Archivo | Rol |
+|---------|-----|
+| `apps/storefront/src/lib/cart/cart-store.ts` | Alpine.js store: add/remove/updateQty/clear, getters count/subtotal, _load/_save localStorage, _toCheckoutUrl |
+| `apps/storefront/src/layouts/BaseLayout.astro` | Registro del store en alpine:init, ícono + badge header, CartDrawer inline |
+| `apps/storefront/src/components/product/ProductCard.astro` | Botón "Agregar" con data-* attributes |
+| `apps/storefront/src/pages/producto/[slug].astro` | Selector qty, "Agregar al carrito", "Comprar ahora" |
+| `apps/storefront/src/pages/cart.astro` | Página /cart completa con estado vacío/ítems |
+| `apps/client-hub/src/pages/checkout/index.astro` | Lectura de ?cart= y ?product= (legado) |
+
+### Decisiones de diseño
+
+**Cross-origin localStorage:** `localhost` (storefront, puerto 4321) y `client.localhost` (client-hub, puerto 5173) son orígenes distintos — no pueden compartir `localStorage`. Solución: serializar el carrito en el parámetro `?cart=encodeURIComponent(JSON.stringify(items))`. `URLSearchParams.get()` auto-decodifica en destino sin necesidad de `atob`.
+
+**data-* vs x-data JSON:** Pasar datos del producto a Alpine via `x-data='{ id: "...", price: ... }'` produce conflictos de quoting cuando los valores tienen comillas. Solución: datos en atributos `data-*` (Astro los HTML-encode; Alpine los lee via `$el.dataset.*`).
+
+**CartDrawer inline:** Importar un componente `CartDrawer.astro` separado hubiera requerido modificar 3 archivos en el mismo turno (violando el límite de 2). Resuelto: HTML del drawer inlineado en `BaseLayout.astro`.
+
+---
+
+## 9. Próximos Pasos Recomendados
 
 ### Prioridad media — Producción
 
@@ -253,7 +347,7 @@ PUBLIC_VENDOR_ADMIN_URL=https://admin.tienda.com
 
 ---
 
-## 8. Comandos de referencia rápida
+## 10. Comandos de referencia rápida
 
 ```bash
 # Desarrollo local

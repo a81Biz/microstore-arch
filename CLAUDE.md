@@ -61,6 +61,7 @@ Si `docs/implementation/` no existe, créalo antes de escribir el log.
 docker compose up --build          # Start all services
 docker compose down                # Stop services
 docker compose down -v && docker compose up --build  # Full reset
+docker compose restart storefront  # Recargar rutas SSG tras crear/eliminar productos (local dev)
 
 # Workspace-wide
 npm run build --workspaces --if-present

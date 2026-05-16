@@ -189,6 +189,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 
 <script>
   import { createOrder, getActivePaymentMethods } from '../../lib/checkout/checkout-client';
+  import { supabaseClient } from '../../lib/supabase-client';
 
   window.checkoutForm = () => ({
     step: 'shipping',
@@ -208,7 +209,44 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
     paymentResult: null,
     displayId: '',
 
-    init() {
+    async init() {
+      const params = new URLSearchParams(window.location.search);
+      const cartParam = params.get('cart');
+      const productId  = params.get('product');
+
+      if (cartParam) {
+        // Multi-item cart from storefront (?cart=URL-encoded-JSON)
+        try {
+          const parsed = JSON.parse(cartParam) as unknown;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            localStorage.setItem('cart', JSON.stringify(parsed));
+          }
+        } catch {
+          // fallback to existing localStorage
+        }
+      } else if (productId) {
+        // Single-product legacy flow (?product=id)
+        try {
+          const { data: product } = await supabaseClient
+            .from('products')
+            .select('id, name, price, slug')
+            .eq('id', productId)
+            .eq('is_visible', true)
+            .single();
+          if (product) {
+            const buyNowCart = [{
+              productId: product.id,
+              name:      product.name,
+              price:     product.price,
+              quantity:  1
+            }];
+            localStorage.setItem('cart', JSON.stringify(buyNowCart));
+          }
+        } catch {
+          // fallback to existing localStorage
+        }
+      }
+
       let cart = [];
       try {
         cart = JSON.parse(localStorage.getItem('cart') || '[]');

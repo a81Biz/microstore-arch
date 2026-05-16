@@ -1,0 +1,419 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const clientHubUrl = import.meta.env.PUBLIC_CLIENT_HUB_URL || 'http://client.localhost';
+---
+
+<BaseLayout title="Mi carrito" description="Revisa y edita tu carrito de compras antes de pagar.">
+  <main class="cart-page" x-data>
+
+    <!-- Empty state -->
+    <template x-if="$store.cart.count === 0">
+      <div class="empty-cart" x-transition>
+        <div class="empty-icon">🛒</div>
+        <h1>Tu carrito está vacío</h1>
+        <p>Explora el catálogo y agrega los productos que te gusten.</p>
+        <a href="/" class="btn-shop">Ver catálogo</a>
+      </div>
+    </template>
+
+    <!-- Cart with items -->
+    <template x-if="$store.cart.count > 0">
+      <div class="cart-layout" x-transition>
+
+        <div class="cart-main">
+          <div class="cart-header">
+            <h1>Mi carrito</h1>
+            <button class="btn-clear" @click="$store.cart.clear()">Vaciar carrito</button>
+          </div>
+
+          <div class="cart-items">
+            <template x-for="item in $store.cart.items" :key="item.productId">
+              <div class="cart-item">
+                <!-- Product image placeholder -->
+                <div class="item-image">
+                  <template x-if="item.imageUrl">
+                    <img :src="item.imageUrl" :alt="item.name" width="80" height="80" />
+                  </template>
+                  <template x-if="!item.imageUrl">
+                    <div class="item-image-placeholder">📦</div>
+                  </template>
+                </div>
+
+                <!-- Product info -->
+                <div class="item-info">
+                  <a :href="'/producto/' + item.slug" class="item-name" x-text="item.name"></a>
+                  <span class="item-unit-price" x-text="'$' + item.price.toFixed(2) + ' c/u'"></span>
+                </div>
+
+                <!-- Quantity controls -->
+                <div class="item-qty-controls">
+                  <button
+                    class="qty-btn"
+                    type="button"
+                    @click="$store.cart.updateQty(item.productId, -1)"
+                    aria-label="Reducir cantidad"
+                  >−</button>
+                  <span class="qty-val" x-text="item.quantity"></span>
+                  <button
+                    class="qty-btn"
+                    type="button"
+                    @click="$store.cart.updateQty(item.productId, 1)"
+                    aria-label="Aumentar cantidad"
+                  >+</button>
+                </div>
+
+                <!-- Subtotal -->
+                <span class="item-subtotal" x-text="'$' + (item.price * item.quantity).toFixed(2)"></span>
+
+                <!-- Remove -->
+                <button
+                  class="btn-remove"
+                  type="button"
+                  @click="$store.cart.remove(item.productId)"
+                  aria-label="Eliminar producto"
+                  title="Eliminar"
+                >🗑️</button>
+              </div>
+            </template>
+          </div>
+
+          <a href="/" class="btn-continue">← Seguir comprando</a>
+        </div>
+
+        <!-- Order summary -->
+        <aside class="cart-summary">
+          <h2>Resumen del pedido</h2>
+
+          <div class="summary-rows">
+            <div class="summary-row">
+              <span>Subtotal (<span x-text="$store.cart.count"></span> artículos)</span>
+              <span x-text="'$' + $store.cart.subtotal.toFixed(2)"></span>
+            </div>
+            <div class="summary-row">
+              <span>Envío</span>
+              <span class="free-shipping">Gratis</span>
+            </div>
+            <div class="summary-row summary-total">
+              <span>Total</span>
+              <span x-text="'$' + $store.cart.subtotal.toFixed(2)"></span>
+            </div>
+          </div>
+
+          <button
+            class="btn-checkout"
+            type="button"
+            @click={`window.location.href = $store.cart._toCheckoutUrl('${clientHubUrl}')`}
+          >
+            Proceder al pago
+          </button>
+
+          <p class="secure-note">🔒 Pago 100% seguro y encriptado</p>
+        </aside>
+
+      </div>
+    </template>
+
+  </main>
+</BaseLayout>
+
+<style>
+  .cart-page {
+    padding: 3rem 0 6rem;
+    min-height: 60vh;
+  }
+
+  /* ── Empty state ── */
+  .empty-cart {
+    text-align: center;
+    padding: 5rem 2rem;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .empty-icon {
+    font-size: 4.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-cart h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.75rem;
+  }
+
+  .empty-cart p {
+    color: #6b7280;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+
+  .btn-shop {
+    display: inline-block;
+    background: #1a1a2e;
+    color: white;
+    padding: 0.875rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .btn-shop:hover { background: #0f172a; }
+
+  /* ── Cart layout ── */
+  .cart-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  /* ── Cart main ── */
+  .cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f3f4f6;
+  }
+
+  .cart-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .btn-clear {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+
+  .btn-clear:hover { background: #fef2f2; }
+
+  .cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .cart-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto auto auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1.25rem;
+    background: white;
+    border: 1px solid #f3f4f6;
+    border-radius: 16px;
+    transition: box-shadow 0.2s;
+  }
+
+  .cart-item:hover {
+    box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.08);
+  }
+
+  .item-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .item-image-placeholder {
+    font-size: 2rem;
+  }
+
+  .item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .item-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #111827;
+    text-decoration: none;
+    line-height: 1.3;
+  }
+
+  .item-name:hover { color: #1a1a2e; text-decoration: underline; }
+
+  .item-unit-price {
+    font-size: 0.8rem;
+    color: #9ca3af;
+  }
+
+  .item-qty-controls {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .qty-btn {
+    background: #f9fafb;
+    border: none;
+    padding: 0.5rem 0.85rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #374151;
+    transition: background 0.15s;
+    line-height: 1;
+  }
+
+  .qty-btn:hover { background: #f3f4f6; }
+
+  .qty-val {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+    min-width: 2rem;
+    text-align: center;
+    border-left: 1.5px solid #e5e7eb;
+    border-right: 1.5px solid #e5e7eb;
+  }
+
+  .item-subtotal {
+    font-weight: 800;
+    font-size: 1rem;
+    color: #1a1a2e;
+    white-space: nowrap;
+  }
+
+  .btn-remove {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.35rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+    opacity: 0.6;
+  }
+
+  .btn-remove:hover { background: #fef2f2; opacity: 1; }
+
+  .btn-continue {
+    color: #4b5563;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .btn-continue:hover { color: #1a1a2e; }
+
+  /* ── Summary ── */
+  .cart-summary {
+    background: white;
+    border: 1px solid #f3f4f6;
+    border-radius: 20px;
+    padding: 2rem;
+    position: sticky;
+    top: 5rem;
+  }
+
+  .cart-summary h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: #4b5563;
+  }
+
+  .free-shipping {
+    color: #059669;
+    font-weight: 700;
+  }
+
+  .summary-total {
+    border-top: 1.5px solid #e5e7eb;
+    padding-top: 0.875rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .btn-checkout {
+    width: 100%;
+    padding: 1.125rem;
+    background: #1a1a2e;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 1rem;
+  }
+
+  .btn-checkout:hover { background: #0f172a; }
+
+  .secure-note {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #9ca3af;
+  }
+
+  @media (max-width: 900px) {
+    .cart-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .cart-summary {
+      position: static;
+    }
+
+    .cart-item {
+      grid-template-columns: 64px 1fr;
+      grid-template-rows: auto auto auto;
+    }
+
+    .item-qty-controls,
+    .item-subtotal,
+    .btn-remove {
+      grid-column: 2;
+    }
+  }
+</style>

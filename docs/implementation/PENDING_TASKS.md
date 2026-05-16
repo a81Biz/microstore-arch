@@ -1,162 +1,234 @@
 # Tareas Pendientes — Micro-Store Arch
 
-**Corte:** 2026-05-16 (sesión 6 · turno 12)
-**Estado general del proyecto:** Sprints 0-5 completos · PT-001–PT-027 cerradas · Sin activas
+**Corte:** 2026-05-16 (sesión 9 · PASO 4 completado)
+**Estado general del proyecto:** Sprints 0-5 completos · PT-001–PT-030 cerradas
 
 ---
 
 ## PRIORIDAD ALTA — Activas
 
-_Ninguna._
+### PT-IMG-030-FIX-A · Bug 500: HTTPS regex en AddImageSchema
+- **Archivo:** `supabase/functions/manage-products/index.ts` *(modificar)*
+- **Qué hace:** Cambiar `HTTPS_REGEX = /^https:\/\/.+/` → `/^https?:\/\/.+/` para aceptar URLs `http://` (entorno local).
+- **Estado:** ✅ Completado 2026-05-16
 
 ---
 
-## ~~PT-FIX-027 · Imagen rota en storefront — `catalog.ts` usa `image_url` de DB~~ ✅ COMPLETADO 2026-05-16
-
-- `catalog.ts` — eliminada construcción manual de URL con `.webp` hardcodeado y `PUBLIC_SUPABASE_URL` vacío.
-- `mapToCatalogProduct` ahora usa `(product as Record<string, unknown>).image_url as string | null ?? null`.
-- **Verificación funcional pendiente (manual):** `docker compose down -v && up` → recargar `localhost` → imágenes visibles en catálogo.
+### PT-IMG-030 · Galería de Imágenes por Producto (hasta 10)
+**Épica:** Extender sistema de 1 imagen a N imágenes (máx 10) con galería interactiva en storefront y UI admin de gestión.
+**Bloqueante de:** experiencia visual del producto en storefront.
 
 ---
 
-## ~~PT-FIX-026 · Desconexión imagen de producto: DB + Edge Function + Cliente + UI~~ ✅ COMPLETADO 2026-05-16
+#### TURNO 1 — Capa de datos + Edge Function (2 archivos)
 
-- `00031_product_image_url.sql` — `ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url TEXT`
-- `manage-products/index.ts` — `imageUrl` en schemas, `mapProduct`, `updateData`, `select`
-- `product-admin.ts` — `imageUrl` en `AdminProduct` y `ProductFormData`
-- `index.astro` — `saveProduct()` con 3 flujos · thumbnail 40×40px en tabla · `<img>` preview en modal · `URL.createObjectURL` + revoke
-- **Verificación funcional pendiente (manual):** Recargar browser → crear producto con imagen → thumbnail visible · editar → imagen existente visible · cambiar imagen → thumbnail actualizado
+##### PT-IMG-030-A1 · Migración: tabla product_images
+- **Archivo:** `supabase/migrations/00032_product_images_gallery.sql` *(nuevo)*
+- **Qué hace:**
+  1. `CREATE TABLE product_images` con columnas: `id UUID PK`, `product_id UUID FK → products(id) ON DELETE CASCADE`, `url TEXT NOT NULL`, `sort_order INT DEFAULT 0`, `alt_text TEXT`, `created_at TIMESTAMPTZ DEFAULT NOW()`.
+  2. `CREATE INDEX idx_product_images_product_id ON product_images(product_id, sort_order)`.
+  3. `ALTER TABLE product_images ENABLE ROW LEVEL SECURITY`.
+  4. Policy **"Public read product_images"**: `FOR SELECT` donde `EXISTS (SELECT 1 FROM products WHERE id = product_id AND is_visible = true)`.
+  5. Policy **"Vendor write product_images"**: `FOR ALL` donde `EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'vendor')`.
+- **Test de aceptación:** `docker compose down -v && docker compose up` → db-migrate ExitCode=0 · migración 00032 CREATE TABLE ✅.
+- **Estado:** ✅ Completado 2026-05-16
 
----
-
-## ~~PT-FIX-025 · Storage bucket público + RLS sin `mfa_verified` (rev. B)~~ ✅ COMPLETADO 2026-05-16
-
-- `00015_storage_hardening.sql` — `ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS public BOOLEAN DEFAULT false` añadido antes del INSERT; INSERT usa `ON CONFLICT DO UPDATE SET public = true`.
-- `00030_storage_rls_fix.sql` — sin cambios adicionales; UPDATE salvaguarda + DROP/CREATE RLS ya correctos.
-- **Verificación funcional pendiente (manual):** `docker compose down -v && up` → `db-migrate ExitCode=0`
-  · `00015: ALTER TABLE + INSERT 0 1` · `00030: UPDATE 1 · DROP × 2 · CREATE × 2` · `public = t` · upload imagen sin 404 ni 400.
-
----
-
-## ~~PT-FIX-024 · RLS Storage — eliminar requisito `mfa_verified` en uploads~~ ✅ COMPLETADO 2026-05-16
-
-- DROP de `"Vendor MFA Write Access"` y `"Vendor MFA Delete Access"` en `storage.objects`.
-- Nuevas políticas `"Vendor Write Access"` (INSERT) y `"Vendor Delete Access"` (DELETE) validan
-  `bucket_id = 'product-images' AND profiles.role = 'vendor'` sin exigir `mfa_verified`.
-- **Verificación funcional pendiente (manual):** `docker compose down -v && up` → `db-migrate ExitCode=0`
-  · `00030 DROP POLICY × 2` · `CREATE POLICY × 2` · upload imagen en `admin.localhost/products` → HTTP 200.
-
----
-
-## ~~PT-FIX-021 · Correcciones de Configuración de Pasarelas (H5, H6)~~ ✅ COMPLETADO 2026-05-15
-
-- Eliminada doble llamada GoTrue en `handle()`: `requireAdminMFA` + `authenticateUser` → único `const user = await this.requireAdminMFA(authHeader)`.
-- Añadida constante `ALL_GATEWAYS = ['stripe', 'paypal', 'mercadopago', 'hey_banco']` en la clase.
-- `listGateways` refactorizado: construye Map por gateway + merge con ALL_GATEWAYS → siempre devuelve 4 elementos; `is_enabled: false` y timestamps null para los no configurados.
-- **Verificación funcional pendiente (manual):** `admin.localhost/settings` → 4 tarjetas visibles · PayPal/MercadoPago con estado real · Stripe/Hey Banco desactivados · 1 POST → HTTP 200 al guardar.
-
----
-
-## ~~PT-FIX-020 · Correcciones del módulo de Productos (H1a, H1b, H3, H4)~~ ✅ COMPLETADO 2026-05-15
-
-- **020-A** (`manage-products/index.ts`): 3× `throw error` crudo → `throw new Error(error.message ?? '...')`. Añadido `mapProduct(row)` en `ProductController` (snake_case → camelCase). Aplicado en los 3 puntos de retorno: `listProducts`, `createProduct`, `updateProduct`.
-- **020-B** (`products/index.astro`): Optimistic update en `toggleVisibility` — `product.isVisible = newState` antes del primer await; rollback `product.isVisible = !newState` en catch.
-- **Bug anotado (no resolver aún):** H2 — `uploadProductImage` en `product-admin.ts` sin `<input type="file">` en modal. SRS RF-06.6 · Prioridad Media → PT futura.
-- **Verificación funcional pendiente (manual):** `admin.localhost/products` → badges correctos · toggle inmediato · modal editar con valores reales · POST 201 · PUT 200.
+##### PT-IMG-030-A2 · Edge Function: handlers POST/DELETE images en manage-products
+- **Archivo:** `supabase/functions/manage-products/index.ts` *(modificar)*
+- **Qué hace:**
+  1. **Routing nuevo** — detectar patrones de ruta:
+     - `POST /manage-products/{productId}/images` → `addImage()`
+     - `DELETE /manage-products/{productId}/images/{imageId}` → `deleteImage()`
+  2. **`addImage(productId, { url, altText?, sortOrder? })`:**
+     - Validar que `productId` existe y pertenece al vendor.
+     - Contar imágenes actuales; rechazar con 400 si `count >= 10`.
+     - Insertar fila en `product_images`.
+     - Si es la primera imagen (`count === 0`), hacer `UPDATE products SET image_url = url WHERE id = productId`.
+     - Retornar `{ id, url, sortOrder, altText }` con status 201.
+  3. **`deleteImage(productId, imageId)`:**
+     - Obtener fila a eliminar (validar que pertenece al `productId`).
+     - Eliminar fila de `product_images`.
+     - Si `url === products.image_url` (era la imagen primaria): buscar la siguiente por `sort_order ASC`; si existe, `UPDATE products SET image_url = nextUrl`; si no, `UPDATE products SET image_url = null`.
+     - Retornar `{ success: true }` con status 200.
+  4. **`listProducts` y `getProduct` actualizados:**
+     - Añadir al SELECT de productos: `.select('*, product_images(id, url, sort_order, alt_text)')` ordenado por `sort_order`.
+     - `mapProduct()` actualizado: incluir `images: Array<{id, url, sortOrder, altText}>` en el objeto retornado.
+     - `imageUrl` sigue siendo el primer elemento de images (sort_order = 0) o el valor actual de `products.image_url`.
+- **Test de aceptación:** POST a `/manage-products/{id}/images` con URL válida → 201. POST cuando ya hay 10 → 400. DELETE de imagen primaria → `products.image_url` se actualiza al siguiente. GET `/manage-products` → cada producto incluye campo `images: [...]`.
+- **Estado:** ✅ Completado 2026-05-16
 
 ---
 
-## ~~PT-FIX-019 · Calificación explícita de schema `extensions` en funciones de pgcrypto~~ ✅ COMPLETADO 2026-05-15
+#### TURNO 2 — Admin: cliente TypeScript + UI (2 archivos)
 
-- Creada `supabase/migrations/00029_fix_crypto_schema.sql` — OR REPLACE de `save_payment_credentials`
-  y `get_payment_credentials` con `extensions.pgp_sym_encrypt(...)` y `extensions.pgp_sym_decrypt(...)`.
-- REVOKE/GRANT reproducidos explícitamente al final (OR REPLACE vacía permisos preexistentes).
-- `save_gateway_credentials_secure` (00028) no requirió cambio — no invoca pgcrypto directamente.
-- Smoke test: `docker compose down -v && up` → `db-migrate ExitCode=0` · `00029 CREATE FUNCTION ×2` ✅
-  · `db-seed admin@tienda.com` ✅.
+##### PT-IMG-030-B1 · product-admin.ts: funciones addProductImage y deleteProductImage
+- **Archivo:** `apps/vendor-admin/src/lib/products/product-admin.ts` *(modificar)*
+- **Qué hace:**
+  1. **Actualizar interfaz `AdminProduct`:** añadir campo `images: Array<{ id: string; url: string; sortOrder: number; altText: string | null }>`.
+  2. **Nueva función `addProductImage(productId, imageUrl, altText?)`:**
+     - POST a `{SUPABASE_FUNCTIONS_URL}/manage-products/{productId}/images` con `{ url: imageUrl, altText }`.
+     - Retorna `{ id, url, sortOrder }`.
+  3. **Nueva función `deleteProductImage(productId, imageId)`:**
+     - DELETE a `{SUPABASE_FUNCTIONS_URL}/manage-products/{productId}/images/{imageId}`.
+     - También elimina el archivo de Supabase Storage: `supabaseClient.storage.from('product-images').remove([storagePath])` donde `storagePath` se extrae de la URL.
+     - Retorna void.
+  4. **Exportar** las dos nuevas funciones.
+- **Test de aceptación:** `addProductImage` retorna objeto con id. `deleteProductImage` no lanza error. TypeScript compila sin errores en `product-admin.ts`.
+- **Estado:** ✅ Completado 2026-05-16
 
-**Bugs anotados (no resolver en esta PT):**
-- `wall clock duration warning` en login/change-password/setup-totp — artefacto de Edge Runtime
-  local matando isolates post-respuesta. Sin acción requerida.
-- Inconsistencia documental: SRS RNF-07 y SDD Capa 4 especifican `pgsodium` pero la
-  implementación usa `pgcrypto`. Alinear en documentación en sesión futura (no afecta funcionalidad).
+##### PT-IMG-030-B2 · products/index.astro: galería multi-imagen en modal
+- **Archivo:** `apps/vendor-admin/src/pages/products/index.astro` *(modificar)*
+- **Qué hace:**
+  1. **Estado Alpine ampliado:**
+     - Añadir `images: []` (array de `{id, url}`) en el objeto `form`.
+     - Añadir `uploadingImage: false` como flag de loading.
+     - `openEditModal(product)`: poblar `form.images` desde `product.images`.
+     - `resetForm()`: limpiar `form.images = []`.
+  2. **Importar** `addProductImage` y `deleteProductImage` desde `product-admin.ts`.
+  3. **Reemplazar la sección de imagen única** por la nueva sección de galería dentro del modal:
+     - Encabezado: "Imágenes del producto" + contador `(X/10)`.
+     - Grid de thumbnails existentes: `x-for="img in form.images"` — muestra `<img>` 80×80px + botón ✕.
+       - Clic en ✕: llama `deleteProductImage(editingProduct.id, img.id)` → splice del array.
+       - Si no hay `editingProduct.id` (creación): sólo splice del array (la imagen aún no está en DB, fue subida previamente; si se cancela el modal se elimina del storage).
+     - Input de archivo + botón "Añadir imagen":
+       - `accept="image/jpeg,image/png,image/webp"`.
+       - `x-bind:disabled="form.images.length >= 10 || uploadingImage"`.
+       - Al seleccionar: `uploadingImage = true` → `uploadProductImage(productId, file)` → `addProductImage(productId, url)` → push a `form.images` → `uploadingImage = false`.
+       - Para creación (sin `productId`): el upload de imagen se hace **tras** `createProduct()`, igual que el flujo anterior de imagen única.
+     - Indicador de carga: spinner o texto "Subiendo..." visible mientras `uploadingImage`.
+  4. **CSS nuevo:** `.gallery-grid` (flex wrap, gap 8px), `.gallery-thumb` (80×80, object-cover, border-radius 8px, relative), `.gallery-thumb-delete` (posición absoluta top-right, botón rojo pequeño), `.gallery-upload-hint` (texto informativo).
+  5. **Eliminar** la lógica antigua de `form.imageFile` / `form.imagePreviewUrl` de imagen única (reemplazada por la galería).
+- **Test de aceptación:** Abrir modal de edición de producto con imágenes existentes → thumbnails visibles. Subir nueva imagen → aparece thumbnail sin recargar. Clic ✕ en thumbnail → desaparece. Con 10 imágenes el botón "Añadir" queda deshabilitado.
+- **Estado:** ✅ Completado 2026-05-16
 
 ---
 
-### ~~PT-FIX-016 · Restauración de integridad de DB local~~ ✅ COMPLETADO 2026-05-15
-- **016a:** Schema ya existía (migraciones habían corrido antes). vendor_whitelist tenía 1 fila.
-  Creado admin@tienda.com vía GoTrue Admin API (HTTP 200). Trigger handle_new_user disparó →
-  profiles con role=vendor creado. Diagnóstico final: 5/5 ✅.
-- **016b:** docker-compose.yml — healthcheck de supabase-db añade `SELECT 1 FROM auth.users`
-  (garantiza entrypoint terminado antes de db-migrate). db-migrate añade `set -e` +
-  `-v ON_ERROR_STOP=on` (elimina falso positivo service_completed_successfully).
-- **Bonus diagnose-admin.sh:** corregidos 2 bugs: `-U postgres`→`-U supabase_admin`,
-  y `-d postgres` añadido al helper psql_q (sin esto fallaba silenciosamente).
+#### TURNO 3 — Storefront: catálogo + galería (2 archivos)
+
+##### PT-IMG-030-C1 · catalog.ts: CatalogProduct.images + query con JOIN
+- **Archivo:** `apps/storefront/src/lib/catalog/catalog.ts` *(modificar)*
+- **Qué hace:**
+  1. **Actualizar interfaz `CatalogProduct`:** añadir `images: string[]` (array de URLs ordenadas por sort_order).
+  2. **`getVisibleProducts()`:** cambiar `.select('*')` por `.select('*, product_images(url, sort_order)')` + `.order('sort_order', { foreignTable: 'product_images' })`.
+  3. **`getProductBySlug(slug)`:** mismo cambio de SELECT.
+  4. **`mapToCatalogProduct(product)`:**
+     - Leer `(product as Record<string, unknown>).product_images` → ordenar por `sort_order` → mapear a array de URL strings.
+     - `images = sortedImages.map(i => i.url)`.
+     - Fallback: si `images` está vacío y `imageUrl` no es null → `images = [imageUrl]`.
+     - Si ambos vacíos → `images = []`.
+- **Test de aceptación:** `getProductBySlug` retorna producto con `images: ['url1', 'url2', ...]`. TypeScript compila sin errores.
+- **Estado:** ✅ Completado 2026-05-16
+
+##### PT-IMG-030-C2 · [slug].astro: galería Alpine completa
+- **Archivo:** `apps/storefront/src/pages/producto/[slug].astro` *(modificar)*
+- **Qué hace:**
+
+  **1. Datos SSR:** computar en frontmatter:
+  ```
+  const images = product.images.length > 0
+    ? product.images
+    : (product.imageUrl ? [product.imageUrl] : []);
+  const hasGallery = images.length > 1;
+  ```
+
+  **2. Estructura HTML de galería** (reemplaza `.product-gallery` actual):
+  - Si `!hasGallery`: mostrar layout actual (imagen única o placeholder). Sin cambios en este path.
+  - Si `hasGallery`:
+    ```
+    <div class="gallery-wrap" x-data="galleryStore()" x-init="init()">
+      <!-- Miniaturas (desktop: columna izquierda; móvil: fila inferior) -->
+      <div class="thumb-strip">
+        <button x-for="(url, idx) in images" :key="idx"
+          class="thumb-btn" :class="{ 'thumb-btn--active': activeIdx === idx }"
+          @click="setActive(idx)" @mouseenter="setActive(idx)"
+          :aria-label="'Ver imagen ' + (idx+1) + ' de ' + images.length"
+          :aria-current="activeIdx === idx">
+          <img :src="url" :alt="productName + ' imagen ' + (idx+1)"
+               width="80" height="80" loading="lazy" />
+        </button>
+      </div>
+      <!-- Imagen principal -->
+      <div class="main-image-wrap" @click="openLightbox()">
+        <img :src="images[activeIdx]" :alt="productName"
+             width="600" height="600" loading="eager"
+             class="main-image" />
+        <span class="zoom-hint" aria-hidden="true">🔍</span>
+      </div>
+    </div>
+    ```
+
+  **3. Lightbox** (al final del body, fuera del grid de producto):
+  ```
+  <div class="lightbox-overlay" x-show="lightboxOpen"
+       role="dialog" aria-modal="true"
+       @click.self="closeLightbox()"
+       @keydown.escape.window="closeLightbox()">
+    <button class="lightbox-prev" @click="prevImage()" aria-label="Imagen anterior">‹</button>
+    <img :src="images[activeIdx]" :alt="productName" class="lightbox-img" />
+    <button class="lightbox-next" @click="nextImage()" aria-label="Imagen siguiente">›</button>
+    <button class="lightbox-close" @click="closeLightbox()" aria-label="Cerrar">✕</button>
+  </div>
+  ```
+
+  **4. Alpine `galleryStore()`** — inline script en el componente:
+  - `images`: array de URLs inyectado vía `data-images` attribute en el nodo raíz (JSON.stringify SSR → JSON.parse en init).
+  - `activeIdx: 0`, `lightboxOpen: false`.
+  - `setActive(idx)`, `openLightbox()`, `closeLightbox()`.
+  - `prevImage()`: `activeIdx = (activeIdx - 1 + images.length) % images.length`.
+  - `nextImage()`: `activeIdx = (activeIdx + 1) % images.length`.
+  - `init()`: lee `this.$el.dataset.images` → JSON.parse → asigna `this.images`.
+
+  **5. CSS nuevo:**
+  - `.gallery-wrap`: `display: grid; grid-template-columns: 88px 1fr; gap: 1rem;` (desktop).
+  - `.thumb-strip`: `display: flex; flex-direction: column; gap: 8px; overflow-y: auto; max-height: 520px`.
+  - `.thumb-btn`: `width: 80px; height: 80px; border-radius: 8px; border: 2px solid transparent; overflow: hidden; cursor: pointer; background: none; padding: 0; transition: border-color 0.15s, box-shadow 0.15s`.
+  - `.thumb-btn--active`: `border-color: #1a1a2e; box-shadow: 0 0 0 1px #1a1a2e`.
+  - `.thumb-btn:hover`: `border-color: #9ca3af`.
+  - `.thumb-btn img`: `width: 100%; height: 100%; object-fit: cover`.
+  - `.main-image-wrap`: `position: relative; cursor: zoom-in; border-radius: 24px; overflow: hidden; background: #f9fafb`.
+  - `.zoom-hint`: `position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.4); color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; opacity: 0; transition: opacity 0.2s`.
+  - `.main-image-wrap:hover .zoom-hint`: `opacity: 1`.
+  - `.lightbox-overlay`: `position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 500; display: flex; align-items: center; justify-content: center; gap: 1rem`.
+  - `.lightbox-img`: `max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px`.
+  - `.lightbox-prev`, `.lightbox-next`: `background: rgba(255,255,255,0.15); border: none; color: white; font-size: 2.5rem; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center`.
+  - `.lightbox-close`: `position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.15); border: none; color: white; font-size: 1.2rem; width: 36px; height: 36px; border-radius: 50%; cursor: pointer`.
+  - **Responsive `@media (max-width: 968px)`:** `.gallery-wrap { grid-template-columns: 1fr; grid-template-rows: auto auto }` · `.thumb-strip { flex-direction: row; overflow-x: auto; max-height: none; order: 2 }` · `.main-image-wrap { order: 1 }`.
+
+- **Test de aceptación:** Producto con 1 imagen → layout actual sin cambios. Producto con 3+ imágenes → se ven thumbnails. Clic en thumbnail → imagen principal cambia sin recargar. Thumbnail activo tiene borde `#1a1a2e`. Clic en imagen principal → lightbox se abre. Tecla Esc → lightbox se cierra. En móvil → thumbnails en fila horizontal debajo de imagen principal.
+- **Estado:** ✅ Completado 2026-05-16
 
 ---
 
-## ~~PT-FIX-018 · 3× POST 500 en manage-payment-gateways (H1–H4)~~ ✅ COMPLETADO 2026-05-15
+#### TURNO 4 — Persistencia
 
-- **018c:** `.env.example` — añadida `PAYMENT_ENCRYPTION_KEY` con nota de producción.
-  `docker-compose.yml` — variable añadida al servicio `supabase-functions`.
-- **018a:** `supabase/migrations/00028_save_credentials_with_key.sql` (nuevo) — función
-  `save_gateway_credentials_secure` inyecta la clave vía `set_config` transaction-local y llama
-  a `save_payment_credentials` en la misma transacción PL/pgSQL. `manage-payment-gateways/index.ts` —
-  lee `PAYMENT_ENCRYPTION_KEY` de Deno.env, valida ≥32 chars, llama a la nueva función, y
-  reemplaza `throw error` por `throw new Error(error.message)` (H4).
-- **018b:** `settings/index.astro` — guardia `_toggling` en `toggleGateway` (H1); `is_enabled`
-  hardcodeado eliminado en `saveCredentials` (H2). `products/index.astro` — misma guardia en
-  `toggleVisibility` (H1).
-- Smoke test: `docker compose down -v && up` → `db-migrate ExitCode=0` · `00028 CREATE FUNCTION` ✅
-  · `db-seed admin@tienda.com` ✅.
+##### PT-IMG-030-D1 · HISTORY.log + limpieza de contexto de sesión
+- **Archivos:** `docs/implementation/HISTORY.log`, `docs/implementation/PENDING_TASKS.md`, `docs/implementation/SESSION_SUMMARY.md`, `docs/implementation/PLAN_ACTUAL.md`
+- **Qué hace:**
+  1. Añadir entrada a `HISTORY.log` documentando PT-IMG-030 (todos los sub-tasks completados).
+  2. Marcar PT-IMG-030 como cerrada en `PENDING_TASKS.md`.
+  3. Vaciar `SESSION_SUMMARY.md` y `PLAN_ACTUAL.md`.
+- **Estado:** ✅ Completado 2026-05-16
+
+---
+
+## Resumen de turnos de ejecución
+
+| Turno | Sub-tasks | Archivos | Descripción |
+|-------|-----------|----------|-------------|
+| **1** | 030-A1, 030-A2 | `00032_product_images_gallery.sql` (nuevo) · `manage-products/index.ts` (mod) | Tabla DB + API de imágenes |
+| **2** | 030-B1, 030-B2 | `product-admin.ts` (mod) · `products/index.astro` (mod) | Cliente TS + UI galería admin |
+| **3** | 030-C1, 030-C2 | `catalog.ts` (mod) · `[slug].astro` (mod) | Catálogo con JOIN + galería storefront |
+| **4** | 030-D1 | `HISTORY.log` · docs de sesión | Persistencia y limpieza |
+
+**Total:** 4 turnos · 7 operaciones · 1 archivo nuevo · 6 archivos modificados
 
 ---
 
 ## PRIORIDAD MEDIA — Producción / Operativas (abiertas)
 
 ### PT-006 · Configurar variables de entorno de producción en Supabase
-- **Contexto:** `ENCRYPTION_KEY`, `RESEND_API_KEY`, `LOGFLARE_API_KEY` y secretos de pasarelas
-  no están configurados en el proyecto Supabase de producción (solo en `.env` local).
+- **Contexto:** `ENCRYPTION_KEY`, `RESEND_API_KEY`, `LOGFLARE_API_KEY` y secretos de pasarelas no están configurados en el proyecto Supabase de producción (solo en `.env` local).
 - **Acción manual:** `supabase secrets set --env-file .env.production` una vez que `.env.production` esté completo.
 
 ### PT-009 · Actualizar graphify tras cada sprint / sesión
 - **Acción:** Ejecutar `/graphify . --update` al inicio de cada sesión. Hábito operativo — no es cambio de código.
-
-### PT-FUTURE-022 · Subida de imagen de producto (SRS RF-06.6)
-- **Contexto:** `uploadProductImage` existe en `product-admin.ts` pero el modal de producto carece de `<input type="file">`. Funcionalidad incompleta.
-- **Prioridad:** Media. No bloquea ningún flujo activo.
-- **Acción:** Añadir input file en el modal de edición/creación de productos y conectarlo con `uploadProductImage`.
-
----
-
-## Completadas esta sesión (2026-05-15 sesión 2)
-
-### ~~PT-FIX-017 · `auth.jwt()` + `storage.buckets` + `db-seed` idempotency~~ ✅ COMPLETADO 2026-05-15
-- `supabase/migrations/00000b_auth_helpers.sql` (nuevo) — define `auth.jwt()` con `OR REPLACE`
-  antes de `00001_initial_schema.sql`. Orden lexicográfico verificado en contenedor.
-- `supabase/migrations/00015_storage_hardening.sql` — eliminada columna `public` del INSERT en
-  `storage.buckets` (no existe en `supabase/postgres:15.8.1.032`; acceso público via RLS).
-- `docker-compose.yml` (db-seed) — reemplazado `grep -c ... || echo "0"` por `grep -q` booleano.
-  Bug: `grep -c` con 0 matches producía `EXISTING="0\n0"` → condición siempre false → usuario
-  nunca se creaba en arranques limpios.
-- Smoke test validado: `docker compose down -v && up` → `db-migrate ExitCode=0` · `db-seed`
-  crea admin · `diagnose-admin.sh` 5/5 ✅.
-
-### ~~PT-FIX-015 · Corrección de nombre de contenedor en diagnose-admin.sh~~ ✅ COMPLETADO 2026-05-15
-- `scripts/dev/diagnose-admin.sh` — `microstore-postgres` → `microstore-supabase-db` (nombre real
-  del compose). Añadida auto-detección fallback: si el nombre canónico no está corriendo, busca
-  cualquier contenedor con `*supabase-db*` o `*postgres*` e informa cuál usó. Si no detecta
-  ninguno, lista todos los contenedores activos para diagnóstico manual.
-
-### ~~PT-FIX-013 · Script de diagnóstico y recuperación de admin local~~ ✅ COMPLETADO 2026-05-15
-- `scripts/dev/diagnose-admin.sh` creado con guard de producción, diagnóstico read-only en 5 secciones
-  (auth.users · profiles · vendor_whitelist · rate_limits · totp_secret) y recuperación opt-in
-  con flags `--reset-password` (vía GoTrue Admin API Kong `:8000`) y `--reset-totp` (psql directo).
-- Limpia rate limits activos automáticamente al resetear contraseña.
-
-### ~~PT-AUDIT-014 · Optimización de requests en vendor-admin (126 → <10)~~ ✅ COMPLETADO 2026-05-15
-- `astro.config.mjs` — eliminado `@astrojs/react`, añadido `vite.optimizeDeps.include`
-  para `@supabase/supabase-js` y `@micro-store/core`, y `manualChunks` con chunk `vendor-supabase`.
-- `package.json` — eliminadas 5 dependencias React sin uso: `@astrojs/react`, `react`,
-  `react-dom`, `@types/react`, `@types/react-dom`. Verificado: 0 referencias React en `src/`.
-- `npm install` ejecutado — lockfile actualizado, 747 packages, build limpia.
