@@ -154,7 +154,7 @@ services:
     volumes:
       - supabase_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U supabase_admin -d postgres"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U supabase_admin -d postgres && psql -U supabase_admin -d postgres -c 'SELECT 1 FROM auth.users LIMIT 1' -q 2>/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 30
@@ -181,10 +181,12 @@ services:
       - sh
       - -c
       - |
+        set -e
         echo "=== Aplicando migraciones del proyecto ==="
         for f in $$(ls /migrations/*.sql | sort); do
           echo "-> $$(basename $$f)"
-          psql -h supabase-db -U supabase_admin -d postgres -f "$$f" 2>&1
+          psql -h supabase-db -U supabase_admin -d postgres \
+               -v ON_ERROR_STOP=on -f "$$f"
         done
         echo "=== Migraciones completadas ==="
     networks: [microstore-network]
@@ -351,16 +353,16 @@ services:
         echo "=== Esperando GoTrue ==="
         until curl -sf http://supabase-auth:9999/health >/dev/null 2>&1; do sleep 3; done
         echo "=== Verificando usuario admin ==="
-        EXISTING=$$(curl -sf -H "Authorization: Bearer $$SERVICE_ROLE_KEY" http://supabase-auth:9999/admin/users | grep -c "admin@tienda.com" || echo "0")
-        if [ "$$EXISTING" = "0" ]; then
+        if curl -sf -H "Authorization: Bearer $$SERVICE_ROLE_KEY" \
+             http://supabase-auth:9999/admin/users 2>/dev/null | grep -q "admin@tienda.com"; then
+          echo "=== Admin ya existe ==="
+        else
           curl -sf -X POST http://supabase-auth:9999/admin/users \
             -H "Authorization: Bearer $$SERVICE_ROLE_KEY" \
             -H "Content-Type: application/json" \
             -d '{"email":"admin@tienda.com","password":"Admin1234!","email_confirm":true}' \
             && echo "=== Admin creado: admin@tienda.com / Admin1234! ===" \
             || echo "Error al crear admin"
-        else
-          echo "=== Admin ya existe ==="
         fi
     depends_on:
       db-migrate:
@@ -383,6 +385,7 @@ services:
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjEzNTMxOTg1LCJleHAiOjQ3NjkyMDU5ODV9.9oDfITnetRe3EYQzDh9CmgUFEJkLgHsGeKT8s1tHtvM}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-local-dev-key-not-for-production-use-only-aabbccdd}
+      PAYMENT_ENCRYPTION_KEY: ${PAYMENT_ENCRYPTION_KEY:-local-dev-key-not-for-production-use-only-aabbccdd}
       VERIFY_JWT: "false"
       DISABLE_TOTP: "true"
       ALLOWED_ORIGINS: "http://localhost,http://client.localhost,http://admin.localhost"

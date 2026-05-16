@@ -5,36 +5,41 @@ import { getSupabaseAdmin } from "../_shared/supabase-client.ts";
 const logger = createLogger('send-order-email');
 
 serve(async (req: Request) => {
-  // Manejo de CORS
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: { 'Access-Control-Allow-Origin': '*' } });
+  // H5: Solo acepta llamadas internas con service_role key.
+  // Los callers (payment-webhook, manage-orders) ya envían este header.
+  const authHeader = req.headers.get('Authorization') ?? '';
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  if (!authHeader || authHeader !== `Bearer ${serviceKey}`) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
     const { orderId } = await req.json();
 
     const supabaseAdmin = getSupabaseAdmin();
-    
-    // Obtener datos de la orden
+
     const { data: order, error } = await supabaseAdmin
       .from('orders')
       .select('*, profiles(email, role), order_items(*, products(name, price))')
       .eq('id', orderId)
       .single();
-    
+
     if (error || !order) {
       throw new Error('Orden no encontrada');
     }
-    
-    // Enviar email con Resend
+
     const resendKey = Deno.env.get('RESEND_API_KEY');
     const emailFrom = Deno.env.get('EMAIL_FROM') || 'noreply@tienda.com';
-    
+
+    // H2: Fallo explícito — no devolver 200 cuando la clave no está configurada.
     if (!resendKey) {
-      logger.warn('RESEND_API_KEY no configurada, saltando envío de email', { orderId });
-      return new Response(JSON.stringify({ success: true, message: 'Email skipped (no API key)' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      logger.error('RESEND_API_KEY no configurada — email de confirmación no enviado', { orderId });
+      return new Response(JSON.stringify({ success: false, error: 'RESEND_NOT_CONFIGURED' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -74,38 +79,39 @@ serve(async (req: Request) => {
         </div>
       </div>
     `;
-    
+
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${resendKey}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         from: emailFrom,
         to: order.profiles.email,
         subject: `Pedido ${order.display_id} confirmado - Micro-Store`,
-        html: emailHtml
-      })
+        html: emailHtml,
+      }),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       logger.error('Failed to send email', { error: errorData });
       throw new Error('Error al enviar email');
     }
-    
+
     logger.info('Confirmation email sent', { orderId });
-    
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
     logger.error('Send email error', { error: String(error) });
     return new Response(JSON.stringify({ error: 'Failed to send email' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 });

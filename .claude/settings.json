@@ -94,7 +94,20 @@
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('scripts',{}\\), indent=2\\)\\)\")",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); deps=d.get\\('devDependencies',{}\\); print\\('vitest' in deps or 'vitest' in d.get\\('dependencies',{}\\)\\); print\\(deps.get\\('vitest','NOT_FOUND'\\)\\); print\\(json.dumps\\(d.get\\('workspaces',[]\\)\\)\\)\")",
       "Bash(node_modules/.bin/vitest run *)",
-      "PowerShell(Get-ChildItem \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\scripts\\\\test\\\\\" -ErrorAction SilentlyContinue | Select-Object Name; if \\(-not \\(Test-Path \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\scripts\\\\test\\\\\"\\)\\) { \"DIR_MISSING\" } else { \"DIR_EXISTS\" })"
+      "PowerShell(Get-ChildItem \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\scripts\\\\test\\\\\" -ErrorAction SilentlyContinue | Select-Object Name; if \\(-not \\(Test-Path \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\scripts\\\\test\\\\\"\\)\\) { \"DIR_MISSING\" } else { \"DIR_EXISTS\" })",
+      "Bash(Remove-Item \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\docs\\\\implementation\\\\SESSION_SUMMARY.md\" -Force)",
+      "Bash(Remove-Item \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\docs\\\\implementation\\\\PLAN_ACTUAL.md\" -Force)",
+      "Bash(Write-Output \"OK\")",
+      "Skill(graphify)",
+      "Skill(graphify:*)",
+      "Bash(not exist *)",
+      "PowerShell(Test-Path \"graphify-out/.graphify_chunk_01.json\" ; if \\(Test-Path \"graphify-out/.graphify_chunk_01.json\"\\) { $content = Get-Content \"graphify-out/.graphify_chunk_01.json\" -Raw; $json = $content | ConvertFrom-Json; Write-Output \"nodes: $\\($json.nodes.Count\\), edges: $\\($json.edges.Count\\)\" })",
+      "Bash(curl -s -w '\\\\nHTTP_STATUS:%{http_code}' -X POST http://localhost:8000/auth/v1/admin/users -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA' -H 'Content-Type: application/json' -d '{\"email\":\"admin@tienda.com\",\"password\":\"Admin1234!\",\"email_confirm\":true}')",
+      "Bash(bash scripts/dev/diagnose-admin.sh)",
+      "Bash(MSYS_NO_PATHCONV=1 docker run --rm --network microstore-arch_microstore-network -v c:/DevOps/Desarrollos/MicroStore-Arch/supabase/migrations:/migrations:ro -e PGPASSWORD=supabase123 postgres:15-alpine psql -h microstore-supabase-db -U supabase_admin -d postgres -v ON_ERROR_STOP=on -f /migrations/00000b_auth_helpers.sql)",
+      "Bash(Get-ChildItem \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\supabase\\\\migrations\\\\*.sql\")",
+      "Bash(Sort-Object Name)",
+      "Bash(Select-Object -Last 5 -ExpandProperty Name)"
     ]
   }
 }

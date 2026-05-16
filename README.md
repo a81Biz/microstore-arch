@@ -60,6 +60,7 @@ La migración `00026_seed_admin_user.sql` crea automáticamente el usuario admin
 | URL | http://admin.localhost |
 | Email | `admin@tienda.com` |
 | Contraseña | `Admin1234!` |
+| Contraseña | `Admin1234!**` |
 
 **Flujo de primer ingreso** (obligatorio, en este orden):
 
@@ -175,6 +176,21 @@ npm run lint
 npm run typecheck
 ```
 
+### Obtener código TOTP local (solo desarrollo)
+
+Cuando el stack Docker está corriendo y el flujo de primer acceso está completado
+(cambio de contraseña + escaneo del QR), este script genera el código de 6 dígitos actual
+sin necesidad de un dispositivo físico:
+
+```bash
+npx ts-node scripts/dev/get-local-otp.ts                    # admin@tienda.com (default)
+npx ts-node scripts/dev/get-local-otp.ts otro@tienda.com    # otro vendor
+```
+
+> El script aborta automáticamente si `SUPABASE_URL` apunta a un proyecto cloud.
+> Ver [`scripts/dev/get-local-otp.ts`](scripts/dev/get-local-otp.ts) y
+> el protocolo de recuperación completo en [`docs/HANDOFF.md`](docs/HANDOFF.md) §4.
+
 ---
 
 ## Arquitectura
@@ -240,6 +256,10 @@ docker compose down -v && docker compose up --build
 | `JWT_SECRET` | Secreto para firmar JWTs (mínimo 32 chars) |
 | `POSTGRES_PASSWORD` | Contraseña de PostgreSQL (default: `supabase123`) |
 | `ENCRYPTION_KEY` | Clave AES-256 para credenciales de pago (mínimo 32 chars) |
+| `ALLOWED_ORIGINS` | Lista separada por comas de dominios CORS permitidos |
+| `RESEND_API_KEY` | API key de Resend para emails transaccionales (pedidos, envíos) |
+| `EMAIL_FROM` | Dirección FROM verificada en Resend (ej. `noreply@tienda.com`) |
+| `LOGFLARE_API_KEY` | API key de Logflare para logs estructurados en producción |
 
 ---
 

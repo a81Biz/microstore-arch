@@ -65,6 +65,11 @@ class PaymentGatewayController extends BaseController {
   ) {
     logger.info('Saving payment gateway', { vendorId, gateway });
 
+    const encKey = Deno.env.get('PAYMENT_ENCRYPTION_KEY') ?? '';
+    if (!encKey || encKey.length < 32) {
+      throw new BusinessError('ENCRYPTION_KEY_NOT_CONFIGURED', 'Clave de cifrado no configurada en el servidor', 500);
+    }
+
     // Verificar que el perfil del usuario autenticado tiene rol vendor
     const { data: profile } = await this.dbAdmin
       .from('profiles')
@@ -77,13 +82,16 @@ class PaymentGatewayController extends BaseController {
       throw new BusinessError('VENDOR_NOT_FOUND', 'Perfil de vendor no encontrado', 404);
     }
 
-    const { error } = await this.dbAdmin.rpc('save_payment_credentials', {
+    // save_gateway_credentials_secure inyecta la clave vía set_config transaction-local
+    // antes de llamar a save_payment_credentials, todo en la misma transacción PL/pgSQL.
+    const { error } = await this.dbAdmin.rpc('save_gateway_credentials_secure', {
       p_vendor_id: vendorId,
       p_gateway: gateway,
       p_credentials: credentials || {},
+      p_encryption_key: encKey,
     });
 
-    if (error) throw error;
+    if (error) throw new Error(error.message ?? 'Error al guardar pasarela');
 
     const { error: updateError } = await this.dbAdmin
       .from('payment_credentials')
@@ -91,7 +99,7 @@ class PaymentGatewayController extends BaseController {
       .eq('vendor_id', vendorId)
       .eq('gateway', gateway);
 
-    if (updateError) throw updateError;
+    if (updateError) throw new Error(updateError.message ?? 'Error al actualizar estado de pasarela');
 
     return { success: true, gateway };
   }

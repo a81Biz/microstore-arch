@@ -1,87 +1,93 @@
 # Graph Report - .  (2026-05-15)
 
 ## Corpus Check
-- 148 files · ~89,686 words
+- 17 files · ~50,000 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 935 nodes · 1258 edges · 88 communities (67 shown, 21 thin omitted)
-- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 94 edges (avg confidence: 0.84)
-- Token cost: 12,500 input · 4,800 output
+- 1022 nodes · 1371 edges · 95 communities (70 shown, 25 thin omitted)
+- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 107 edges (avg confidence: 0.84)
+- Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Database Schema & Core Tables|Database Schema & Core Tables]]
-- [[_COMMUNITY_Payment Credentials & Transactions|Payment Credentials & Transactions]]
-- [[_COMMUNITY_Backend Deployment & Routing|Backend Deployment & Routing]]
-- [[_COMMUNITY_Order & Payment Edge Functions|Order & Payment Edge Functions]]
-- [[_COMMUNITY_Vendor Admin Client Library|Vendor Admin Client Library]]
-- [[_COMMUNITY_Root Package Scripts|Root Package Scripts]]
-- [[_COMMUNITY_Core Domain Types & Enums|Core Domain Types & Enums]]
-- [[_COMMUNITY_Requirements & Technical Docs|Requirements & Technical Docs]]
-- [[_COMMUNITY_App Dependencies Config|App Dependencies Config]]
-- [[_COMMUNITY_Vendor Auth & TOTP Flow|Vendor Auth & TOTP Flow]]
+- [[_COMMUNITY_DB Enums & MFARLS Core|DB Enums & MFA/RLS Core]]
+- [[_COMMUNITY_Edge Function Patterns|Edge Function Patterns]]
+- [[_COMMUNITY_Payment Encryption Migrations|Payment Encryption Migrations]]
+- [[_COMMUNITY_Architecture Rules (CLAUDE.md)|Architecture Rules (CLAUDE.md)]]
+- [[_COMMUNITY_SDD Flows & Infrastructure|SDD Flows & Infrastructure]]
+- [[_COMMUNITY_Vendor Admin Pages|Vendor Admin Pages]]
+- [[_COMMUNITY_Root DevDependencies|Root DevDependencies]]
+- [[_COMMUNITY_Architecture Config & CI|Architecture Config & CI]]
+- [[_COMMUNITY_Client Hub Config|Client Hub Config]]
 - [[_COMMUNITY_TOTP Test Suite|TOTP Test Suite]]
-- [[_COMMUNITY_Package Dependencies|Package Dependencies]]
+- [[_COMMUNITY_Security Audit & Deploy|Security Audit & Deploy]]
+- [[_COMMUNITY_Vendor Whitelist & Auth Flow|Vendor Whitelist & Auth Flow]]
+- [[_COMMUNITY_Client Hub Dependencies|Client Hub Dependencies]]
+- [[_COMMUNITY_Domain Interfaces|Domain Interfaces]]
+- [[_COMMUNITY_Vendor Admin Dependencies|Vendor Admin Dependencies]]
 - [[_COMMUNITY_Core Package Config|Core Package Config]]
-- [[_COMMUNITY_Infrastructure & API Gateway|Infrastructure & API Gateway]]
-- [[_COMMUNITY_TypeScript Configuration|TypeScript Configuration]]
-- [[_COMMUNITY_Package Dependencies B|Package Dependencies B]]
-- [[_COMMUNITY_Error Handling Utilities|Error Handling Utilities]]
-- [[_COMMUNITY_Order Domain Model|Order Domain Model]]
-- [[_COMMUNITY_Supabase Client Instances|Supabase Client Instances]]
-- [[_COMMUNITY_Storefront Catalog Pages|Storefront Catalog Pages]]
-- [[_COMMUNITY_Client Hub App Layer|Client Hub App Layer]]
+- [[_COMMUNITY_Kong API Gateway|Kong API Gateway]]
+- [[_COMMUNITY_TypeScript Compiler Config|TypeScript Compiler Config]]
+- [[_COMMUNITY_Storefront Dependencies|Storefront Dependencies]]
+- [[_COMMUNITY_Core Enums & Models|Core Enums & Models]]
+- [[_COMMUNITY_Edge Function Infrastructure|Edge Function Infrastructure]]
+- [[_COMMUNITY_Password & Order Management|Password & Order Management]]
+- [[_COMMUNITY_Storefront Pages|Storefront Pages]]
+- [[_COMMUNITY_Client Hub Checkout Flow|Client Hub Checkout Flow]]
 - [[_COMMUNITY_Client Hub Auth Pages|Client Hub Auth Pages]]
-- [[_COMMUNITY_Docker Dev Stack|Docker Dev Stack]]
-- [[_COMMUNITY_Security Audit Round 2|Security Audit Round 2]]
-- [[_COMMUNITY_Vendor Admin App UI|Vendor Admin App UI]]
-- [[_COMMUNITY_Logging Infrastructure|Logging Infrastructure]]
-- [[_COMMUNITY_Client Hub Auth Flow|Client Hub Auth Flow]]
-- [[_COMMUNITY_Webhook Test Suite|Webhook Test Suite]]
-- [[_COMMUNITY_Checkout Client|Checkout Client]]
-- [[_COMMUNITY_Base Controller & Auth|Base Controller & Auth]]
+- [[_COMMUNITY_Security Audit (Round 2)|Security Audit (Round 2)]]
+- [[_COMMUNITY_Vendor Auth & Admin Clients|Vendor Auth & Admin Clients]]
+- [[_COMMUNITY_Client Hub Auth Client|Client Hub Auth Client]]
 - [[_COMMUNITY_Payment Webhook Controller|Payment Webhook Controller]]
-- [[_COMMUNITY_Sprint DoDs & Security Fixes|Sprint DoDs & Security Fixes]]
-- [[_COMMUNITY_Error Types & Validation|Error Types & Validation]]
-- [[_COMMUNITY_Vendor Auth Client|Vendor Auth Client]]
-- [[_COMMUNITY_Order Detail Client|Order Detail Client]]
-- [[_COMMUNITY_Misc Package Config|Misc Package Config]]
-- [[_COMMUNITY_Software Design Document|Software Design Document]]
-- [[_COMMUNITY_First Remediation Report|First Remediation Report]]
-- [[_COMMUNITY_Auth Client Tests|Auth Client Tests]]
-- [[_COMMUNITY_Logging & Error Classes|Logging & Error Classes]]
-- [[_COMMUNITY_Payment Encryption|Payment Encryption]]
-- [[_COMMUNITY_Create Order Controller|Create Order Controller]]
-- [[_COMMUNITY_Order Management Controller|Order Management Controller]]
-- [[_COMMUNITY_DoD Final Corrections|DoD Final Corrections]]
-- [[_COMMUNITY_Setup TOTP Function|Setup TOTP Function]]
-- [[_COMMUNITY_Product Controller|Product Controller]]
-- [[_COMMUNITY_Core TypeScript Config|Core TypeScript Config]]
-- [[_COMMUNITY_Sprint 4-5 DoDs|Sprint 4-5 DoDs]]
-- [[_COMMUNITY_Sprint 2-3 DoDs|Sprint 2-3 DoDs]]
-- [[_COMMUNITY_Verify TOTP Function|Verify TOTP Function]]
-- [[_COMMUNITY_Auth Client Test Mocks|Auth Client Test Mocks]]
-- [[_COMMUNITY_Payment Gateway Controller|Payment Gateway Controller]]
-- [[_COMMUNITY_Stock Utilities|Stock Utilities]]
-- [[_COMMUNITY_Order Shared Schemas|Order Shared Schemas]]
-- [[_COMMUNITY_Order Client Tests|Order Client Tests]]
-- [[_COMMUNITY_CI Architecture Rules|CI Architecture Rules]]
-- [[_COMMUNITY_User Profile Types|User Profile Types]]
-- [[_COMMUNITY_Rate Limiting Database|Rate Limiting Database]]
-- [[_COMMUNITY_Health Check Function|Health Check Function]]
-- [[_COMMUNITY_Security Scripts & RLS|Security Scripts & RLS]]
-- [[_COMMUNITY_API Routes Constants|API Routes Constants]]
-- [[_COMMUNITY_Backup Scripts|Backup Scripts]]
-- [[_COMMUNITY_Products Test Suite|Products Test Suite]]
-- [[_COMMUNITY_Vendor Auth Test|Vendor Auth Test]]
-- [[_COMMUNITY_Root TypeScript Config|Root TypeScript Config]]
-- [[_COMMUNITY_Vendor Admin Astro Config|Vendor Admin Astro Config]]
-- [[_COMMUNITY_Vendor Admin Package JSON|Vendor Admin Package JSON]]
-- [[_COMMUNITY_LogEntry Interface|LogEntry Interface]]
-- [[_COMMUNITY_SDD Storefront UI|SDD Storefront UI]]
-- [[_COMMUNITY_Production Runbook|Production Runbook]]
-- [[_COMMUNITY_Smoke Test Script|Smoke Test Script]]
-- [[_COMMUNITY_Load Test Script|Load Test Script]]
+- [[_COMMUNITY_Payment Webhook Tests|Payment Webhook Tests]]
+- [[_COMMUNITY_Module Group 30|Module Group 30]]
+- [[_COMMUNITY_Module Group 31|Module Group 31]]
+- [[_COMMUNITY_Module Group 32|Module Group 32]]
+- [[_COMMUNITY_Module Group 33|Module Group 33]]
+- [[_COMMUNITY_Module Group 34|Module Group 34]]
+- [[_COMMUNITY_Module Group 35|Module Group 35]]
+- [[_COMMUNITY_Module Group 36|Module Group 36]]
+- [[_COMMUNITY_Module Group 37|Module Group 37]]
+- [[_COMMUNITY_Module Group 38|Module Group 38]]
+- [[_COMMUNITY_Module Group 39|Module Group 39]]
+- [[_COMMUNITY_Module Group 40|Module Group 40]]
+- [[_COMMUNITY_Module Group 41|Module Group 41]]
+- [[_COMMUNITY_Module Group 42|Module Group 42]]
+- [[_COMMUNITY_Module Group 43|Module Group 43]]
+- [[_COMMUNITY_Module Group 44|Module Group 44]]
+- [[_COMMUNITY_Module Group 45|Module Group 45]]
+- [[_COMMUNITY_Module Group 46|Module Group 46]]
+- [[_COMMUNITY_Module Group 47|Module Group 47]]
+- [[_COMMUNITY_Module Group 48|Module Group 48]]
+- [[_COMMUNITY_Module Group 49|Module Group 49]]
+- [[_COMMUNITY_Module Group 50|Module Group 50]]
+- [[_COMMUNITY_Module Group 51|Module Group 51]]
+- [[_COMMUNITY_Module Group 52|Module Group 52]]
+- [[_COMMUNITY_Module Group 53|Module Group 53]]
+- [[_COMMUNITY_Module Group 54|Module Group 54]]
+- [[_COMMUNITY_Module Group 55|Module Group 55]]
+- [[_COMMUNITY_Module Group 56|Module Group 56]]
+- [[_COMMUNITY_Module Group 57|Module Group 57]]
+- [[_COMMUNITY_Module Group 58|Module Group 58]]
+- [[_COMMUNITY_Module Group 60|Module Group 60]]
+- [[_COMMUNITY_Module Group 61|Module Group 61]]
+- [[_COMMUNITY_Module Group 63|Module Group 63]]
+- [[_COMMUNITY_Module Group 64|Module Group 64]]
+- [[_COMMUNITY_Module Group 65|Module Group 65]]
+- [[_COMMUNITY_Module Group 67|Module Group 67]]
+- [[_COMMUNITY_Module Group 69|Module Group 69]]
+- [[_COMMUNITY_Module Group 70|Module Group 70]]
+- [[_COMMUNITY_Module Group 84|Module Group 84]]
+- [[_COMMUNITY_Module Group 85|Module Group 85]]
+- [[_COMMUNITY_Module Group 86|Module Group 86]]
+- [[_COMMUNITY_Module Group 87|Module Group 87]]
+- [[_COMMUNITY_Module Group 88|Module Group 88]]
+- [[_COMMUNITY_Module Group 89|Module Group 89]]
+- [[_COMMUNITY_Module Group 90|Module Group 90]]
+- [[_COMMUNITY_Module Group 91|Module Group 91]]
+- [[_COMMUNITY_Module Group 92|Module Group 92]]
+- [[_COMMUNITY_Module Group 93|Module Group 93]]
+- [[_COMMUNITY_Module Group 94|Module Group 94]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 18 edges
@@ -96,284 +102,255 @@
 10. `DB Table: orders` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Service: db-seed (creates admin@tienda.com via GoTrue Admin API)` --conceptually_related_to--> `Table: vendor_whitelist (email-based vendor authorization)`  [INFERRED]
-  docker-compose.yml → supabase/migrations/00021_vendor_whitelist.sql
 - `getCurrentUser` --conceptually_related_to--> `Row Level Security (RLS) Policy Pattern`  [INFERRED]
   apps/client-hub/src/lib/auth/auth-client.ts → docs/Fix & Hardening Runbook.md
-- `Fix 3: Secure nonce via pgsodium.crypto_secretbox_noncegen()` --rationale_for--> `Migration 00018: Fix Payment Encryption (pgsodium → pgcrypto)`  [INFERRED]
-  docs/Correcciones Finales.md → supabase/migrations/00018_fix_payment_encryption.sql
-- `Architecture Decision: Multi-layer security (RLS + MFA + AES-256)` --rationale_for--> `Pattern: pgp_sym_encrypt AES-256 with IV embedded`  [INFERRED]
-  docs/ARCHITECTURE.md → supabase/migrations/00018_fix_payment_encryption.sql
-- `Architecture Decision: Multi-layer security (RLS + MFA + AES-256)` --rationale_for--> `Pattern: mfa_verified in app_metadata JWT claim`  [INFERRED]
-  docs/ARCHITECTURE.md → supabase/migrations/00020_audit_payment_tables.sql
+- `Migration 00018: Fix Payment Encryption (pgsodium → pgcrypto)` --rationale_for--> `Fix 3: Secure nonce via pgsodium.crypto_secretbox_noncegen()`  [INFERRED]
+  supabase/migrations/00018_fix_payment_encryption.sql → docs/Correcciones Finales.md
+- `Pattern: pgp_sym_encrypt AES-256 with IV embedded` --rationale_for--> `Architecture Decision: Multi-layer security (RLS + MFA + AES-256)`  [INFERRED]
+  supabase/migrations/00018_fix_payment_encryption.sql → docs/ARCHITECTURE.md
+- `Pattern: mfa_verified in app_metadata JWT claim` --rationale_for--> `Architecture Decision: Multi-layer security (RLS + MFA + AES-256)`  [INFERRED]
+  supabase/migrations/00020_audit_payment_tables.sql → docs/ARCHITECTURE.md
+- `Table: vendor_whitelist (email-based vendor authorization)` --conceptually_related_to--> `Service: db-seed (creates admin@tienda.com via GoTrue Admin API)`  [INFERRED]
+  supabase/migrations/00021_vendor_whitelist.sql → docker-compose.yml
 
 ## Hyperedges (group relationships)
-- **Order Lifecycle (OrdersPage + OrderDetail + OrderClient + RealtimeSubscriptions)** — clienthub_page_orders_list, clienthub_page_order_detail, clienthub_order_client, concept_supabase_realtime, concept_order_timeline [EXTRACTED 0.95]
-- **Checkout Flow (CheckoutPage + CheckoutClient + PaymentGateways)** — clienthub_page_checkout, clienthub_checkout_client, concept_payment_gateways, clienthub_e2e_checkout [EXTRACTED 0.90]
-- **Storefront Catalog Data Pipeline** — catalog_ts, supabaseclient_storefront, storefront_index_page [EXTRACTED 0.95]
-- **Vendor MFA Login Multi-Step Flow** — vendor_login_page, authclient_vendor, mfa_totp_flow [INFERRED 0.95]
-- **Vendor Product CRUD with Storefront Rebuild Trigger** — vendor_products_page, productadmin_ts, triggerrebuild_fn [EXTRACTED 0.95]
-- **Core Domain Layer: Enums + Models + Schemas form the shared domain contract** — enum_order_status, enum_fulfillment_status, enum_payment_gateway, enum_user_role, model_order, model_product, model_user, schema_order [INFERRED 0.95]
-- **Order Lifecycle: OrderStatus, ItemFulfillmentStatus, and calculateOrderStatus together model order state transitions** — enum_order_status, enum_fulfillment_status, util_order_status_calculator [INFERRED 0.95]
-- **Architecture Enforcement: check-architecture.sh enforces rules on core purity, no magic strings, no direct DB writes** — script_check_architecture, core_package, enum_order_status [EXTRACTED 1.00]
-- **Multi-Gateway Payment Processing Pipeline** — fn_create_order, fn_payment_webhook, fn_manage_payment_gateways [INFERRED 0.85]
-- **Vendor MFA Authentication Pipeline** — fn_login, fn_change_password, fn_setup_totp, fn_confirm_totp, fn_verify_totp [EXTRACTED 0.95]
-- **BaseController Subclass Implementations** — core_base_controller, fn_create_order, fn_manage_orders, fn_manage_products, fn_manage_payment_gateways, fn_payment_webhook [EXTRACTED 1.00]
-- **Shared Edge Function Infrastructure** — error_handler_handleError, logger_createLogger, supabase_client_getSupabaseClient, supabase_client_getSupabaseAdmin [INFERRED 0.95]
-- **Order Lifecycle DB Functions** — db_fn_create_order_atomic, db_fn_confirm_order_payment, db_fn_update_order_status, db_fn_update_order_tracking, db_fn_update_order_status_manual, db_fn_update_item_fulfillment [INFERRED 0.95]
-- **RLS MFA Vendor Policy Applied Tables** — db_table_products, db_table_orders, db_table_order_items, db_table_webhook_logs, storage_bucket_product_images [EXTRACTED 1.00]
-- **Vendor MFA Access Control: app_metadata claim + profiles role + RLS policies** — mfa_verified_app_metadata, table_profiles, 00020_rls_audit_vendor_mfa [INFERRED 0.85]
-- **Vendor Onboarding Chain: whitelist → handle_new_user → seed** — 00021_vendor_whitelist_table, 00022_handle_new_user_fn, 00026_seed_admin_user [EXTRACTED 0.95]
-- **Payment Credential Security: encryption_key GUC + pgcrypto + service_role restriction** — encryption_key_guc, pgp_sym_encrypt_aes256, 00025_get_payment_credentials_fn [INFERRED 0.85]
-- **Multi-Gateway Payment System (Stripe, PayPal, MercadoPago, HeyBanco)** — sprint3_stripe_integration, sprint3_paypal_integration, sprint3_mercadopago_integration, sprint3_hey_banco_integration [EXTRACTED 1.00]
-- **Kong API Gateway Services (auth, rest, realtime, functions)** — kong_auth_service, kong_rest_service, kong_realtime_service, kong_functions_service [EXTRACTED 1.00]
-- **Order Email Notification Flow** — send_order_email_fn, send_shipping_email_fn, resend_api_integration, shared_supabase_client [EXTRACTED 0.95]
-- **Critical Security Vulnerabilities Triad** — audit_critical_totp_broken, audit_critical_webhook_no_sig, audit_critical_plaintext_creds [EXTRACTED 1.00]
-- **Client-Hub Auth via Supabase SDK** — auth_client_signInWithEmail, auth_client_signInWithGoogle, auth_client_signUpWithEmail, auth_client_signOut, auth_client_supabaseClient [EXTRACTED 1.00]
-- **Cadena de Fallos del Flujo de Autenticación Vendor** — audit2_totp_backdoor_verify, audit2_mfa_inconsistency, sprint1_totp_simulation [EXTRACTED 0.95]
-- **Remediación de Seguridad de Pagos** — remediation1_webhook_hmac, remediation1_amount_validation, remediation1_idor_payment_gateways, remediation2_pgcrypto_credentials [EXTRACTED 0.95]
-- **Pipeline de Entrega Sprint 0 a Sprint 5** — dod_sprint0, dod_sprint1, dod_sprint2, dod_sprint3, dod_sprint4, dod_sprint5 [EXTRACTED 0.95]
-- **Core Domain Layer: Enums + Models + Schemas form the shared domain contract** — enum_order_status, enum_fulfillment_status, enum_payment_gateway, enum_user_role, model_order, model_product, model_user, schema_order [INFERRED 0.95]
-- **Architecture Enforcement: check-architecture.sh enforces rules on core purity, no magic strings, no direct DB writes** — script_check_architecture, core_package, enum_order_status [EXTRACTED 1.00]
-- **Order Lifecycle: OrderStatus, ItemFulfillmentStatus, and calculateOrderStatus together model order state transitions** — enum_order_status, enum_fulfillment_status, util_order_status_calculator [INFERRED 0.95]
-- **Vendor MFA Authentication Pipeline** — fn_login, fn_change_password, fn_setup_totp, fn_confirm_totp, fn_verify_totp [EXTRACTED 0.95]
-- **Multi-Gateway Payment Processing Pipeline** — fn_create_order, fn_payment_webhook, fn_manage_payment_gateways [INFERRED 0.85]
-- **BaseController Subclass Implementations** — core_base_controller, fn_create_order, fn_manage_orders, fn_manage_products, fn_manage_payment_gateways, fn_payment_webhook [EXTRACTED 1.00]
-- **Order Lifecycle DB Functions** — db_fn_create_order_atomic, db_fn_confirm_order_payment, db_fn_update_order_status, db_fn_update_order_tracking, db_fn_update_order_status_manual, db_fn_update_item_fulfillment [INFERRED 0.95]
-- **RLS MFA Vendor Policy Applied Tables** — db_table_products, db_table_orders, db_table_order_items, db_table_webhook_logs, storage_bucket_product_images [EXTRACTED 1.00]
-- **Shared Edge Function Infrastructure** — error_handler_handleError, logger_createLogger, supabase_client_getSupabaseClient, supabase_client_getSupabaseAdmin [INFERRED 0.95]
-- **Payment Credential Security: encryption_key GUC + pgcrypto + service_role restriction** — encryption_key_guc, pgp_sym_encrypt_aes256, 00025_get_payment_credentials_fn [INFERRED 0.85]
-- **Vendor MFA Access Control: app_metadata claim + profiles role + RLS policies** — mfa_verified_app_metadata, table_profiles, 00020_rls_audit_vendor_mfa [INFERRED 0.85]
-- **Vendor Onboarding Chain: whitelist → handle_new_user → seed** — 00021_vendor_whitelist_table, 00022_handle_new_user_fn, 00026_seed_admin_user [EXTRACTED 0.95]
-- **Multi-Gateway Payment System (Stripe, PayPal, MercadoPago, HeyBanco)** — sprint3_stripe_integration, sprint3_paypal_integration, sprint3_mercadopago_integration, sprint3_hey_banco_integration [EXTRACTED 1.00]
-- **Nginx Subdomain Routing for Local Dev (storefront, client-hub, vendor-admin, kong)** — nginx_storefront_upstream, nginx_client_hub_upstream, nginx_vendor_admin_upstream, nginx_supabase_kong_upstream [EXTRACTED 1.00]
-- **Kong API Gateway Services (auth, rest, realtime, functions)** — kong_auth_service, kong_rest_service, kong_realtime_service, kong_functions_service [EXTRACTED 1.00]
+- **Payment Credentials Encryption Pipeline** — manage_payment_gateways_fn, fn_save_gateway_credentials_secure, fn_save_payment_credentials, payment_credentials_table [EXTRACTED 0.95]
+- **Vendor Admin MFA + RLS Security Gate** — concept_mfa_rls_claim, migration_00015_storage_hardening, fn_auth_jwt, manage_payment_gateways_fn [INFERRED 0.85]
+- **Cascading State Protocol Document Hierarchy** — session_summary_md, plan_actual_md, pending_tasks_md, concept_cascading_state_protocol [EXTRACTED 0.95]
 
-## Communities (88 total, 21 thin omitted)
+## Communities (95 total, 25 thin omitted)
 
-### Community 0 - "Database Schema & Core Tables"
+### Community 0 - "DB Enums & MFA/RLS Core"
 Cohesion: 0.07
-Nodes (51): DB Enum: item_fulfillment_status, DB Enum: order_status, DB Enum: payment_gateway, DB Enum: user_role, DB Fn: check_password_change_required, DB Fn: confirm_order_payment, DB Fn: create_order_atomic, DB Fn: create_product (+43 more)
+Nodes (52): mfa_verified JWT Claim as RLS Gate, DB Enum: item_fulfillment_status, DB Enum: order_status, DB Enum: payment_gateway, DB Enum: user_role, DB Fn: check_password_change_required, DB Fn: confirm_order_payment, DB Fn: create_order_atomic (+44 more)
 
-### Community 1 - "Payment Credentials & Transactions"
-Cohesion: 0.05
-Nodes (48): Migration 00018: Fix Payment Encryption (pgsodium → pgcrypto), Extension: pgcrypto (AES-256 symmetric encryption), Function: save_payment_credentials (pgcrypto AES-256 v1), Migration 00019: Fix Order Cancellation Stock Restoration, Function: update_order_status_manual (with stock restoration), Table: audit_logs (immutable audit trail), Migration 00020: Audit Logs & Payment Transactions, Function: confirm_order_payment (updated with transaction logging) (+40 more)
-
-### Community 2 - "Backend Deployment & Routing"
+### Community 1 - "Edge Function Patterns"
 Cohesion: 0.09
 Nodes (47): Atomic Order Creation with Pessimistic Locking, Centralized CORS Management, HMAC-SHA256 Webhook Signature Verification, Vendor MFA Authentication Flow, Password Complexity Policy, Payment Amount Mismatch Detection (Anti-Fraud), Rate Limiting Pattern, Webhook Idempotency Pattern (+39 more)
 
-### Community 3 - "Order & Payment Edge Functions"
+### Community 2 - "Payment Encryption Migrations"
+Cohesion: 0.07
+Nodes (39): Migration 00018: Fix Payment Encryption (pgsodium → pgcrypto), Extension: pgcrypto (AES-256 symmetric encryption), Function: save_payment_credentials (pgcrypto AES-256 v1), Migration 00019: Fix Order Cancellation Stock Restoration, Function: update_order_status_manual (with stock restoration), Table: audit_logs (immutable audit trail), Migration 00020: Audit Logs & Payment Transactions, Function: confirm_order_payment (updated with transaction logging) (+31 more)
+
+### Community 3 - "Architecture Rules (CLAUDE.md)"
+Cohesion: 0.08
+Nodes (38): App: client-hub (Astro 5 + React 18 + Alpine.js), App: storefront (Astro 5 + Alpine.js), App: vendor-admin (Astro 5 + React 18 + Alpine.js), Astro + Islands Pattern, scripts/check-architecture.sh — Architecture CI Guard, CLAUDE.md — Project Guidance File, Graphify Knowledge Graph Context Protocol, @micro-store/core Package (+30 more)
+
+### Community 4 - "SDD Flows & Infrastructure"
 Cohesion: 0.06
 Nodes (37): SDD: Purchase Flow Diagram, SDD: Storefront SSG Rebuild Flow, SDD: Payment Webhook Confirmation Flow, SDD: Free Tier Infrastructure Strategy, SDD: Vendor Admin UI Design, Sprint 3: Checkout y Pagos, DB Function: confirm_order_payment, DB Function: create_order_atomic (+29 more)
 
-### Community 4 - "Vendor Admin Client Library"
-Cohesion: 0.11
-Nodes (24): ../../layouts/VendorAdminLayout.astro, ../../lib/products/product-admin.ts, ../../lib/auth/auth-client, ../../lib/orders/order-admin, ../../lib/supabase-client, @micro-store/core, AdminOrder, AdminOrderDetail (+16 more)
+### Community 5 - "Vendor Admin Pages"
+Cohesion: 0.1
+Nodes (26): ../../layouts/VendorAdminLayout.astro, ../../lib/products/product-admin.ts, ../../layouts/VendorAdminLayout.astro, ../../lib/auth/auth-client, ../../lib/orders/order-admin, ../../lib/products/product-admin.ts, ../../lib/supabase-client, @micro-store/core (+18 more)
 
-### Community 5 - "Root Package Scripts"
+### Community 6 - "Root DevDependencies"
 Cohesion: 0.06
-Nodes (30): devDependencies, husky, lint-staged, prettier, typescript, engines, node, name (+22 more)
+Nodes (31): devDependencies, husky, lint-staged, prettier, ts-node, typescript, engines, node (+23 more)
 
-### Community 6 - "Core Domain Types & Enums"
+### Community 7 - "Architecture Config & CI"
+Cohesion: 0.09
+Nodes (27): auth-client.ts Library, Script: check-architecture.sh (CI architecture validator), CLAUDE.md Project Instructions, Architecture Rules: 5 CI-enforced constraints, NPM Workspaces Monorepo Pattern, auth.jwt() Self-Hosted Polyfill, Cascading State Protocol (ACK-gated workflow), pgcrypto extensions.* Schema Qualification Fix (+19 more)
+
+### Community 8 - "Client Hub Config"
 Cohesion: 0.11
 Nodes (29): client-hub Astro Config, client-hub package.json, Astro Islands Pattern, NPM Workspaces Monorepo, @micro-store/eslint-config Package, API Routes Constants, Core Package Entry Point, @micro-store/core Package (+21 more)
 
-### Community 7 - "Requirements & Technical Docs"
+### Community 9 - "TOTP Test Suite"
+Cohesion: 0.07
+Nodes (23): bytes, bytes1, bytes2, code1, code2, currentCode, currentValid, delta (+15 more)
+
+### Community 10 - "Security Audit & Deploy"
 Cohesion: 0.13
 Nodes (28): CRÍTICO-4: Plaintext Credential Fallback, CRÍTICO-1: TOTP Hardcoded Secret, CRÍTICO-3: Webhooks Sin Verificación de Firma, Cloudflare Pages Deploy Hook, Auditoría Técnica Profunda, Fix & Hardening Runbook, Sprint 0 — Configuración y Setup, SRS — Especificación de Requisitos (+20 more)
 
-### Community 8 - "App Dependencies Config"
-Cohesion: 0.08
-Nodes (23): dependencies, alpinejs, astro, @astrojs/alpinejs, @astrojs/check, @astrojs/react, @micro-store/core, react (+15 more)
+### Community 11 - "Vendor Whitelist & Auth Flow"
+Cohesion: 0.11
+Nodes (24): RLS Policy: vendor_whitelist service_role only (USING false), Migration 00021: Vendor Whitelist Table, Table: vendor_whitelist (email-based vendor authorization), Migration 00026: Seed admin@tienda.com into vendor_whitelist, Vendor MFA First-Login Flow, Service: client-hub (Astro + React + Alpine.js, port 5173), docker-compose.yml: Full Local Development Stack, Service: db-migrate (applies all .sql migrations in order, runs once) (+16 more)
 
-### Community 9 - "Vendor Auth & TOTP Flow"
+### Community 12 - "Client Hub Dependencies"
+Cohesion: 0.08
+Nodes (24): dependencies, alpinejs, astro, @astrojs/alpinejs, @astrojs/check, @astrojs/react, @micro-store/core, react (+16 more)
+
+### Community 13 - "Domain Interfaces"
 Cohesion: 0.13
 Nodes (24): AdminProduct Interface, AuthLayout (Vendor Admin), AuthResult Interface, BaseLayout (Storefront), Catalog Data Layer, CatalogProduct Interface, changePassword Function, confirmTOTP Function (+16 more)
 
-### Community 10 - "TOTP Test Suite"
-Cohesion: 0.08
-Nodes (20): bytes, bytes1, bytes2, code1, code2, currentCode, currentValid, delta (+12 more)
-
-### Community 11 - "Package Dependencies"
+### Community 14 - "Vendor Admin Dependencies"
 Cohesion: 0.08
 Nodes (23): dependencies, alpinejs, astro, @astrojs/alpinejs, @astrojs/check, @astrojs/react, @micro-store/core, react (+15 more)
 
-### Community 12 - "Core Package Config"
-Cohesion: 0.1
-Nodes (20): dependencies, zod, description, devDependencies, typescript, vitest, exports, ./enums (+12 more)
+### Community 15 - "Core Package Config"
+Cohesion: 0.09
+Nodes (21): dependencies, zod, description, devDependencies, otpauth, typescript, vitest, exports (+13 more)
 
-### Community 13 - "Infrastructure & API Gateway"
+### Community 16 - "Kong API Gateway"
 Cohesion: 0.1
 Nodes (21): Kong Service: auth-v1 (/auth/v1 → supabase-auth:9999), Kong Service: functions-v1 (/functions/v1 → supabase-functions:9000), Kong Service: realtime-v1 (/realtime/v1 → supabase-realtime:4000), Kong Service: rest-v1 (/rest/v1 → supabase-rest:3000), Kong API Gateway Config (kong.yml), Nginx Upstream: client-hub:5173, Nginx: nginx.conf (main config with WebSocket map), Nginx: microstore.conf (subdomain routing) (+13 more)
 
-### Community 14 - "TypeScript Configuration"
+### Community 17 - "TypeScript Compiler Config"
 Cohesion: 0.1
 Nodes (19): compilerOptions, declaration, declarationMap, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, module, moduleResolution (+11 more)
 
-### Community 15 - "Package Dependencies B"
+### Community 18 - "Storefront Dependencies"
 Cohesion: 0.11
 Nodes (18): dependencies, alpinejs, astro, @astrojs/alpinejs, @astrojs/check, @micro-store/core, @supabase/supabase-js, typescript (+10 more)
 
-### Community 16 - "Error Handling Utilities"
-Cohesion: 0.14
-Nodes (12): logger, supabaseAdmin, supabaseClient, logger, OrderFilters, TrackingUpdate, AppError, BusinessError (+4 more)
-
-### Community 17 - "Order Domain Model"
+### Community 19 - "Core Enums & Models"
 Cohesion: 0.15
 Nodes (12): ItemFulfillmentStatus, OrderStatus, PaymentGateway, Order, OrderItem, CreateOrderPayload, CreateOrderPayloadSchema, OrderTracking (+4 more)
 
-### Community 18 - "Supabase Client Instances"
+### Community 20 - "Edge Function Infrastructure"
 Cohesion: 0.14
 Nodes (13): checks, logger, supabase, supabaseAdmin, logger, resendKey, supabaseAdmin, logger (+5 more)
 
-### Community 19 - "Storefront Catalog Pages"
+### Community 21 - "Password & Order Management"
+Cohesion: 0.15
+Nodes (11): logger, supabaseAdmin, logger, OrderFilters, TrackingUpdate, AppError, BusinessError, handleError() (+3 more)
+
+### Community 22 - "Storefront Pages"
 Cohesion: 0.2
 Nodes (14): ../components/product/ProductCard.astro, ../../layouts/BaseLayout.astro, ../../lib/catalog/catalog.ts, ../styles/global.css, CatalogProduct, getAllProductSlugs(), getProductBySlug(), getVisibleProducts() (+6 more)
 
-### Community 20 - "Client Hub App Layer"
+### Community 23 - "Client Hub Checkout Flow"
 Cohesion: 0.17
 Nodes (17): Checkout Client, Checkout Flow E2E Test, ClientHubLayout Astro, Order Client, Order Client Tests, Auth Callback Page, Checkout Page, client-hub Index Page (+9 more)
 
-### Community 21 - "Client Hub Auth Pages"
+### Community 24 - "Client Hub Auth Pages"
 Cohesion: 0.15
 Nodes (8): ../../layouts/ClientHubLayout.astro, ../lib/auth/auth-client, ../../lib/checkout/checkout-client, ../../lib/orders/order-client, ../lib/supabase-client, fetchOrders(), init(), loadCustomerOrders()
 
-### Community 22 - "Docker Dev Stack"
-Cohesion: 0.23
-Nodes (15): Service: client-hub (Astro + React + Alpine.js, port 5173), docker-compose.yml: Full Local Development Stack, Service: db-migrate (applies all .sql migrations in order, runs once), Service: db-seed (creates admin@tienda.com via GoTrue Admin API), Service: inbucket (local email capture port 8025), Service: nginx (reverse proxy port 80), Service: storefront (Astro + Alpine.js, port 4321), Service: supabase-auth (GoTrue v2.151.0, JWT + MFA) (+7 more)
-
-### Community 23 - "Security Audit Round 2"
+### Community 25 - "Security Audit (Round 2)"
 Cohesion: 0.18
 Nodes (15): CLABE Hardcodeada Hey Banco (C3), CORS Wildcard en todos los endpoints (C6), Doble Autenticación por Request, Email Hardcodeado para Vendor Role (C7), localStorage auth_token en Checkout (C4), localStorage auth_token en Settings (C5), Rate Limiting Fail-Open (C10), Policies RLS Contradictorias (AMR vs app_metadata) (+7 more)
 
-### Community 24 - "Vendor Admin App UI"
+### Community 26 - "Vendor Auth & Admin Clients"
 Cohesion: 0.22
 Nodes (14): AdminOrder Interface, Auth Client (Vendor Admin), getVendorAuthHeader Function, Order Admin Client, Product Admin Client, signOut Function, Supabase Client (Vendor Admin), triggerRebuild Function (+6 more)
 
-### Community 25 - "Logging Infrastructure"
-Cohesion: 0.19
-Nodes (8): logger, getLogflareClient(), LogflareClient, LogflareConfig, logger, createLogger(), LogEntry, LogLevel
-
-### Community 26 - "Client Hub Auth Flow"
+### Community 27 - "Client Hub Auth Client"
 Cohesion: 0.18
 Nodes (7): ../../lib/auth/auth-client.ts, AuthResult, getCurrentUser(), signOut(), signUpWithEmail(), handleRegister(), loadProfile()
 
-### Community 27 - "Webhook Test Suite"
+### Community 28 - "Payment Webhook Controller"
+Cohesion: 0.31
+Nodes (5): logger, PaymentWebhookController, verifyHeyBancoSignature(), verifyMercadoPagoSignature(), verifyStripeSignature()
+
+### Community 29 - "Payment Webhook Tests"
 Cohesion: 0.15
 Nodes (9): existingLog, expectedCents, header, parts, tamperedBody, timestamp, tPart, v1Part (+1 more)
 
-### Community 28 - "Checkout Client"
+### Community 30 - "Module Group 30"
 Cohesion: 0.2
 Nodes (8): ../../lib/supabase-client.ts, CheckoutResult, createOrder(), getAuthHeader(), HeyBancoInstructions, PaymentResult, ShippingAddress, supabaseClient
 
-### Community 29 - "Base Controller & Auth"
+### Community 31 - "Module Group 31"
 Cohesion: 0.18
 Nodes (5): authenticateUser(), requireAdminMFA(), CreateProductSchema, logger, UpdateProductSchema
 
-### Community 30 - "Payment Webhook Controller"
-Cohesion: 0.35
-Nodes (4): PaymentWebhookController, verifyHeyBancoSignature(), verifyMercadoPagoSignature(), verifyStripeSignature()
+### Community 32 - "Module Group 32"
+Cohesion: 0.21
+Nodes (7): logger, getLogflareClient(), LogflareClient, LogflareConfig, createLogger(), LogEntry, LogLevel
 
-### Community 31 - "Sprint DoDs & Security Fixes"
+### Community 33 - "Module Group 33"
 Cohesion: 0.2
 Nodes (11): Inconsistencia MFA user_metadata vs app_metadata (C2), Backdoor TOTP en verify-totp (C1), DoD Sprint 0 Infraestructura y Entorno, DoD Sprint 1 Autenticación y Perfiles, Reescritura verify-totp con TOTP Real, Metodología Docker-First, Migración 00001 Initial Schema, Estructura Monorepo npm Workspaces (+3 more)
 
-### Community 32 - "Error Types & Validation"
-Cohesion: 0.18
-Nodes (7): logger, supabaseAdmin, delta, logger, supabaseAdmin, totp, UnauthorizedError
-
-### Community 33 - "Vendor Auth Client"
+### Community 34 - "Module Group 34"
 Cohesion: 0.31
 Nodes (8): ../../layouts/AuthLayout.astro, ../../lib/auth/auth-client.ts, base(), changePassword(), confirmTOTP(), setupTOTP(), vendorSignIn(), verifyTOTP()
 
-### Community 34 - "Order Detail Client"
+### Community 35 - "Module Group 35"
 Cohesion: 0.24
 Nodes (8): generateTimeline(), loadOrderDetail(), mapToViewModel(), OrderItemViewModel, OrderViewModel, RawOrder, RawOrderItem, TimelineStep
 
-### Community 35 - "Misc Package Config"
+### Community 36 - "Module Group 36"
 Cohesion: 0.2
 Nodes (9): devDependencies, eslint, eslint-config-prettier, eslint-plugin-astro, eslint-plugin-react, main, name, private (+1 more)
 
-### Community 36 - "Software Design Document"
+### Community 37 - "Module Group 37"
 Cohesion: 0.22
 Nodes (10): SDD: Role-Based Access Matrix, SDD: System Architecture Overview, SDD: Entity-Relationship Data Model, SDD: Database ENUM Types Definition, SDD: Vendor MFA Auth Flow Diagram, SDD: Monorepo Component Diagram, SDD: Jamstack + Hexagonal Architecture Patterns, SDD: 5-Layer Security Design (+2 more)
 
-### Community 37 - "First Remediation Report"
+### Community 38 - "Module Group 38"
 Cohesion: 0.22
 Nodes (9): Validación de Monto en Webhooks, Tablas audit_logs y payment_transactions, Corrección IDOR Gateways de Pago, Validación de Complejidad de Contraseña, Rate Limiting en Login, Remediation Report Primera Ronda, Restauración de Stock en Cancelaciones, Secret TOTP Único por Usuario (+1 more)
 
-### Community 38 - "Auth Client Tests"
+### Community 39 - "Module Group 39"
 Cohesion: 0.36
 Nodes (8): AuthResult Interface, getCurrentUser, signInWithEmail, signInWithGoogle, signOut, signUpWithEmail, supabaseClient (client-hub), Auth Client Test Suite
 
-### Community 39 - "Logging & Error Classes"
+### Community 40 - "Module Group 40"
 Cohesion: 0.29
 Nodes (8): AppError Class, BusinessError Class, UnauthorizedError Class, handleError Function, LogflareClient Class, LogflareConfig Interface, getLogflareClient Singleton Factory, createLogger Function
 
-### Community 40 - "Payment Encryption"
+### Community 41 - "Module Group 41"
 Cohesion: 0.29
-Nodes (8): Nonce Seguro pgsodium.crypto_secretbox_noncegen, pgcrypto para Credenciales de Pago, Client Hub: checkout-client.ts Library, Client Hub: Checkout Page (multi-step), Edge Function: manage-payment-gateways, pgsodium Credential Encryption, DB Function: save_payment_credentials (pgsodium), Vendor Admin: Gateway Settings Page
+Nodes (8): Nonce Seguro pgsodium.crypto_secretbox_noncegen, pgcrypto para Credenciales de Pago, Client Hub: checkout-client.ts Library, Client Hub: Checkout Page (multi-step), Edge Function: manage-payment-gateways, Encriptación pgsodium en Base de Datos, DB Function: save_payment_credentials (pgsodium), Vendor Admin: Gateway Settings Page
 
-### Community 43 - "DoD Final Corrections"
+### Community 42 - "Module Group 42"
 Cohesion: 0.48
 Nodes (7): Networking Docker host.docker.internal, DoD Correcciones Finales, DoD Fix and Hardening, MFA Robusto en RLS Compatibilidad Free Tier, Rate Limiting SQL Puro, Storage RLS Bucket product-images, Idempotencia de Webhooks webhook_logs
 
-### Community 44 - "Setup TOTP Function"
+### Community 44 - "Module Group 44"
+Cohesion: 0.29
+Nodes (5): headers, logger, response, supabaseAdmin, supabaseClient
+
+### Community 46 - "Module Group 46"
+Cohesion: 0.29
+Nodes (5): delta, logger, supabaseAdmin, totp, UnauthorizedError
+
+### Community 47 - "Module Group 47"
 Cohesion: 0.29
 Nodes (6): logger, otpauthUrl, secret, secretBytes, supabaseAdmin, totp
 
-### Community 46 - "Core TypeScript Config"
+### Community 48 - "Module Group 48"
 Cohesion: 0.33
 Nodes (5): compilerOptions, outDir, rootDir, extends, include
 
-### Community 47 - "Sprint 4-5 DoDs"
+### Community 50 - "Module Group 50"
 Cohesion: 0.33
 Nodes (6): DoD Sprint 4 Pedidos y Logística, DoD Sprint 5 Despliegue y Cierre, Notificaciones Realtime de Pedidos, Máquina de Estados de Órdenes en PL/pgSQL, Despliegue en Cloudflare Pages, Integración Logflare para Observabilidad
 
-### Community 48 - "Sprint 2-3 DoDs"
+### Community 51 - "Module Group 51"
 Cohesion: 0.33
 Nodes (6): DoD Sprint 2 Catálogo y Productos, DoD Sprint 3 Checkout y Pagos, Generación Automática de Slugs en BD, Catálogo SSG con Astro, Creación Atómica de Órdenes con FOR UPDATE, Múltiples Pasarelas de Pago
 
-### Community 49 - "Verify TOTP Function"
+### Community 52 - "Module Group 52"
 Cohesion: 0.33
 Nodes (5): delta, logger, secret, supabaseAdmin, totp
 
-### Community 50 - "Auth Client Test Mocks"
+### Community 53 - "Module Group 53"
 Cohesion: 0.33
 Nodes (5): mockGetUser, mockSignInWithOAuth, mockSignInWithPassword, mockSignOut, mockSignUp
 
-### Community 53 - "Order Shared Schemas"
+### Community 56 - "Module Group 56"
 Cohesion: 0.4
 Nodes (4): CreateOrderPayloadSchema, logger, OrderRpcResult, ShippingAddressSchema
 
-### Community 55 - "CI Architecture Rules"
-Cohesion: 0.5
-Nodes (4): Script: check-architecture.sh (CI architecture validator), CLAUDE.md: Project Developer Guide, Architecture Rules: 5 CI-enforced constraints, NPM Workspaces Monorepo Pattern
-
-### Community 58 - "Rate Limiting Database"
+### Community 60 - "Module Group 60"
 Cohesion: 1.0
 Nodes (3): DB Fn: check_rate_limit, DB Table: rate_limits, Migration 00016: Rate Limiting
 
 ## Knowledge Gaps
-- **374 isolated node(s):** `name`, `version`, `private`, `dev`, `dev:stop` (+369 more)
+- **401 isolated node(s):** `name`, `version`, `private`, `dev`, `dev:stop` (+396 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **21 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `pgsodium Credential Encryption` connect `Payment Encryption` to `Sprint 2-3 DoDs`, `Software Design Document`?**
+- **Why does `Migration 00015: Storage Hardening` connect `DB Enums & MFA/RLS Core` to `Architecture Config & CI`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `Encriptación pgsodium en Base de Datos` connect `Module Group 41` to `Module Group 51`, `Module Group 37`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `DB Function: save_payment_credentials (pgsodium)` connect `Payment Encryption` to `Order & Payment Edge Functions`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `Edge Function: create-order` connect `Order & Payment Edge Functions` to `Payment Encryption`, `Infrastructure & API Gateway`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+- **Why does `Table: vendor_whitelist (email-based vendor authorization)` connect `Vendor Whitelist & Auth Flow` to `Payment Encryption Migrations`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `private` to the rest of the system?**
-  _374 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Database Schema & Core Tables` be split into smaller, more focused modules?**
+  _401 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `DB Enums & MFA/RLS Core` be split into smaller, more focused modules?**
   _Cohesion score 0.07 - nodes in this community are weakly interconnected._
-- **Should `Payment Credentials & Transactions` be split into smaller, more focused modules?**
-  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
-- **Should `Backend Deployment & Routing` be split into smaller, more focused modules?**
+- **Should `Edge Function Patterns` be split into smaller, more focused modules?**
   _Cohesion score 0.09 - nodes in this community are weakly interconnected._
+- **Should `Payment Encryption Migrations` be split into smaller, more focused modules?**
+  _Cohesion score 0.07 - nodes in this community are weakly interconnected._

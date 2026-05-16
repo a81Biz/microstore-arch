@@ -153,14 +153,21 @@ class OrderManagementController extends BaseController {
   }
 
   private async triggerEmail(orderId: string, type: string, status?: string): Promise<void> {
-    const functionName = type === 'shipping' ? 'send-shipping-email' : 'send-order-email';
+    // H3: status_update no tiene función de email dedicada — skip con trazabilidad.
+    // TODO PT-012c: implementar send-status-email cuando se requiera notificar cambios de estado.
+    if (type === 'status_update') {
+      logger.info('Status update email skipped (send-status-email not implemented)', { orderId, status });
+      return;
+    }
+
+    const functionName = 'send-shipping-email';
     await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/${functionName}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ orderId, statusUpdate: status })
+      body: JSON.stringify({ orderId }),
     });
   }
 }

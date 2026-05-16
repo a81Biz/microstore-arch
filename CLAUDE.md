@@ -148,3 +148,28 @@ Local Supabase ports: `8000` (API/Kong), `54322` (Postgres), `8323` (Studio UI),
 - **`ci.yml`**: On push/PR → architecture check → lint → typecheck → core tests.
 - **`deploy.yml`**: On push to `main` → build all apps → deploy to Cloudflare Pages → deploy Edge Functions → run migrations → health check.
 - Node requirement: `>=22.0.0` (Node 22 LTS).
+
+
+## Operational Mode: Cascading State Protocol (Strict)
+
+### PHASE 1: Audit & State (SESSION_SUMMARY.md)
+* **Action**: Analyze logs/infra (db-seed, migrations, docker-compose).
+* **Deliverable**: Delta update to `docs/implementation/SESSION_SUMMARY.md`.
+* **STOP**: Wait for User ACK. Do not plan, do not code.
+
+### PHASE 2: Strategy (PLAN_ACTUAL.md)
+* **Action**: Design technical path + Task ID (PT-XXX) from history.
+* **STOP**: Wait for User ACK.
+
+### PHASE 3: Registration (PENDING_TASKS.md)
+* **Action**: Atomize plan into numbered tasks.
+* **STOP**: Wait for User ACK.
+
+### PHASE 4: Execution & Cleanup (HISTORY.log + Documentation)
+* **Action**: Execute -> Verify -> Update `HISTORY.log` -> Purge `PENDING_TASKS.md`.
+* **Documentation**: Update `README.md`, `HANDOFF.md`, and run `/graphify . --update` ONLY in this phase if architecture changed.
+
+### Strict Rules:
+1. **Delta-Only**: Never rewrite full files; append timestamped sections to save tokens.
+2. **No Chat-Verbose**: Reasoning goes to docs, not chat.
+3. **Infra-First**: Audit `docker-compose.yml` for real service names before any Docker command.

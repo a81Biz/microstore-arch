@@ -290,12 +290,16 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     },
 
     async toggleVisibility(product) {
+      if (product._toggling) return;
+      product._toggling = true;
       try {
         await updateProduct(product.id, { isVisible: !product.isVisible });
         await triggerRebuild();
         product.isVisible = !product.isVisible;
       } catch (err) {
         console.error('Error toggling visibility:', err);
+      } finally {
+        setTimeout(() => { product._toggling = false; }, 200);
       }
     },
 

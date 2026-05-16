@@ -3,8 +3,10 @@
 
 
 -- 1. Crear el bucket 'product-images' si no existe
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('product-images', 'product-images', true)
+-- La columna 'public' no existe en supabase/postgres:15.8.1.032.
+-- El acceso público se controla por RLS (política "Public Read Access" abajo).
+INSERT INTO storage.buckets (id, name)
+VALUES ('product-images', 'product-images')
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. Políticas de Seguridad para Storage

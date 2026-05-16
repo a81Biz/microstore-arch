@@ -202,6 +202,8 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     },
 
     async toggleGateway(gateway) {
+      if (gateway._toggling) return;
+      gateway._toggling = true;
       const newState = !gateway.is_enabled;
       try {
         const authHeader = await getVendorAuthHeader();
@@ -220,15 +222,15 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 
         if (!response.ok) {
           const data = await response.json();
-          // Mostrar error visible al usuario — no modificar el estado UI si falló
           this.saveError[gateway.gateway] = data.message || 'Error al cambiar estado del gateway';
           return;
         }
 
-        // Solo actualizar la UI DESPUÉS de confirmar éxito
         gateway.is_enabled = newState;
       } catch {
         this.saveError[gateway.gateway] = 'Error de red al conectar con la API';
+      } finally {
+        setTimeout(() => { gateway._toggling = false; }, 200);
       }
     },
 
@@ -239,6 +241,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 
       try {
         const authHeader = await getVendorAuthHeader();
+        const gw = this.gateways.find(g => g.gateway === gateway);
         const response = await fetch(`${import.meta.env.PUBLIC_API_BASE}${API_ROUTES.admin.paymentGateways}`, {
           method: 'POST',
           headers: {
@@ -247,15 +250,13 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
           },
           body: JSON.stringify({
             gateway,
-            is_enabled: true,
+            is_enabled: gw?.is_enabled ?? false,
             credentials: this.credentials[gateway]
           })
         });
 
         if (response.ok) {
           this.saveMessage[gateway] = 'Configuración guardada exitosamente';
-          const gw = this.gateways.find(g => g.gateway === gateway);
-          if (gw) gw.is_enabled = true;
           // Limpiar campos sensibles después de guardar
           Object.keys(this.credentials[gateway]).forEach(k => { this.credentials[gateway][k] = ''; });
           setTimeout(() => { this.showForm = null; }, 2000);

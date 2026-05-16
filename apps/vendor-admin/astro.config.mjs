@@ -1,8 +1,21 @@
 import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
 import alpinejs from '@astrojs/alpinejs';
 
 export default defineConfig({
-  integrations: [react(), alpinejs()],
+  integrations: [alpinejs()],
   server: { port: 5174 },
+  vite: {
+    optimizeDeps: {
+      include: ['@supabase/supabase-js', '@micro-store/core'],
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-supabase': ['@supabase/supabase-js'],
+          },
+        },
+      },
+    },
+  },
 });
