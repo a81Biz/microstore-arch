@@ -3,37 +3,10 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 ---
 
 <ClientHubLayout title="Mi Perfil">
-  <div class="profile-container" x-data="profilePage()" x-init="loadProfile()">
-    <h1>Mi Perfil</h1>
+  <div class="profile-page" x-data="profilePage()" x-init="init()">
 
     <template x-if="loading">
-      <p class="loading-text">Cargando perfil...</p>
-    </template>
-
-    <template x-if="!loading && profile">
-      <div class="profile-card">
-        <div class="profile-info">
-          <div class="info-group">
-            <label>Email</label>
-            <p x-text="profile.email"></p>
-          </div>
-
-          <div class="info-group">
-            <label>Rol</label>
-            <p x-text="profile.role === 'customer' ? 'Cliente' : 'Vendedor'"></p>
-          </div>
-
-          <div class="info-group">
-            <label>Miembro desde</label>
-            <p x-text="new Date(profile.createdAt).toLocaleDateString('es-MX')"></p>
-          </div>
-        </div>
-
-        <div class="profile-actions">
-          <a href="/orders" class="btn-primary">Ver Mis Pedidos</a>
-          <button @click="handleLogout()" class="btn-secondary">Cerrar Sesión</button>
-        </div>
-      </div>
+      <div class="loading-state"><div class="spinner"></div></div>
     </template>
 
     <template x-if="!loading && !profile">
@@ -42,135 +15,425 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
         <a href="/auth/login" class="btn-primary">Iniciar Sesión</a>
       </div>
     </template>
+
+    <template x-if="!loading && profile">
+      <div>
+        <!-- Header -->
+        <div class="profile-header">
+          <div class="avatar" x-text="profile.email[0].toUpperCase()"></div>
+          <div>
+            <h1 x-text="profile.name || profile.email"></h1>
+            <p class="profile-email" x-text="profile.email"></p>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab" :class="{ active: activeTab === 'personal' }" @click="activeTab = 'personal'">Datos Personales</button>
+          <button class="tab" :class="{ active: activeTab === 'password' }" @click="activeTab = 'password'">Contraseña</button>
+          <button class="tab" :class="{ active: activeTab === 'addresses' }" @click="activeTab = 'addresses'; loadAddresses()">Mis Direcciones</button>
+        </div>
+
+        <!-- Tab: Datos Personales -->
+        <div class="card" x-show="activeTab === 'personal'">
+          <h2 class="card-title">Datos Personales</h2>
+
+          <template x-if="successMsg">
+            <div class="alert-success" x-text="successMsg"></div>
+          </template>
+          <template x-if="errorMsg">
+            <div class="alert-error" x-text="errorMsg"></div>
+          </template>
+
+          <form class="form-stack" @submit.prevent="saveProfile()">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" x-model="form.name" placeholder="Tu nombre" />
+              </div>
+              <div class="form-group">
+                <label>Teléfono</label>
+                <input type="tel" x-model="form.phone" placeholder="+52 55 1234 5678" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" :value="profile.email" disabled class="input-disabled" />
+            </div>
+            <div class="form-group">
+              <label>Rol</label>
+              <input type="text" :value="profile.role === 'customer' ? 'Cliente' : 'Vendedor'" disabled class="input-disabled" />
+            </div>
+            <div class="form-group">
+              <label>Miembro desde</label>
+              <input type="text" :value="new Date(profile.createdAt).toLocaleDateString('es-MX')" disabled class="input-disabled" />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary" :disabled="savingProfile">
+                <span x-show="!savingProfile">Guardar cambios</span>
+                <span x-show="savingProfile">Guardando...</span>
+              </button>
+              <a href="/orders" class="btn-secondary">Ver Mis Pedidos</a>
+              <button type="button" @click="handleLogout()" class="btn-ghost">Cerrar Sesión</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab: Contraseña -->
+        <div class="card" x-show="activeTab === 'password'">
+          <h2 class="card-title">Cambiar Contraseña</h2>
+          <p class="card-sub">Elige una contraseña de al menos 8 caracteres con letras y números.</p>
+
+          <template x-if="pwSuccess">
+            <div class="alert-success" x-text="pwSuccess"></div>
+          </template>
+          <template x-if="pwError">
+            <div class="alert-error" x-text="pwError"></div>
+          </template>
+
+          <form class="form-stack" @submit.prevent="changePassword()">
+            <div class="form-group">
+              <label>Nueva contraseña</label>
+              <input type="password" x-model="pw.newPassword" required minlength="8" placeholder="Mínimo 8 caracteres" />
+            </div>
+            <div class="form-group">
+              <label>Confirmar contraseña</label>
+              <input type="password" x-model="pw.confirm" required placeholder="Repite la contraseña" />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary" :disabled="savingPw">
+                <span x-show="!savingPw">Actualizar contraseña</span>
+                <span x-show="savingPw">Guardando...</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab: Mis Direcciones -->
+        <div class="card" x-show="activeTab === 'addresses'">
+          <div class="section-head">
+            <h2 class="card-title">Mis Direcciones</h2>
+            <button class="btn-add" @click="openAddressModal(null)">+ Añadir</button>
+          </div>
+
+          <template x-if="addrError">
+            <div class="alert-error" x-text="addrError"></div>
+          </template>
+
+          <template x-if="loadingAddresses">
+            <p class="muted">Cargando...</p>
+          </template>
+
+          <template x-if="!loadingAddresses && addresses.length === 0">
+            <p class="muted">No tienes direcciones guardadas.</p>
+          </template>
+
+          <div class="addr-list">
+            <template x-for="addr in addresses" :key="addr.id">
+              <div class="addr-card" :class="{ 'addr-card--default': addr.is_default }">
+                <div class="addr-card-top">
+                  <span class="addr-type" x-text="{ home: '🏠 Casa', office: '🏢 Oficina', other: '📍 Otro' }[addr.label]"></span>
+                  <template x-if="addr.is_default">
+                    <span class="badge-default">Predeterminada</span>
+                  </template>
+                </div>
+                <p class="addr-text" x-text="addr.street"></p>
+                <p class="addr-text muted" x-text="addr.city + ', CP ' + addr.postal_code + ' · ' + addr.country"></p>
+                <div class="addr-actions">
+                  <button class="link-btn" @click="openAddressModal(addr)">Editar</button>
+                  <template x-if="!addr.is_default">
+                    <button class="link-btn" @click="makeDefault(addr.id)">Predeterminada</button>
+                  </template>
+                  <button class="link-btn link-btn--danger" @click="removeAddress(addr.id)">Eliminar</button>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Inline form (add / edit) -->
+          <template x-if="showAddrForm">
+            <div class="addr-form-panel" x-transition>
+              <h3 class="card-title" x-text="editingAddrId ? 'Editar dirección' : 'Nueva dirección'"></h3>
+              <form class="form-stack" @submit.prevent="saveAddress()">
+                <div class="form-group">
+                  <label>Tipo</label>
+                  <select x-model="addrForm.label">
+                    <option value="home">Casa</option>
+                    <option value="office">Oficina</option>
+                    <option value="other">Otro</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Calle y número</label>
+                  <input type="text" x-model="addrForm.street" required placeholder="Av. Siempre Viva 123" minlength="5" />
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Ciudad</label>
+                    <input type="text" x-model="addrForm.city" required minlength="2" />
+                  </div>
+                  <div class="form-group">
+                    <label>Código Postal</label>
+                    <input type="text" x-model="addrForm.postal_code" required minlength="4" maxlength="6" pattern="\d{4,6}" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>País</label>
+                  <select x-model="addrForm.country">
+                    <option value="MX">México</option>
+                    <option value="US">Estados Unidos</option>
+                    <option value="ES">España</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" x-model="addrForm.is_default" />
+                    <span>Establecer como predeterminada</span>
+                  </label>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn-primary" :disabled="savingAddr">
+                    <span x-show="!savingAddr">Guardar</span>
+                    <span x-show="savingAddr">Guardando...</span>
+                  </button>
+                  <button type="button" class="btn-ghost" @click="showAddrForm = false">Cancelar</button>
+                </div>
+              </form>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
   </div>
 </ClientHubLayout>
 
 <script>
   import { getCurrentUser, signOut } from '../../lib/auth/auth-client.ts';
+  import {
+    updateProfile, updatePassword,
+    loadAddresses, createAddress, updateAddress, deleteAddress, setDefaultAddress
+  } from '../../lib/profile/profile-client.ts';
 
   window.profilePage = () => ({
-    profile: null,
     loading: true,
+    profile: null,
+    activeTab: 'personal',
 
-    async loadProfile() {
+    form: { name: '', phone: '' },
+    savingProfile: false,
+    successMsg: '',
+    errorMsg: '',
+
+    pw: { newPassword: '', confirm: '' },
+    savingPw: false,
+    pwSuccess: '',
+    pwError: '',
+
+    addresses: [],
+    loadingAddresses: false,
+    addrError: '',
+    showAddrForm: false,
+    editingAddrId: null,
+    savingAddr: false,
+    addrForm: { label: 'home', street: '', city: '', postal_code: '', country: 'MX', is_default: false },
+
+    async init() {
       try {
         const result = await getCurrentUser();
-
         if (result) {
+          const meta = result.user.user_metadata || {};
           this.profile = {
             email: result.user.email,
             role: result.profile?.role || 'customer',
-            createdAt: result.user.created_at
+            createdAt: result.user.created_at,
+            name: meta.name || '',
+            phone: meta.phone || '',
           };
+          this.form.name = this.profile.name;
+          this.form.phone = this.profile.phone;
         }
-      } catch (err) {
-        console.error('Error loading profile:', err);
+      } catch {}
+      finally { this.loading = false; }
+    },
+
+    async saveProfile() {
+      this.savingProfile = true;
+      this.successMsg = '';
+      this.errorMsg = '';
+      try {
+        await updateProfile(this.form.name, this.form.phone);
+        this.profile.name = this.form.name;
+        this.profile.phone = this.form.phone;
+        this.successMsg = 'Perfil actualizado correctamente';
+        setTimeout(() => { this.successMsg = ''; }, 3000);
+      } catch (e) {
+        this.errorMsg = 'Error al guardar los cambios';
       } finally {
-        this.loading = false;
+        this.savingProfile = false;
       }
+    },
+
+    async changePassword() {
+      this.pwError = '';
+      this.pwSuccess = '';
+      if (this.pw.newPassword !== this.pw.confirm) {
+        this.pwError = 'Las contraseñas no coinciden';
+        return;
+      }
+      if (this.pw.newPassword.length < 8) {
+        this.pwError = 'La contraseña debe tener al menos 8 caracteres';
+        return;
+      }
+      this.savingPw = true;
+      try {
+        await updatePassword(this.pw.newPassword);
+        this.pw = { newPassword: '', confirm: '' };
+        this.pwSuccess = 'Contraseña actualizada';
+        setTimeout(() => { this.pwSuccess = ''; }, 3000);
+      } catch (e) {
+        this.pwError = 'Error al actualizar la contraseña';
+      } finally {
+        this.savingPw = false;
+      }
+    },
+
+    async loadAddresses() {
+      if (this.addresses.length > 0) return;
+      this.loadingAddresses = true;
+      this.addrError = '';
+      try {
+        this.addresses = await loadAddresses();
+      } catch { this.addrError = 'Error al cargar direcciones'; }
+      finally { this.loadingAddresses = false; }
+    },
+
+    openAddressModal(addr) {
+      if (addr) {
+        this.editingAddrId = addr.id;
+        this.addrForm = { label: addr.label, street: addr.street, city: addr.city, postal_code: addr.postal_code, country: addr.country, is_default: addr.is_default };
+      } else {
+        this.editingAddrId = null;
+        this.addrForm = { label: 'home', street: '', city: '', postal_code: '', country: 'MX', is_default: false };
+      }
+      this.showAddrForm = true;
+    },
+
+    async saveAddress() {
+      this.savingAddr = true;
+      this.addrError = '';
+      try {
+        if (this.editingAddrId) {
+          const updated = await updateAddress(this.editingAddrId, this.addrForm);
+          const idx = this.addresses.findIndex(a => a.id === this.editingAddrId);
+          if (idx >= 0) this.addresses[idx] = updated;
+        } else {
+          const created = await createAddress(this.addrForm);
+          this.addresses.push(created);
+        }
+        if (this.addrForm.is_default) {
+          this.addresses = this.addresses.map(a => ({ ...a, is_default: a.id === (this.editingAddrId || this.addresses[this.addresses.length - 1].id) }));
+        }
+        this.showAddrForm = false;
+      } catch (e) {
+        this.addrError = e instanceof Error ? e.message : 'Error al guardar';
+      } finally {
+        this.savingAddr = false;
+      }
+    },
+
+    async makeDefault(id) {
+      try {
+        await setDefaultAddress(id);
+        this.addresses = this.addresses.map(a => ({ ...a, is_default: a.id === id }));
+      } catch { this.addrError = 'Error al actualizar'; }
+    },
+
+    async removeAddress(id) {
+      if (!confirm('¿Eliminar esta dirección?')) return;
+      try {
+        await deleteAddress(id);
+        this.addresses = this.addresses.filter(a => a.id !== id);
+      } catch { this.addrError = 'Error al eliminar'; }
     },
 
     async handleLogout() {
       await signOut();
       window.location.href = '/auth/login';
-    }
+    },
   });
 </script>
 
 <style>
-  .profile-container {
-    max-width: 600px;
-    margin: 2rem auto;
-    padding: 2rem;
-  }
+  .profile-page { max-width: 760px; margin: 2rem auto; padding: 0 1.5rem 4rem; }
 
-  h1 {
-    margin-bottom: 2rem;
-    font-size: 2rem;
-    color: #1a1a2e;
-  }
+  .loading-state { display: flex; justify-content: center; padding: 4rem; }
+  .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  .loading-text {
-    color: #666;
-    text-align: center;
-  }
+  .profile-header { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 2rem; }
+  .avatar { width: 56px; height: 56px; border-radius: 50%; background: #4f46e5; color: white; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .profile-header h1 { font-size: 1.75rem; font-weight: 800; color: #1e293b; margin: 0; }
+  .profile-email { color: #64748b; font-size: 0.9rem; margin: 0.2rem 0 0; }
 
-  .profile-card {
-    background: white;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  }
+  .tabs { display: flex; gap: 0.25rem; border-bottom: 2px solid #e2e8f0; margin-bottom: 1.5rem; }
+  .tab { padding: 0.75rem 1.25rem; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; font-size: 0.9rem; font-weight: 600; color: #64748b; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+  .tab:hover { color: #4f46e5; }
+  .tab.active { color: #4f46e5; border-bottom-color: #4f46e5; }
 
-  .profile-info {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-  }
+  .card { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .card-title { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0 0 1.5rem; }
+  .card-sub { color: #64748b; font-size: 0.875rem; margin: -1rem 0 1.5rem; }
 
-  .info-group label {
-    font-size: 0.75rem;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    display: block;
-  }
+  .form-stack { display: flex; flex-direction: column; gap: 1.25rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group label { font-size: 0.8rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.03em; }
+  .form-group input, .form-group select { padding: 0.7rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; transition: border-color 0.2s; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: #4f46e5; }
+  .input-disabled { background: #f8fafc; color: #94a3b8; cursor: default; }
+  .form-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.5rem; }
 
-  .info-group p {
-    font-size: 1.125rem;
-    color: #333;
-    font-weight: 500;
-  }
+  .btn-primary { background: #4f46e5; color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
+  .btn-primary:hover { background: #4338ca; }
+  .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+  .btn-secondary { display: inline-flex; align-items: center; padding: 0.7rem 1.5rem; background: #f1f5f9; color: #334155; border: none; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; text-decoration: none; }
+  .btn-secondary:hover { background: #e2e8f0; }
+  .btn-ghost { background: none; border: none; color: #94a3b8; font-size: 0.875rem; cursor: pointer; padding: 0.7rem 0.5rem; }
+  .btn-ghost:hover { color: #ef4444; }
+  .btn-add { background: #ede9fe; color: #4f46e5; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+  .btn-add:hover { background: #ddd6fe; }
 
-  .profile-actions {
-    display: flex;
-    gap: 1rem;
-    border-top: 1px solid #eee;
-    padding-top: 1.5rem;
-  }
+  .alert-success { background: #dcfce7; border: 1px solid #86efac; color: #166534; padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.875rem; margin-bottom: 1rem; }
+  .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.875rem; margin-bottom: 1rem; }
 
-  .btn-primary {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background: #1a1a2e;
-    color: white;
-    text-decoration: none;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 500;
-  }
+  .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .section-head .card-title { margin: 0; }
 
-  .btn-secondary {
-    padding: 0.75rem 1.5rem;
-    background: #f3f4f6;
-    color: #374151;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 500;
-  }
+  .addr-list { display: flex; flex-direction: column; gap: 1rem; }
+  .addr-card { border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem 1.25rem; }
+  .addr-card--default { border-color: #4f46e5; background: #fafaff; }
+  .addr-card-top { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem; }
+  .addr-type { font-weight: 700; font-size: 0.9rem; color: #1e293b; }
+  .badge-default { background: #dbeafe; color: #1d4ed8; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+  .addr-text { margin: 0.1rem 0; font-size: 0.875rem; color: #334155; }
+  .addr-actions { display: flex; gap: 1rem; margin-top: 0.75rem; }
+  .link-btn { background: none; border: none; font-size: 0.8rem; font-weight: 600; color: #4f46e5; cursor: pointer; padding: 0; }
+  .link-btn:hover { text-decoration: underline; }
+  .link-btn--danger { color: #ef4444; }
 
-  .btn-secondary:hover {
-    background: #e5e7eb;
-  }
+  .addr-form-panel { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; }
+  .addr-form-panel .card-title { margin-bottom: 1.25rem; }
 
-  .not-logged-in {
-    text-align: center;
-    padding: 3rem;
-    background: #f9fafb;
-    border-radius: 12px;
-  }
+  .checkbox-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #475569; cursor: pointer; }
+  .checkbox-label input { accent-color: #4f46e5; }
 
-  .not-logged-in p {
-    margin-bottom: 1.5rem;
-    color: #4b5563;
-    font-size: 1.1rem;
+  .muted { color: #94a3b8; font-size: 0.875rem; }
+  .not-logged-in { text-align: center; padding: 3rem; background: #f9fafb; border-radius: 12px; }
+  .not-logged-in p { margin-bottom: 1.5rem; color: #4b5563; }
+
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .tabs { gap: 0; }
+    .tab { padding: 0.75rem 0.875rem; font-size: 0.82rem; }
   }
 </style>

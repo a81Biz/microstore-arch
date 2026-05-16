@@ -1,0 +1,944 @@
+{
+  "nodes": [
+    {
+      "id": "manage_cart_ManageCartController",
+      "label": "ManageCartController",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-cart/index.ts",
+      "source_location": "line 16",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_cart_SyncSchema",
+      "label": "SyncSchema (Zod cart sync validation)",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-cart/index.ts",
+      "source_location": "line 9",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_cart_cart_items_table",
+      "label": "cart_items DB Table (manage-cart)",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-cart/index.ts",
+      "source_location": "line 70",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_orders_OrderManagementController",
+      "label": "OrderManagementController",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 22",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_orders_OrderFilters",
+      "label": "OrderFilters Interface",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 8",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_orders_TrackingUpdate",
+      "label": "TrackingUpdate Interface",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 17",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_orders_triggerEmail",
+      "label": "triggerEmail (internal email dispatch)",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 170",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_orders_rpc_search_orders",
+      "label": "RPC: search_orders",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 97",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_orders_rpc_update_order_tracking",
+      "label": "RPC: update_order_tracking",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 138",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_orders_rpc_update_order_status_manual",
+      "label": "RPC: update_order_status_manual",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 156",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "send_delivery_email_fn",
+      "label": "send-delivery-email Edge Function",
+      "file_type": "code",
+      "source_file": "supabase/functions/send-delivery-email/index.ts",
+      "source_location": "line 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "send_delivery_email_resend_integration",
+      "label": "Resend API integration (delivery email)",
+      "file_type": "rationale",
+      "source_file": "supabase/functions/send-delivery-email/index.ts",
+      "source_location": "line 75",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00033_customer_addresses",
+      "label": "Migration 00033: customer_addresses table",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00033_customer_addresses.sql",
+      "source_location": "line 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00033_enforce_single_default",
+      "label": "Trigger: enforce_single_default_address",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00033_customer_addresses.sql",
+      "source_location": "line 26",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00034_cart_items",
+      "label": "Migration 00034: cart_items table",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00034_cart_items.sql",
+      "source_location": "line 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00035_extend_order_status",
+      "label": "Migration 00035: extend order_status enum + profiles name/phone",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00035_extend_order_status_and_profiles.sql",
+      "source_location": "line 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00035_sync_profile_meta",
+      "label": "Trigger: sync_profile_meta (auth.users → profiles)",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00035_extend_order_status_and_profiles.sql",
+      "source_location": "line 13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00036_order_status_history",
+      "label": "Migration 00036: order_status_history table + trigger",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00036_order_status_history.sql",
+      "source_location": "line 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00036_record_order_status_change",
+      "label": "Trigger: record_order_status_change",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00036_order_status_history.sql",
+      "source_location": "line 22",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00037_order_payments",
+      "label": "Migration 00037: order_payments table + confirm_order_payment RPC",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00037_order_payments_and_rpc.sql",
+      "source_location": "line 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00037_confirm_order_payment_rpc",
+      "label": "RPC: confirm_order_payment (updated)",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00037_order_payments_and_rpc.sql",
+      "source_location": "line 23",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_microstore_arch",
+      "label": "README: Micro-Store Arch Project",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "line 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_order_status_lifecycle",
+      "label": "Order Status Lifecycle (9 states)",
+      "file_type": "rationale",
+      "source_file": "README.md",
+      "source_location": "line 296",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_cart_cross_origin_pattern",
+      "label": "Cross-origin Cart Serialization Pattern (?cart=)",
+      "file_type": "rationale",
+      "source_file": "README.md",
+      "source_location": "line 218",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_totp_mfa_vendor",
+      "label": "TOTP MFA Vendor Security (RFC 6238)",
+      "file_type": "rationale",
+      "source_file": "README.md",
+      "source_location": "line 82",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_architecture_rules",
+      "label": "Architecture Rules (CI-enforced)",
+      "file_type": "rationale",
+      "source_file": "README.md",
+      "source_location": "line 330",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "handoff_project_state",
+      "label": "HANDOFF: Project State & Sprint History",
+      "file_type": "document",
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "handoff_break_glass_protocol",
+      "label": "Break-glass MFA Reset Protocol",
+      "file_type": "rationale",
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 128",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "handoff_base_controller_tree",
+      "label": "BaseController Inheritance Tree (5 controllers)",
+      "file_type": "rationale",
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 84",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "handoff_mfa_pipeline",
+      "label": "MFA Vendor Pipeline (login → change-password → setup-totp → verify-totp)",
+      "file_type": "rationale",
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 105",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "handoff_transactional_emails",
+      "label": "Transactional Emails System (Resend)",
+      "file_type": "rationale",
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 270",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "pending_tasks_pt_admin_032",
+      "label": "PT-ADMIN-032: Flujo Administrativo de Pedidos",
+      "file_type": "document",
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 14",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "pending_tasks_pt_client_031",
+      "label": "PT-CLIENT-031: Flujo del Cliente",
+      "file_type": "document",
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 183",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "pending_tasks_pt_img_030",
+      "label": "PT-IMG-030: Galería de Imágenes",
+      "file_type": "document",
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 384",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "rationale_upsert_greatest_qty",
+      "label": "Cart UPSERT Strategy: GREATEST quantity to avoid overwriting larger server cart",
+      "file_type": "rationale",
+      "source_file": "supabase/functions/manage-cart/index.ts",
+      "source_location": "line 67",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "rationale_order_payment_no_rollback",
+      "label": "Payment INSERT non-blocking: confirmed payment must not roll back on audit INSERT failure",
+      "file_type": "rationale",
+      "source_file": "supabase/migrations/00037_order_payments_and_rpc.sql",
+      "source_location": "line 68",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "rationale_service_role_only_rls",
+      "label": "service_role-only RLS on audit tables (order_status_history, order_payments)",
+      "file_type": "rationale",
+      "source_file": "supabase/migrations/00036_order_status_history.sql",
+      "source_location": "line 15",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "manage_cart_ManageCartController",
+      "target": "manage_cart_SyncSchema",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-cart/index.ts",
+      "source_location": "line 54",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_cart_ManageCartController",
+      "target": "manage_cart_cart_items_table",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-cart/index.ts",
+      "source_location": "line 70",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_cart_ManageCartController",
+      "target": "rationale_upsert_greatest_qty",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-cart/index.ts",
+      "source_location": "line 67",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_orders_OrderManagementController",
+      "target": "manage_orders_OrderFilters",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 78",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_orders_OrderManagementController",
+      "target": "manage_orders_TrackingUpdate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 128",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_orders_OrderManagementController",
+      "target": "manage_orders_rpc_search_orders",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 97",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_orders_OrderManagementController",
+      "target": "manage_orders_rpc_update_order_tracking",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 138",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_orders_OrderManagementController",
+      "target": "manage_orders_rpc_update_order_status_manual",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 156",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_orders_OrderManagementController",
+      "target": "manage_orders_triggerEmail",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 146",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_orders_triggerEmail",
+      "target": "send_delivery_email_fn",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 175",
+      "weight": 1.0
+    },
+    {
+      "source": "send_delivery_email_fn",
+      "target": "send_delivery_email_resend_integration",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/send-delivery-email/index.ts",
+      "source_location": "line 75",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00033_customer_addresses",
+      "target": "migration_00033_enforce_single_default",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00033_customer_addresses.sql",
+      "source_location": "line 38",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00035_extend_order_status",
+      "target": "migration_00035_sync_profile_meta",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00035_extend_order_status_and_profiles.sql",
+      "source_location": "line 24",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00036_order_status_history",
+      "target": "migration_00036_record_order_status_change",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00036_order_status_history.sql",
+      "source_location": "line 31",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00037_order_payments",
+      "target": "migration_00037_confirm_order_payment_rpc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00037_order_payments_and_rpc.sql",
+      "source_location": "line 23",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00037_confirm_order_payment_rpc",
+      "target": "rationale_order_payment_no_rollback",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00037_order_payments_and_rpc.sql",
+      "source_location": "line 68",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00036_order_status_history",
+      "target": "rationale_service_role_only_rls",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00036_order_status_history.sql",
+      "source_location": "line 15",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00037_order_payments",
+      "target": "rationale_service_role_only_rls",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "supabase/migrations/00037_order_payments_and_rpc.sql",
+      "source_location": "line 18",
+      "weight": 0.95
+    },
+    {
+      "source": "manage_orders_OrderManagementController",
+      "target": "migration_00036_order_status_history",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 112",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_orders_OrderManagementController",
+      "target": "migration_00037_order_payments",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-orders/index.ts",
+      "source_location": "line 113",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_microstore_arch",
+      "target": "readme_order_status_lifecycle",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "line 296",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_microstore_arch",
+      "target": "readme_cart_cross_origin_pattern",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "line 218",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_microstore_arch",
+      "target": "readme_totp_mfa_vendor",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "line 82",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_microstore_arch",
+      "target": "readme_architecture_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "line 330",
+      "weight": 1.0
+    },
+    {
+      "source": "handoff_project_state",
+      "target": "handoff_break_glass_protocol",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 128",
+      "weight": 1.0
+    },
+    {
+      "source": "handoff_project_state",
+      "target": "handoff_base_controller_tree",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 84",
+      "weight": 1.0
+    },
+    {
+      "source": "handoff_project_state",
+      "target": "handoff_mfa_pipeline",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 105",
+      "weight": 1.0
+    },
+    {
+      "source": "handoff_project_state",
+      "target": "handoff_transactional_emails",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 270",
+      "weight": 1.0
+    },
+    {
+      "source": "handoff_transactional_emails",
+      "target": "send_delivery_email_fn",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 264",
+      "weight": 0.95
+    },
+    {
+      "source": "handoff_transactional_emails",
+      "target": "manage_orders_triggerEmail",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 275",
+      "weight": 0.95
+    },
+    {
+      "source": "pending_tasks_pt_admin_032",
+      "target": "migration_00035_extend_order_status",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 29",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_pt_admin_032",
+      "target": "migration_00036_order_status_history",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 51",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_pt_admin_032",
+      "target": "migration_00037_order_payments",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 62",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_pt_admin_032",
+      "target": "manage_orders_OrderManagementController",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 77",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_pt_client_031",
+      "target": "migration_00033_customer_addresses",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 191",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_pt_client_031",
+      "target": "migration_00034_cart_items",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 271",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_pt_client_031",
+      "target": "manage_cart_ManageCartController",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 281",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_pt_client_031",
+      "target": "send_delivery_email_fn",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "line 314",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_cart_ManageCartController",
+      "target": "migration_00034_cart_items",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-cart/index.ts",
+      "source_location": "line 70",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_order_status_lifecycle",
+      "target": "migration_00035_extend_order_status",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "README.md",
+      "source_location": "line 296",
+      "weight": 0.95
+    },
+    {
+      "source": "handoff_break_glass_protocol",
+      "target": "readme_totp_mfa_vendor",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "line 128",
+      "weight": 0.85
+    },
+    {
+      "source": "migration_00034_cart_items",
+      "target": "rationale_upsert_greatest_qty",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00034_cart_items.sql",
+      "source_location": "line 3",
+      "weight": 1.0
+    },
+    {
+      "source": "send_delivery_email_fn",
+      "target": "manage_orders_OrderManagementController",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "supabase/functions/send-delivery-email/index.ts",
+      "source_location": "line 7",
+      "weight": 0.95
+    },
+    {
+      "source": "readme_architecture_rules",
+      "target": "handoff_project_state",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "README.md",
+      "source_location": "line 330",
+      "weight": 0.75
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "order_audit_trail_system",
+      "label": "Order Audit Trail System (status history + payments + trigger)",
+      "nodes": [
+        "migration_00036_order_status_history",
+        "migration_00036_record_order_status_change",
+        "migration_00037_order_payments",
+        "migration_00037_confirm_order_payment_rpc",
+        "manage_orders_OrderManagementController"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00036_order_status_history.sql"
+    },
+    {
+      "id": "customer_cart_persistence_system",
+      "label": "Customer Cart Persistence System (DB + Edge Function + sync)",
+      "nodes": [
+        "migration_00034_cart_items",
+        "manage_cart_ManageCartController",
+        "manage_cart_SyncSchema",
+        "rationale_upsert_greatest_qty"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00034_cart_items.sql"
+    },
+    {
+      "id": "transactional_email_pipeline",
+      "label": "Transactional Email Pipeline (manage-orders → send-delivery-email → Resend)",
+      "nodes": [
+        "manage_orders_OrderManagementController",
+        "manage_orders_triggerEmail",
+        "send_delivery_email_fn",
+        "send_delivery_email_resend_integration",
+        "handoff_transactional_emails"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-orders/index.ts"
+    },
+    {
+      "id": "customer_address_management",
+      "label": "Customer Address Management (table + RLS + single-default trigger)",
+      "nodes": [
+        "migration_00033_customer_addresses",
+        "migration_00033_enforce_single_default",
+        "pending_tasks_pt_client_031"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00033_customer_addresses.sql"
+    },
+    {
+      "id": "pt_admin_032_delivery",
+      "label": "PT-ADMIN-032: Backoffice Order Admin (migrations 35-37 + manage-orders enriched)",
+      "nodes": [
+        "pending_tasks_pt_admin_032",
+        "migration_00035_extend_order_status",
+        "migration_00036_order_status_history",
+        "migration_00037_order_payments",
+        "manage_orders_OrderManagementController"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md"
+    },
+    {
+      "id": "pt_client_031_delivery",
+      "label": "PT-CLIENT-031: Full Customer Flow (addresses + cart + profile + emails)",
+      "nodes": [
+        "pending_tasks_pt_client_031",
+        "migration_00033_customer_addresses",
+        "migration_00034_cart_items",
+        "manage_cart_ManageCartController",
+        "send_delivery_email_fn"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md"
+    }
+  ],
+  "input_tokens": 18500,
+  "output_tokens": 4200
+}

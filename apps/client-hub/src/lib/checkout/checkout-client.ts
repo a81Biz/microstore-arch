@@ -1,6 +1,16 @@
 import { supabaseClient } from '../supabase-client';
 import { API_ROUTES } from '@micro-store/core';
 
+export interface CustomerAddress {
+  id: string;
+  label: 'home' | 'office' | 'other';
+  street: string;
+  city: string;
+  postal_code: string;
+  country: string;
+  is_default: boolean;
+}
+
 export interface CheckoutResult {
   success: boolean;
   orderId?: string;
@@ -90,6 +100,37 @@ export async function createOrder(
     currency: data.currency,
     payment: data.payment
   };
+}
+
+export async function loadSavedAddresses(): Promise<CustomerAddress[]> {
+  const authHeader = await getAuthHeader();
+  if (!authHeader) return [];
+
+  const response = await fetch(
+    `${import.meta.env.PUBLIC_API_BASE}/functions/v1/manage-addresses`,
+    { headers: { Authorization: authHeader } }
+  );
+  if (!response.ok) return [];
+  return response.json();
+}
+
+export async function saveAddressToAccount(
+  address: Omit<CustomerAddress, 'id' | 'is_default'>,
+  isDefault = false
+): Promise<CustomerAddress | null> {
+  const authHeader = await getAuthHeader();
+  if (!authHeader) return null;
+
+  const response = await fetch(
+    `${import.meta.env.PUBLIC_API_BASE}/functions/v1/manage-addresses`,
+    {
+      method: 'POST',
+      headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...address, is_default: isDefault }),
+    }
+  );
+  if (!response.ok) return null;
+  return response.json();
 }
 
 export async function getActivePaymentMethods(): Promise<string[]> {

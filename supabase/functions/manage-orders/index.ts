@@ -8,6 +8,8 @@ const logger = createLogger('manage-orders');
 interface OrderFilters {
   status?: string;
   search?: string;
+  dateFrom?: string;
+  dateTo?: string;
   limit: number;
   offset: number;
 }
@@ -27,10 +29,12 @@ class OrderManagementController extends BaseController {
     // GET /manage-orders → Listar pedidos
     if (method === 'GET' && url.pathname.endsWith('/manage-orders')) {
       const filters: OrderFilters = {
-        status: url.searchParams.get('status') ?? undefined,
-        search: url.searchParams.get('search') ?? undefined,
-        limit: Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 100),
-        offset: Math.max(parseInt(url.searchParams.get('offset') || '0', 10), 0)
+        status:   url.searchParams.get('status')    ?? undefined,
+        search:   url.searchParams.get('search')    ?? undefined,
+        dateFrom: url.searchParams.get('date_from') ?? undefined,
+        dateTo:   url.searchParams.get('date_to')   ?? undefined,
+        limit:    Math.min(parseInt(url.searchParams.get('limit')  || '50', 10), 100),
+        offset:   Math.max(parseInt(url.searchParams.get('offset') || '0',  10), 0),
       };
       const orders = await this.listOrders(authHeader, filters);
       return new Response(JSON.stringify(orders), {
@@ -74,19 +78,28 @@ class OrderManagementController extends BaseController {
   private async listOrders(authHeader: string, filters: OrderFilters) {
     await this.requireAdminMFA(authHeader);
 
-    const { data: orders, error } = await this.dbAdmin.rpc('search_orders', {
+    const params: Record<string, unknown> = {
       p_status: filters.status ?? null,
       p_search: filters.search ?? null,
-      p_limit: filters.limit,
-      p_offset: filters.offset
-    });
+      p_limit:  filters.limit,
+      p_offset: filters.offset,
+    };
 
+    if (filters.dateFrom) {
+      const d = new Date(filters.dateFrom);
+      if (!isNaN(d.getTime())) params.p_date_from = d.toISOString();
+    }
+    if (filters.dateTo) {
+      const d = new Date(filters.dateTo);
+      if (!isNaN(d.getTime())) params.p_date_to = d.toISOString();
+    }
+
+    const { data: orders, error } = await this.dbAdmin.rpc('search_orders', params);
     if (error) throw error;
     return orders;
   }
 
   private async getOrderDetail(authHeader: string, orderId: string) {
-    // Autenticar una sola vez y reutilizar el objeto user
     const user = await this.authenticateUser(authHeader);
     const isAdmin = await this.isAdminUser(user);
 
@@ -94,10 +107,13 @@ class OrderManagementController extends BaseController {
       .from('orders')
       .select(`
         *,
-        profiles(email),
-        order_items(*, products(name, slug))
+        profiles(email, name, phone),
+        order_items(*, products(name, slug)),
+        order_status_history(from_status, to_status, changed_at),
+        order_payments(gateway, transaction_id, amount_cents, currency, paid_at)
       `)
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .order('changed_at', { foreignTable: 'order_status_history', ascending: true });
 
     if (!isAdmin) {
       query = query.eq('customer_id', user.id);
@@ -120,14 +136,13 @@ class OrderManagementController extends BaseController {
     }
 
     const { data, error } = await this.dbAdmin.rpc('update_order_tracking', {
-      p_order_id: orderId,
+      p_order_id:   orderId,
       p_tracking_id: tracking.trackingId,
-      p_carrier: tracking.carrier
+      p_carrier:    tracking.carrier
     });
 
     if (error) throw error;
 
-    // Notificación asíncrona — error no debe bloquear la respuesta al vendor
     this.triggerEmail(orderId, 'shipping').catch(err =>
       logger.error('Failed to trigger shipping email', { orderId, error: String(err) })
     );
@@ -139,7 +154,7 @@ class OrderManagementController extends BaseController {
     await this.requireAdminMFA(authHeader);
 
     const { data, error } = await this.dbAdmin.rpc('update_order_status_manual', {
-      p_order_id: orderId,
+      p_order_id:   orderId,
       p_new_status: newStatus
     });
 
@@ -153,14 +168,17 @@ class OrderManagementController extends BaseController {
   }
 
   private async triggerEmail(orderId: string, type: string, status?: string): Promise<void> {
-    // H3: status_update no tiene función de email dedicada — skip con trazabilidad.
-    // TODO PT-012c: implementar send-status-email cuando se requiera notificar cambios de estado.
-    if (type === 'status_update') {
-      logger.info('Status update email skipped (send-status-email not implemented)', { orderId, status });
+    let functionName: string | null = null;
+
+    if (type === 'shipping') {
+      functionName = 'send-shipping-email';
+    } else if (type === 'status_update' && status === 'delivered') {
+      functionName = 'send-delivery-email';
+    } else {
+      logger.info('No email configured for this event', { orderId, type, status });
       return;
     }
 
-    const functionName = 'send-shipping-email';
     await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/${functionName}`, {
       method: 'POST',
       headers: {

@@ -21,6 +21,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 
 <script>
   import { supabaseClient } from '../../lib/supabase-client.ts';
+  import { syncCartOnLogin } from '../../lib/auth/auth-client.ts';
 
   window.authCallback = () => ({
     loading: true,
@@ -37,7 +38,13 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
         }
 
         localStorage.setItem('auth_token', session.access_token);
-        window.location.href = '/';
+
+        // Sync localStorage cart to DB (fire-and-forget; never blocks redirect)
+        await syncCartOnLogin();
+
+        const returnUrl = sessionStorage.getItem('returnUrl') || '/';
+        sessionStorage.removeItem('returnUrl');
+        window.location.href = returnUrl;
       } catch (err) {
         this.error = 'Error de conexión';
         this.loading = false;

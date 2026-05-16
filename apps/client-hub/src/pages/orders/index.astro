@@ -100,12 +100,15 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 
     getStatusLabel(status) {
       const labels = {
-        pending: 'Pendiente',
-        paid: 'Pagado',
-        in_production: 'En Producción',
-        shipped: 'Enviado',
-        delivered: 'Entregado',
-        cancelled: 'Cancelado'
+        pending:       'Pendiente',
+        paid:          'Pago confirmado',
+        in_production: 'Preparando',
+        packaged:      'Empaquetado',
+        shipped:       'Enviado',
+        in_transit:    'En tránsito',
+        delivered:     'Entregado',
+        cancelled:     'Cancelado',
+        refunded:      'Reembolsado',
       };
       return labels[status] || status;
     }
@@ -147,7 +150,10 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
   .status--in_production { background: #f5f3ff; color: #5b21b6; }
   .status--shipped { background: #f0fdf4; color: #166534; }
   .status--delivered { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-  .status--cancelled { background: #fef2f2; color: #991b1b; }
+  .status--packaged   { background: #fdf2f8; color: #9d174d; }
+  .status--in_transit { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+  .status--cancelled  { background: #fef2f2; color: #991b1b; }
+  .status--refunded   { background: #f9fafb; color: #374151; border: 1px solid #d1d5db; }
 
   .shipping-tag { font-size: 0.8rem; color: #64748b; font-weight: 500; }
 

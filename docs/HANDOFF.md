@@ -19,6 +19,10 @@
 | Sprint 4 | Pedidos y Logística | Máquina de estados PL/pgSQL, notificaciones Realtime, tracking y fulfillment |
 | Sprint 5 | Despliegue y Cierre | Cloudflare Pages, Logflare observabilidad, smoke tests, CI/CD completo |
 
+**PT-ADMIN-032 (2026-05-16):** Flujo administrativo de pedidos (backoffice) — enum `order_status` extendido a 9 valores (`packaged`, `in_transit` añadidos, migraciones 00035–00037); tabla `order_status_history` con trigger automático de registro en cada cambio de estado; tabla `order_payments` + `confirm_order_payment` RPC actualizado para persistir gateway/transacción/monto; columnas `name`/`phone` en `profiles` + trigger de sync desde `auth.users.raw_user_meta_data`; `manage-orders` enriquecido con historial, cliente completo y pago en detalle; filtro de fecha en listado (RPC ya lo soportaba); vendor-admin orders UI con secciones Cliente, Pago, Historial; timeline de cliente con 7 pasos (incluye Empaquetado y En tránsito); labels y CSS en client-hub para los 9 estados.
+
+**PT-CLIENT-031 (2026-05-16):** Flujo completo del cliente — tabla `customer_addresses` (migración 00033) con RLS y trigger de única-predeterminada; tabla `cart_items` (migración 00034); Edge Functions `manage-addresses` (CRUD de direcciones), `manage-cart` (sync localStorage→DB al login), `send-delivery-email` (email "pedido entregado", hook en `manage-orders`); checkout con selector de direcciones guardadas; perfil con 3 tabs (datos personales, contraseña, mis direcciones); `syncCartOnLogin()` en auth-client.ts disparado desde callback OAuth.
+
 **PT-IMG-030 (2026-05-16):** Galería de imágenes por producto — tabla `product_images` (migración 00032), hasta 10 imágenes por producto, galería Alpine en storefront con lightbox (Esc, ← →), UI admin multi-imagen con upload/delete por thumbnail.
 
 **PT-CART-029 (2026-05-16):** Sistema de carrito completo implementado — Alpine.js store persistente, botón "Agregar" en ProductCard, selector de cantidad en detalle, página `/cart`, drawer lateral, checkout multi-ítem via `?cart=`.

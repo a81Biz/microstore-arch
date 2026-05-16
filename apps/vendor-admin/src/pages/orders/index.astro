@@ -14,9 +14,9 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     <div class="filters-panel card">
       <div class="search-box">
         <span class="icon">🔍</span>
-        <input 
-          type="text" 
-          placeholder="Buscar por ID o email del cliente..." 
+        <input
+          type="text"
+          placeholder="Buscar por ID o email del cliente..."
           x-model="search"
           @input.debounce.300ms="fetchOrders()"
         />
@@ -24,14 +24,25 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       <div class="filter-group">
         <label>Estado</label>
         <select x-model="statusFilter" @change="fetchOrders()">
-          <option value="">Todos los estados</option>
-          <option value="pending">Pendientes</option>
-          <option value="paid">Pagados</option>
-          <option value="in_production">En Producción</option>
-          <option value="shipped">Enviados</option>
-          <option value="delivered">Entregados</option>
-          <option value="cancelled">Cancelados</option>
+          <option value="">Todos</option>
+          <option value="pending">Pago pendiente</option>
+          <option value="paid">Pago confirmado</option>
+          <option value="in_production">Preparando</option>
+          <option value="packaged">Empaquetado</option>
+          <option value="shipped">Enviado</option>
+          <option value="in_transit">En tránsito</option>
+          <option value="delivered">Entregado</option>
+          <option value="cancelled">Cancelado</option>
+          <option value="refunded">Reembolsado</option>
         </select>
+      </div>
+      <div class="filter-group">
+        <label>Desde</label>
+        <input type="date" x-model="dateFrom" @change="fetchOrders()" class="date-input" />
+      </div>
+      <div class="filter-group">
+        <label>Hasta</label>
+        <input type="date" x-model="dateTo" @change="fetchOrders()" class="date-input" />
       </div>
     </div>
 
@@ -56,24 +67,20 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
               <span class="order-id" x-text="order.displayId"></span>
               <span class="order-customer" x-text="order.customerEmail"></span>
             </div>
-            
             <div class="order-meta-info">
               <span class="order-date" x-text="formatDate(order.createdAt)"></span>
               <span class="order-items-count" x-text="order.itemsCount + ' productos'"></span>
             </div>
-
             <div class="order-status-info">
-              <span 
+              <span
                 class="status-badge"
                 :class="'status--' + order.status"
                 x-text="getStatusLabel(order.status)"
               ></span>
             </div>
-
             <div class="order-amount-info">
               <span class="order-amount" x-text="'$' + order.totalAmount.toFixed(2)"></span>
             </div>
-
             <div class="order-actions">
               <button @click.stop="openTrackingModal(order)" class="btn-icon" :disabled="TERMINAL_STATUSES.includes(order.status)" title="Actualizar Tracking">
                 🚚
@@ -102,7 +109,9 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
             <template x-if="!detailLoading && selectedOrder">
               <div class="detail-layout">
                 <div class="detail-main">
-                  <section class="items-section">
+
+                  <!-- Productos -->
+                  <section class="detail-section">
                     <h3>Productos</h3>
                     <div class="items-table">
                       <template x-for="item in selectedOrder.items" :key="item.id">
@@ -119,11 +128,77 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                     </div>
                   </section>
 
-                  <section class="customer-section">
+                  <!-- Cliente y Envío -->
+                  <section class="detail-section">
                     <h3>Cliente y Envío</h3>
-                    <p><strong>Email:</strong> <span x-text="selectedOrder.customerEmail"></span></p>
-                    <p><strong>Dirección:</strong> <span x-text="selectedOrder.shippingAddress.street + ', ' + selectedOrder.shippingAddress.city"></span></p>
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <span class="info-label">Nombre</span>
+                        <span class="info-value" x-text="selectedOrder.customerName || '—'"></span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value" x-text="selectedOrder.customerEmail"></span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">Teléfono</span>
+                        <span class="info-value" x-text="selectedOrder.customerPhone || '—'"></span>
+                      </div>
+                      <div class="info-item info-item--full">
+                        <span class="info-label">Dirección</span>
+                        <span class="info-value" x-text="formatAddress(selectedOrder.shippingAddress)"></span>
+                      </div>
+                    </div>
                   </section>
+
+                  <!-- Pago -->
+                  <template x-if="selectedOrder.paymentInfo">
+                    <section class="detail-section">
+                      <h3>Pago</h3>
+                      <div class="info-grid">
+                        <div class="info-item">
+                          <span class="info-label">Pasarela</span>
+                          <span class="info-value" x-text="selectedOrder.paymentInfo.gateway.toUpperCase()"></span>
+                        </div>
+                        <div class="info-item">
+                          <span class="info-label">Referencia</span>
+                          <span class="info-value code" x-text="selectedOrder.paymentInfo.transactionId"></span>
+                        </div>
+                        <div class="info-item">
+                          <span class="info-label">Monto</span>
+                          <span class="info-value" x-text="'$' + (selectedOrder.paymentInfo.amountCents / 100).toFixed(2) + ' ' + selectedOrder.paymentInfo.currency"></span>
+                        </div>
+                        <div class="info-item">
+                          <span class="info-label">Fecha de pago</span>
+                          <span class="info-value" x-text="formatFullDate(selectedOrder.paymentInfo.paidAt)"></span>
+                        </div>
+                      </div>
+                    </section>
+                  </template>
+
+                  <!-- Historial de estados -->
+                  <template x-if="selectedOrder.statusHistory && selectedOrder.statusHistory.length > 0">
+                    <section class="detail-section">
+                      <h3>Historial de Estados</h3>
+                      <div class="history-list">
+                        <template x-for="(entry, idx) in selectedOrder.statusHistory" :key="idx">
+                          <div class="history-entry">
+                            <span class="history-time" x-text="formatFullDate(entry.changedAt)"></span>
+                            <div class="history-transition">
+                              <template x-if="entry.fromStatus">
+                                <span class="status-badge status-badge--sm" :class="'status--' + entry.fromStatus" x-text="getStatusLabel(entry.fromStatus)"></span>
+                              </template>
+                              <template x-if="entry.fromStatus">
+                                <span class="history-arrow">→</span>
+                              </template>
+                              <span class="status-badge status-badge--sm" :class="'status--' + entry.toStatus" x-text="getStatusLabel(entry.toStatus)"></span>
+                            </div>
+                          </div>
+                        </template>
+                      </div>
+                    </section>
+                  </template>
+
                 </div>
 
                 <aside class="detail-sidebar">
@@ -131,14 +206,17 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
                     <h3>Cambiar Estado</h3>
                     <select x-model="statusUpdate" class="status-select">
                       <option value="">Seleccionar...</option>
-                      <option value="in_production">En Producción</option>
+                      <option value="in_production">Preparando pedido</option>
+                      <option value="packaged">Empaquetado</option>
                       <option value="shipped">Enviado</option>
+                      <option value="in_transit">En tránsito</option>
                       <option value="delivered">Entregado</option>
                       <option value="cancelled">Cancelar Pedido</option>
+                      <option value="refunded">Reembolsado</option>
                     </select>
-                    <button 
-                      @click="updateStatus()" 
-                      class="btn-primary" 
+                    <button
+                      @click="updateStatus()"
+                      class="btn-primary"
                       :disabled="!statusUpdate || processingStatus"
                     >
                       <span x-show="!processingStatus">Actualizar</span>
@@ -169,7 +247,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
             <h2>Actualizar Guía de Envío</h2>
             <button @click="showTracking = false" class="btn-close">×</button>
           </header>
-          
+
           <form @submit.prevent="submitTracking()" class="modal-form">
             <div class="form-group">
               <label>Paquetería</label>
@@ -185,7 +263,6 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
               <label>Número de Rastreo (Guía)</label>
               <input type="text" x-model="trackingData.id" placeholder="Ex: 1234567890" required />
             </div>
-
             <div class="modal-actions">
               <button type="button" @click="showTracking = false" class="btn-secondary">Cancelar</button>
               <button type="submit" class="btn-primary" :disabled="processingTracking">
@@ -210,8 +287,10 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     loading: true,
     search: '',
     statusFilter: '',
-    TERMINAL_STATUSES: [OrderStatus.DELIVERED, OrderStatus.CANCELLED],
-    
+    dateFrom: '',
+    dateTo: '',
+    TERMINAL_STATUSES: [OrderStatus.DELIVERED, OrderStatus.CANCELLED, OrderStatus.REFUNDED],
+
     showDetail: false,
     detailLoading: false,
     selectedOrder: null,
@@ -235,8 +314,10 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       this.loading = true;
       try {
         this.orders = await loadOrders({
-          status: this.statusFilter || undefined,
-          search: this.search || undefined
+          status:   this.statusFilter || undefined,
+          search:   this.search       || undefined,
+          dateFrom: this.dateFrom     || undefined,
+          dateTo:   this.dateTo       || undefined,
         });
       } catch (err) {
         console.error('Error loading orders:', err);
@@ -273,10 +354,10 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     },
 
     openTrackingModal(order) {
-      this.trackingData = { 
-        orderId: order.id, 
-        carrier: order.carrier || '', 
-        id: order.trackingId || '' 
+      this.trackingData = {
+        orderId: order.id,
+        carrier: order.carrier || '',
+        id:      order.trackingId || ''
       };
       this.showTracking = true;
     },
@@ -300,11 +381,29 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       });
     },
 
+    formatFullDate(dateStr) {
+      return new Date(dateStr).toLocaleString('es-MX', {
+        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+      });
+    },
+
+    formatAddress(addr) {
+      if (!addr) return '—';
+      const parts = [addr.street, addr.city, addr.postal_code, addr.country].filter(Boolean);
+      return parts.join(', ');
+    },
+
     getStatusLabel(status) {
       const labels = {
-        pending: 'Pendiente', paid: 'Pagado',
-        in_production: 'En Producción', shipped: 'Enviado',
-        delivered: 'Entregado', cancelled: 'Cancelado'
+        pending:       'Pago pendiente',
+        paid:          'Pago confirmado',
+        in_production: 'Preparando pedido',
+        packaged:      'Empaquetado',
+        shipped:       'Enviado',
+        in_transit:    'En tránsito',
+        delivered:     'Entregado',
+        cancelled:     'Cancelado',
+        refunded:      'Reembolsado',
       };
       return labels[status] || status;
     }
@@ -318,24 +417,18 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
   .admin-header p { color: #6b7280; }
 
   .card { background: white; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-  
-  .filters-panel { display: flex; gap: 1.5rem; padding: 1.5rem; margin-bottom: 2rem; align-items: center; }
-  .search-box { flex: 1; display: flex; align-items: center; gap: 0.75rem; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 10px; padding: 0.5rem 1rem; }
+
+  .filters-panel { display: flex; flex-wrap: wrap; gap: 1.5rem; padding: 1.5rem; margin-bottom: 2rem; align-items: center; }
+  .search-box { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 0.75rem; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 10px; padding: 0.5rem 1rem; }
   .search-box input { flex: 1; border: none; background: transparent; padding: 0.25rem 0; font-size: 0.95rem; }
   .search-box input:focus { outline: none; }
-  .filter-group { display: flex; align-items: center; gap: 1rem; }
-  .filter-group label { font-size: 0.875rem; font-weight: 600; color: #4b5563; }
-  .filter-group select { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid #d1d5db; font-size: 0.9rem; }
+  .filter-group { display: flex; align-items: center; gap: 0.75rem; }
+  .filter-group label { font-size: 0.875rem; font-weight: 600; color: #4b5563; white-space: nowrap; }
+  .filter-group select, .date-input { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid #d1d5db; font-size: 0.9rem; }
+  .date-input { padding: 0.45rem 0.75rem; }
 
   .orders-list { display: flex; flex-direction: column; gap: 1rem; }
-  .order-row { 
-    display: grid; 
-    grid-template-columns: 2fr 1.5fr 1fr 1fr 120px; 
-    padding: 1.25rem 2rem; 
-    align-items: center; 
-    cursor: pointer; 
-    transition: all 0.2s;
-  }
+  .order-row { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 120px; padding: 1.25rem 2rem; align-items: center; cursor: pointer; transition: all 0.2s; }
   .order-row:hover { border-color: #16213e; background: #f8fafc; }
 
   .order-id { font-weight: 700; color: #111827; display: block; }
@@ -344,13 +437,17 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
   .order-items-count { font-size: 0.75rem; color: #9ca3af; }
   .order-amount { font-weight: 700; color: #111827; }
 
-  .status-badge { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 6px; }
-  .status--pending { background: #fef3c7; color: #92400e; }
-  .status--paid { background: #dbeafe; color: #1e40af; }
+  .status-badge { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 6px; white-space: nowrap; }
+  .status-badge--sm { font-size: 0.65rem; }
+  .status--pending       { background: #fef3c7; color: #92400e; }
+  .status--paid          { background: #dbeafe; color: #1e40af; }
   .status--in_production { background: #ede9fe; color: #5b21b6; }
-  .status--shipped { background: #dcfce7; color: #166534; }
-  .status--delivered { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
-  .status--cancelled { background: #fee2e2; color: #991b1b; }
+  .status--packaged      { background: #fce7f3; color: #9d174d; }
+  .status--shipped       { background: #dcfce7; color: #166534; }
+  .status--in_transit    { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+  .status--delivered     { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .status--cancelled     { background: #fee2e2; color: #991b1b; }
+  .status--refunded      { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
 
   .order-actions { display: flex; justify-content: flex-end; align-items: center; gap: 1.5rem; }
   .btn-icon { background: none; border: none; font-size: 1.25rem; cursor: pointer; transition: transform 0.2s; opacity: 0.6; }
@@ -359,31 +456,45 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
   .arrow { color: #9ca3af; }
 
   /* Modales */
-  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 2rem; }
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 2rem; overflow-y: auto; }
   .modal { background: white; border-radius: 20px; width: 500px; max-width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; }
-  .modal-lg { width: 800px; }
-  .modal-header { padding: 1.5rem 2rem; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
+  .modal-lg { width: 860px; max-height: 90vh; overflow-y: auto; }
+  .modal-header { padding: 1.5rem 2rem; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 1; }
   .modal-header h2 { font-size: 1.25rem; font-weight: 800; }
   .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9ca3af; }
   .modal-content { padding: 2rem; }
 
   .detail-layout { display: grid; grid-template-columns: 1fr 240px; gap: 2rem; }
-  .detail-main { display: flex; flex-direction: column; gap: 2rem; }
-  .detail-main h3 { font-size: 0.875rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+  .detail-main { display: flex; flex-direction: column; gap: 1.75rem; }
+
+  .detail-section h3 { font-size: 0.75rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
 
   .items-table { display: flex; flex-direction: column; gap: 0.75rem; }
   .detail-item-row { display: flex; justify-content: space-between; font-size: 0.95rem; }
   .detail-total-row { margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #f3f4f6; display: flex; justify-content: space-between; font-weight: 800; font-size: 1.1rem; }
 
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem 1.5rem; }
+  .info-item--full { grid-column: 1 / -1; }
+  .info-label { display: block; font-size: 0.7rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; }
+  .info-value { font-size: 0.9rem; color: #111827; font-weight: 500; }
+  .info-value.code { font-family: monospace; background: #e0f2fe; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; }
+
+  .history-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .history-entry { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 0.75rem; background: #f9fafb; border-radius: 8px; }
+  .history-time { font-size: 0.75rem; color: #6b7280; white-space: nowrap; min-width: 120px; }
+  .history-transition { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .history-arrow { color: #9ca3af; font-size: 0.8rem; }
+
   .detail-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
   .status-change-box, .tracking-info-box { background: #f9fafb; padding: 1.25rem; border-radius: 12px; border: 1px solid #f3f4f6; }
+  .status-change-box h3, .tracking-info-box h3 { font-size: 0.75rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
   .status-select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid #d1d5db; }
 
   .btn-primary { width: 100%; background: #16213e; color: white; padding: 0.6rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
   .btn-primary:disabled { opacity: 0.5; }
   .btn-secondary { background: white; border: 1px solid #d1d5db; padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
-  .modal-form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .modal-form { display: flex; flex-direction: column; gap: 1.5rem; padding: 2rem; }
   .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
   .form-group label { font-size: 0.875rem; font-weight: 600; }
   .form-group select, .form-group input { padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 10px; }
@@ -392,6 +503,10 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
   .code { font-family: monospace; background: #e0f2fe; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem; color: #0369a1; }
 
   .loading-state { text-align: center; padding: 4rem; }
+  .loading-state-sm { text-align: center; padding: 2rem; }
   .spinner { width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top-color: #16213e; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+  .spinner-sm { width: 24px; height: 24px; border: 3px solid #f3f4f6; border-top-color: #16213e; border-radius: 50%; animation: spin 1s linear infinite; margin: auto; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state { text-align: center; padding: 3rem; color: #6b7280; }
 </style>

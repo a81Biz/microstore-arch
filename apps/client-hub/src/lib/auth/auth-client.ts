@@ -65,6 +65,35 @@ export async function signOut(): Promise<void> {
   }
 }
 
+export async function syncCartOnLogin(): Promise<void> {
+  try {
+    const cartJson = localStorage.getItem('cart');
+    if (!cartJson) return;
+
+    const cart: Array<{ productId: string; quantity: number }> = JSON.parse(cartJson);
+    if (!Array.isArray(cart) || cart.length === 0) return;
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) return;
+
+    const items = cart.map(item => ({
+      product_id: item.productId,
+      quantity: item.quantity,
+    }));
+
+    await fetch(`${import.meta.env.PUBLIC_API_BASE}/functions/v1/manage-cart/sync`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ items }),
+    });
+  } catch {
+    // Non-fatal: cart sync failure must not block login
+  }
+}
+
 export async function getCurrentUser() {
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) return null;

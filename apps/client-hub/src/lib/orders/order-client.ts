@@ -57,20 +57,20 @@ function mapToViewModel(order: RawOrder): OrderViewModel {
   const timeline = generateTimeline(order);
 
   return {
-    id: order.id,
-    displayId: order.display_id,
-    status: order.status,
-    totalAmount: `$${(order.total_amount || 0).toFixed(2)}`,
-    currency: order.currency || 'MXN',
+    id:              order.id,
+    displayId:       order.display_id,
+    status:          order.status,
+    totalAmount:     `$${(order.total_amount || 0).toFixed(2)}`,
+    currency:        order.currency || 'MXN',
     items: (order.order_items || []).map((item) => ({
-      id: item.id,
-      productName: item.products?.name || 'Producto',
-      productSlug: item.products?.slug || '',
-      quantity: item.quantity,
-      unitPrice: `$${(item.unit_price || 0).toFixed(2)}`,
+      id:           item.id,
+      productName:  item.products?.name || 'Producto',
+      productSlug:  item.products?.slug || '',
+      quantity:     item.quantity,
+      unitPrice:    `$${(item.unit_price || 0).toFixed(2)}`,
     })),
-    trackingId: order.tracking_id,
-    carrier: order.carrier,
+    trackingId:      order.tracking_id,
+    carrier:         order.carrier,
     shippingAddress: order.shipping_address
       ? `${order.shipping_address.street}, ${order.shipping_address.city}`
       : '',
@@ -80,43 +80,59 @@ function mapToViewModel(order: RawOrder): OrderViewModel {
 }
 
 function generateTimeline(order: RawOrder): TimelineStep[] {
-  const shipped = [OrderStatus.SHIPPED, OrderStatus.DELIVERED];
-  const inProgress = [OrderStatus.IN_PRODUCTION, OrderStatus.SHIPPED, OrderStatus.DELIVERED];
+  const s = order.status as OrderStatus;
+
+  const afterPaid    = [OrderStatus.IN_PRODUCTION, OrderStatus.PACKAGED, OrderStatus.SHIPPED, OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED];
+  const afterPacked  = [OrderStatus.SHIPPED, OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED];
+  const afterShipped = [OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED];
 
   const steps: TimelineStep[] = [
-    { label: 'Pedido creado', status: 'completed', date: order.created_at, icon: '📋' },
     {
-      label: 'Pago confirmado',
-      status: order.status !== OrderStatus.PENDING ? 'completed' : 'upcoming',
-      date: order.updated_at,
-      icon: '💳',
+      label:  'Pedido creado',
+      status: 'completed',
+      date:   order.created_at,
+      icon:   '📋',
     },
     {
-      label: 'En producción',
-      status: inProgress.includes(order.status as OrderStatus) ? 'completed' : 'upcoming',
-      date: null,
-      icon: '🏭',
+      label:  'Pago confirmado',
+      status: s !== OrderStatus.PENDING ? 'completed' : 'upcoming',
+      date:   order.updated_at,
+      icon:   '💳',
     },
     {
-      label: 'Enviado',
-      status: shipped.includes(order.status as OrderStatus)
-        ? 'completed'
-        : order.status === OrderStatus.IN_PRODUCTION
-          ? 'current'
-          : 'upcoming',
-      date: order.shipped_at,
-      icon: '🚚',
+      label:  'Preparando pedido',
+      status: afterPaid.includes(s) ? 'completed' : s === OrderStatus.PAID ? 'current' : 'upcoming',
+      date:   null,
+      icon:   '🏭',
     },
     {
-      label: 'Entregado',
-      status: order.status === OrderStatus.DELIVERED ? 'completed' : 'upcoming',
-      date: order.delivered_at,
-      icon: '📦',
+      label:  'Empaquetado',
+      status: afterPacked.includes(s) ? 'completed' : s === OrderStatus.PACKAGED ? 'current' : 'upcoming',
+      date:   null,
+      icon:   '📦',
+    },
+    {
+      label:  'Enviado',
+      status: afterShipped.includes(s) ? 'completed' : s === OrderStatus.SHIPPED ? 'current' : 'upcoming',
+      date:   order.shipped_at,
+      icon:   '🚚',
+    },
+    {
+      label:  'En tránsito',
+      status: s === OrderStatus.DELIVERED ? 'completed' : s === OrderStatus.IN_TRANSIT ? 'current' : 'upcoming',
+      date:   null,
+      icon:   '🛣️',
+    },
+    {
+      label:  'Entregado',
+      status: s === OrderStatus.DELIVERED ? 'completed' : 'upcoming',
+      date:   order.delivered_at,
+      icon:   '✅',
     },
   ];
 
-  // Si ningún paso está marcado como actual, el siguiente al último completado lo es
-  const hasCurrent = steps.some((s) => s.status === 'current');
+  // Si ningún paso está marcado como actual, marcar el siguiente al último completado
+  const hasCurrent = steps.some((step) => step.status === 'current');
   if (!hasCurrent) {
     const lastCompleted = steps.reduceRight(
       (acc, step, i) => (step.status === 'completed' && acc === -1 ? i : acc),

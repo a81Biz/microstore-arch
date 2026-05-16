@@ -45,36 +45,82 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
           <template x-if="step === 'shipping'">
             <div x-transition>
               <h2 class="card-title">Dirección de Envío</h2>
-              <form @submit.prevent="nextToPayment()" class="form-stack">
-                <div class="form-group">
-                  <label for="street">Calle y número</label>
-                  <input type="text" id="street" x-model="shipping.street" required placeholder="Av. Siempre Viva 123" />
-                </div>
 
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="city">Ciudad</label>
-                    <input type="text" id="city" x-model="shipping.city" required placeholder="México DF" />
+              <!-- Selector de direcciones guardadas -->
+              <template x-if="savedAddresses.length > 0">
+                <div class="saved-addresses">
+                  <p class="section-sub">Selecciona una dirección guardada o ingresa una nueva</p>
+                  <div class="address-list">
+                    <template x-for="addr in savedAddresses" :key="addr.id">
+                      <label class="address-option" :class="{ selected: selectedAddressId === addr.id }">
+                        <input type="radio" name="saved_address" :value="addr.id" x-model="selectedAddressId" @change="selectAddress(addr)" />
+                        <div class="address-option-content">
+                          <div class="addr-top">
+                            <span class="addr-label" x-text="{ home: 'Casa', office: 'Oficina', other: 'Otro' }[addr.label]"></span>
+                            <template x-if="addr.is_default"><span class="addr-badge">Predeterminada</span></template>
+                          </div>
+                          <span class="addr-detail" x-text="addr.street + ', ' + addr.city + ', CP ' + addr.postal_code + ' ' + addr.country"></span>
+                        </div>
+                      </label>
+                    </template>
+                    <label class="address-option address-option--new" :class="{ selected: selectedAddressId === 'new' }">
+                      <input type="radio" name="saved_address" value="new" x-model="selectedAddressId" @change="shipping = { street: '', city: '', postalCode: '', country: 'MX' }" />
+                      <div class="address-option-content">
+                        <span class="addr-label">+ Nueva dirección</span>
+                      </div>
+                    </label>
                   </div>
+                  <!-- CTA directa si eligió dirección guardada -->
+                  <template x-if="selectedAddressId !== 'new'">
+                    <div class="form-actions" style="margin-top: 1.5rem;">
+                      <button type="button" @click="nextToPayment()" class="btn-primary">Continuar al pago</button>
+                    </div>
+                  </template>
+                </div>
+              </template>
+
+              <!-- Formulario: nueva dirección (siempre visible si no hay guardadas; condicional si las hay) -->
+              <template x-if="savedAddresses.length === 0 || selectedAddressId === 'new'">
+                <form @submit.prevent="nextToPayment()" class="form-stack" style="margin-top: 1.5rem;">
                   <div class="form-group">
-                    <label for="postal_code">Código Postal</label>
-                    <input type="text" id="postal_code" x-model="shipping.postalCode" required placeholder="06700" pattern="\d{4,6}" title="Código postal de 4 a 6 dígitos" minlength="4" maxlength="6" />
+                    <label for="street">Calle y número</label>
+                    <input type="text" id="street" x-model="shipping.street" required placeholder="Av. Siempre Viva 123" />
                   </div>
-                </div>
 
-                <div class="form-group">
-                  <label for="country">País</label>
-                  <select id="country" x-model="shipping.country" required>
-                    <option value="MX">México</option>
-                    <option value="US">Estados Unidos</option>
-                    <option value="ES">España</option>
-                  </select>
-                </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="city">Ciudad</label>
+                      <input type="text" id="city" x-model="shipping.city" required placeholder="México DF" />
+                    </div>
+                    <div class="form-group">
+                      <label for="postal_code">Código Postal</label>
+                      <input type="text" id="postal_code" x-model="shipping.postalCode" required placeholder="06700" pattern="\d{4,6}" title="Código postal de 4 a 6 dígitos" minlength="4" maxlength="6" />
+                    </div>
+                  </div>
 
-                <div class="form-actions">
-                  <button type="submit" class="btn-primary">Continuar al pago</button>
-                </div>
-              </form>
+                  <div class="form-group">
+                    <label for="country">País</label>
+                    <select id="country" x-model="shipping.country" required>
+                      <option value="MX">México</option>
+                      <option value="US">Estados Unidos</option>
+                      <option value="ES">España</option>
+                    </select>
+                  </div>
+
+                  <template x-if="isAuthenticated">
+                    <div class="form-group">
+                      <label class="checkbox-label">
+                        <input type="checkbox" x-model="saveNewAddress" />
+                        <span>Guardar esta dirección en mi cuenta</span>
+                      </label>
+                    </div>
+                  </template>
+
+                  <div class="form-actions">
+                    <button type="submit" class="btn-primary">Continuar al pago</button>
+                  </div>
+                </form>
+              </template>
             </div>
           </template>
 
@@ -188,7 +234,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 </ClientHubLayout>
 
 <script>
-  import { createOrder, getActivePaymentMethods } from '../../lib/checkout/checkout-client';
+  import { createOrder, getActivePaymentMethods, loadSavedAddresses, saveAddressToAccount } from '../../lib/checkout/checkout-client';
   import { supabaseClient } from '../../lib/supabase-client';
 
   window.checkoutForm = () => ({
@@ -204,6 +250,10 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
       postalCode: '',
       country: 'MX'
     },
+    savedAddresses: [],
+    selectedAddressId: '',
+    saveNewAddress: false,
+    isAuthenticated: false,
     selectedMethod: '',
     activeMethods: [],
     paymentResult: null,
@@ -261,6 +311,32 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
       this.items = cart;
       this.calculateTotal();
       this.loadPaymentMethods();
+
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      this.isAuthenticated = !!session;
+      if (this.isAuthenticated) {
+        try {
+          this.savedAddresses = await loadSavedAddresses();
+          if (this.savedAddresses.length > 0) {
+            const def = this.savedAddresses.find(a => a.is_default) || this.savedAddresses[0];
+            this.selectedAddressId = def.id;
+            this.selectAddress(def);
+          } else {
+            this.selectedAddressId = 'new';
+          }
+        } catch {
+          this.selectedAddressId = 'new';
+        }
+      } else {
+        this.selectedAddressId = 'new';
+      }
+    },
+
+    selectAddress(addr) {
+      this.shipping.street     = addr.street;
+      this.shipping.city       = addr.city;
+      this.shipping.postalCode = addr.postal_code;
+      this.shipping.country    = addr.country;
     },
 
     calculateTotal() {
@@ -280,7 +356,20 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
       }
     },
 
-    nextToPayment() {
+    async nextToPayment() {
+      if (this.saveNewAddress && this.isAuthenticated && this.selectedAddressId === 'new') {
+        try {
+          await saveAddressToAccount({
+            label: 'home',
+            street: this.shipping.street,
+            city: this.shipping.city,
+            postal_code: this.shipping.postalCode,
+            country: this.shipping.country,
+          });
+        } catch {
+          // Non-fatal: continue even if save fails
+        }
+      }
       this.step = 'payment';
       window.scrollTo(0, 0);
     },
@@ -419,6 +508,21 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
   .empty-icon { font-size: 4rem; margin-bottom: 1.5rem; }
   .empty-state h2 { color: #1e293b; font-size: 1.75rem; margin-bottom: 0.75rem; }
   .empty-state p { color: #64748b; margin-bottom: 2rem; }
+
+  .section-sub { font-size: 0.875rem; color: #64748b; margin-bottom: 1rem; }
+  .address-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .address-option { display: flex; align-items: flex-start; gap: 0.75rem; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem 1.25rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+  .address-option:hover { border-color: #4f46e5; background: #f8faff; }
+  .address-option.selected { border-color: #4f46e5; background: #f5f3ff; box-shadow: 0 0 0 1px #4f46e5; }
+  .address-option input[type="radio"] { margin-top: 3px; accent-color: #4f46e5; }
+  .address-option-content { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+  .addr-top { display: flex; align-items: center; gap: 0.5rem; }
+  .addr-label { font-weight: 700; font-size: 0.9rem; color: #1e293b; }
+  .addr-badge { background: #dbeafe; color: #1d4ed8; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+  .addr-detail { font-size: 0.82rem; color: #64748b; }
+  .address-option--new .addr-label { color: #4f46e5; }
+  .checkbox-label { display: flex; align-items: center; gap: 0.625rem; cursor: pointer; font-size: 0.875rem; color: #475569; font-weight: 500; }
+  .checkbox-label input[type="checkbox"] { accent-color: #4f46e5; width: 16px; height: 16px; }
 
   @media (max-width: 968px) {
     .checkout-grid { grid-template-columns: 1fr; }

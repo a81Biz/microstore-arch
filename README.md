@@ -235,6 +235,46 @@ Cada producto soporta hasta **10 imágenes** gestionadas via tabla `product_imag
 
 El campo `products.image_url` se mantiene como imagen primaria (sort_order=0) para compatibilidad con ProductCard, carrito y checkout existentes.
 
+### Flujo del Cliente — Client Hub (`client.localhost`)
+
+Autenticación, checkout, pedidos, perfil y direcciones del cliente final.
+
+**Autenticación:**
+- Email + contraseña con `signInWithEmail` / `signUpWithEmail`
+- Google OAuth con `signInWithGoogle` (callback en `/auth/callback`)
+- Sincronización de carrito post-login: `syncCartOnLogin()` en `auth-client.ts`
+
+**Checkout (un solo paso):**
+- Lee carrito desde `localStorage` (cross-origin via `?cart=` desde storefront)
+- Si usuario autenticado con direcciones guardadas: selector de radio buttons en paso de envío
+- Opción "Guardar esta dirección" crea entrada en `customer_addresses` via `manage-addresses`
+- Orden creada via Edge Function `create-order` (sin cambios)
+
+| Tabla | Descripción |
+|-------|-------------|
+| `customer_addresses` (00033) | Direcciones guardadas del cliente (home/office/other, max 1 predeterminada por trigger) |
+| `cart_items` (00034) | Carrito persistente en DB: UPSERT `(user_id, product_id)`, sync desde localStorage al login |
+
+**Edge Functions nuevas:**
+
+| Función | Rol |
+|---------|-----|
+| `manage-addresses` | CRUD de direcciones: GET / POST / PUT/:id / DELETE/:id / PATCH/:id/default |
+| `manage-cart` | Carrito DB: POST /sync (UPSERT desde localStorage), GET, DELETE/:product_id, DELETE (vaciar) |
+| `send-delivery-email` | Email "pedido entregado" (Resend); hookeado en `manage-orders.triggerEmail` cuando status→delivered |
+
+**Perfil del cliente (`/profile`):**
+- Tres tabs: Datos Personales (nombre, teléfono) · Contraseña (`supabase.auth.updateUser`) · Mis Direcciones
+- Gestión completa de direcciones: añadir, editar, eliminar, establecer predeterminada
+
+**Emails transaccionales (Resend):**
+
+| Email | Función | Trigger |
+|-------|---------|---------|
+| Pedido confirmado | `send-order-email` | `payment-webhook` post-pago |
+| Pedido enviado | `send-shipping-email` | `manage-orders.updateTracking` |
+| Pedido entregado | `send-delivery-email` | `manage-orders.updateStatus` → status=delivered |
+
 ### Paquetes compartidos (`packages/`)
 
 - **`@micro-store/core`** — Interfaces TypeScript, enums (`OrderStatus`, `PaymentGateway`, `UserRole`), schemas Zod y utilidades. Testeado con Vitest.
@@ -252,6 +292,30 @@ El campo `products.image_url` se mantiene como imagen primaria (sort_order=0) pa
 | `supabase-kong` | `kong:2.8.1` | API Gateway en :8000 |
 | `supabase-studio` | `supabase/studio:2026.04.13-sha-e95f1cc` | UI admin en :8323 |
 | `inbucket` | `inbucket/inbucket:3.0.3` | Emails de prueba en :8025 |
+
+### Estados del Pedido (`OrderStatus`)
+
+| Valor DB | Etiqueta UI | Descripción |
+|---|---|---|
+| `pending` | Pago pendiente | Orden creada, pago no confirmado |
+| `paid` | Pago confirmado | Pasarela confirmó el pago; stock reservado |
+| `in_production` | Preparando pedido | Equipo reúne y prepara el pedido |
+| `packaged` | Empaquetado | Pedido listo para entrega a paquetería |
+| `shipped` | Enviado | Entregado a la paquetería |
+| `in_transit` | En tránsito | En camino al cliente |
+| `delivered` | Entregado | Cliente recibió el paquete |
+| `cancelled` | Cancelado | Pedido cancelado |
+| `refunded` | Reembolsado | Pago devuelto al cliente |
+
+**TERMINAL_STATUSES** (no admiten cambio de estado ni tracking): `delivered`, `cancelled`, `refunded`.
+
+### Tablas nuevas (PT-ADMIN-032)
+
+| Tabla | Migración | Descripción |
+|---|---|---|
+| `order_status_history` | 00036 | Audit trail automático de cambios de estado (trigger en `orders.status`) |
+| `order_payments` | 00037 | Registro de pago confirmado por orden (gateway, transaction_id, amount_cents) |
+| `profiles.name` / `profiles.phone` | 00035 | Nombre y teléfono del cliente, sincronizados desde `auth.users.raw_user_meta_data` |
 
 ### Migraciones
 
