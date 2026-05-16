@@ -1,0 +1,1034 @@
+{
+  "nodes": [
+    {
+      "id": "catalog_CatalogProduct",
+      "label": "CatalogProduct Interface",
+      "file_type": "code",
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts",
+      "source_location": "line 4",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "catalog_mapToCatalogProduct",
+      "label": "mapToCatalogProduct Function",
+      "file_type": "code",
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts",
+      "source_location": "line 17",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "catalog_getVisibleProducts",
+      "label": "getVisibleProducts Function",
+      "file_type": "code",
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts",
+      "source_location": "line 40",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "catalog_getProductBySlug",
+      "label": "getProductBySlug Function",
+      "file_type": "code",
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts",
+      "source_location": "line 55",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "catalog_getAllProductSlugs",
+      "label": "getAllProductSlugs Function",
+      "file_type": "code",
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts",
+      "source_location": "line 70",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "slug_astro_page",
+      "label": "Product Detail Page [slug].astro",
+      "file_type": "code",
+      "source_file": "apps/storefront/src/pages/producto/[slug].astro",
+      "source_location": "line 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "slug_galleryStore",
+      "label": "galleryStore Alpine Component",
+      "file_type": "code",
+      "source_file": "apps/storefront/src/pages/producto/[slug].astro",
+      "source_location": "line 238",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_ProductFormData",
+      "label": "ProductFormData Interface",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 3",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_AdminProductImage",
+      "label": "AdminProductImage Interface",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_AdminProduct",
+      "label": "AdminProduct Interface",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 20",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_loadProducts",
+      "label": "loadProducts Function",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 46",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_createProduct",
+      "label": "createProduct Function",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 58",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_updateProduct",
+      "label": "updateProduct Function",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 73",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_deleteProduct",
+      "label": "deleteProduct Function",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 88",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_uploadProductImage",
+      "label": "uploadProductImage Function",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 100",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_addProductImage",
+      "label": "addProductImage Function",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 118",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_deleteProductImage",
+      "label": "deleteProductImage Function",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 137",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "product_admin_triggerRebuild",
+      "label": "triggerRebuild Function",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 164",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "vendor_products_page",
+      "label": "Vendor Products Index Page",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "vendor_productList_alpine",
+      "label": "productList Alpine Component",
+      "file_type": "code",
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 240",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_products_ProductController",
+      "label": "ProductController Edge Function",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 39",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_products_CreateProductSchema",
+      "label": "CreateProductSchema Zod Schema",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 11",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_products_UpdateProductSchema",
+      "label": "UpdateProductSchema Zod Schema",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 21",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_products_AddImageSchema",
+      "label": "AddImageSchema Zod Schema",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 33",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_products_mapProduct",
+      "label": "mapProduct Method",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 41",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_products_addImage",
+      "label": "addImage Method",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 218",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_products_deleteImage",
+      "label": "deleteImage Method",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 263",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "manage_products_verifyProductOwner",
+      "label": "verifyProductOwner Method",
+      "file_type": "code",
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 315",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_00032",
+      "label": "Migration 00032 product_images Gallery",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00032_product_images_gallery.sql",
+      "source_location": "line 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_product_images_table",
+      "label": "product_images Table Schema",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00032_product_images_gallery.sql",
+      "source_location": "line 4",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_rls_public_read",
+      "label": "RLS Policy Public Read product_images",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00032_product_images_gallery.sql",
+      "source_location": "line 19",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "migration_rls_vendor_write",
+      "label": "RLS Policy Vendor Write product_images",
+      "file_type": "code",
+      "source_file": "supabase/migrations/00032_product_images_gallery.sql",
+      "source_location": "line 25",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_microstore",
+      "label": "Micro-Store Arch README",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": "Alberto Jacinto Martínez Torres",
+      "contributor": null
+    },
+    {
+      "id": "handoff_doc",
+      "label": "HANDOFF Document",
+      "file_type": "document",
+      "source_file": "docs/HANDOFF.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "pending_tasks_doc",
+      "label": "PENDING_TASKS Document",
+      "file_type": "document",
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "rationale_normalized_images_table",
+      "label": "Normalized Table vs Array Column Rationale",
+      "file_type": "rationale",
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7 Decisiones de diseño",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Tabla normalizada product_images elegida sobre TEXT[] porque: sort_order y alt_text por imagen son inviables en array; DELETE directo por imagen requiere unnest; el JOIN es un SELECT simple con índice compuesto (product_id, sort_order)."
+    },
+    {
+      "id": "rationale_image_url_primary_compat",
+      "label": "products.image_url Primary Image Compatibility Rationale",
+      "file_type": "rationale",
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7 Decisiones de diseño",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "products.image_url se mantiene como imagen primaria (sort_order=0) para compatibilidad con ProductCard, cart-store y checkout — ninguno de esos componentes cambia."
+    },
+    {
+      "id": "rationale_alpine_custom_events",
+      "label": "Alpine Gallery Cross-Instance Sync via CustomEvents Rationale",
+      "file_type": "rationale",
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7 Decisiones de diseño",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "gallery-wrap y lightbox-overlay son dos nodos x-data=galleryStore() distintos; sincronizados via CustomEvent en document (gallery:open-lightbox, gallery:close, gallery:set-active) porque los dos nodos no comparten scope Alpine."
+    },
+    {
+      "id": "rationale_storage_timestamp_filename",
+      "label": "Storage Filename Timestamp Strategy Rationale",
+      "file_type": "rationale",
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7 Decisiones de diseño",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "uploadProductImage usa Date.now().ext en lugar de main.ext para soportar múltiples archivos por producto en el mismo bucket sin sobreescritura."
+    }
+  ],
+  "edges": [
+    {
+      "source": "catalog_getVisibleProducts",
+      "target": "catalog_mapToCatalogProduct",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts",
+      "source_location": "line 52",
+      "weight": 1.0
+    },
+    {
+      "source": "catalog_getProductBySlug",
+      "target": "catalog_mapToCatalogProduct",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts",
+      "source_location": "line 67",
+      "weight": 1.0
+    },
+    {
+      "source": "catalog_mapToCatalogProduct",
+      "target": "catalog_CatalogProduct",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts",
+      "source_location": "line 26",
+      "weight": 1.0
+    },
+    {
+      "source": "slug_astro_page",
+      "target": "catalog_getProductBySlug",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/storefront/src/pages/producto/[slug].astro",
+      "source_location": "line 13",
+      "weight": 1.0
+    },
+    {
+      "source": "slug_astro_page",
+      "target": "catalog_getAllProductSlugs",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/storefront/src/pages/producto/[slug].astro",
+      "source_location": "line 8",
+      "weight": 1.0
+    },
+    {
+      "source": "slug_astro_page",
+      "target": "slug_galleryStore",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/storefront/src/pages/producto/[slug].astro",
+      "source_location": "line 62",
+      "weight": 1.0
+    },
+    {
+      "source": "slug_astro_page",
+      "target": "catalog_CatalogProduct",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "apps/storefront/src/pages/producto/[slug].astro",
+      "source_location": "line 19",
+      "weight": 0.9
+    },
+    {
+      "source": "slug_galleryStore",
+      "target": "rationale_alpine_custom_events",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7",
+      "weight": 1.0
+    },
+    {
+      "source": "product_admin_loadProducts",
+      "target": "product_admin_AdminProduct",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 46",
+      "weight": 1.0
+    },
+    {
+      "source": "product_admin_createProduct",
+      "target": "product_admin_AdminProduct",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 58",
+      "weight": 1.0
+    },
+    {
+      "source": "product_admin_updateProduct",
+      "target": "product_admin_AdminProduct",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 73",
+      "weight": 1.0
+    },
+    {
+      "source": "product_admin_AdminProduct",
+      "target": "product_admin_AdminProductImage",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 30",
+      "weight": 1.0
+    },
+    {
+      "source": "product_admin_uploadProductImage",
+      "target": "rationale_storage_timestamp_filename",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7",
+      "weight": 1.0
+    },
+    {
+      "source": "product_admin_deleteProductImage",
+      "target": "product_admin_uploadProductImage",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 156",
+      "weight": 0.8
+    },
+    {
+      "source": "vendor_productList_alpine",
+      "target": "product_admin_loadProducts",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 270",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_productList_alpine",
+      "target": "product_admin_createProduct",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 323",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_productList_alpine",
+      "target": "product_admin_updateProduct",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 325",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_productList_alpine",
+      "target": "product_admin_deleteProduct",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 399",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_productList_alpine",
+      "target": "product_admin_uploadProductImage",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 349",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_productList_alpine",
+      "target": "product_admin_addProductImage",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 352",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_productList_alpine",
+      "target": "product_admin_deleteProductImage",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 371",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_productList_alpine",
+      "target": "product_admin_triggerRebuild",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 330",
+      "weight": 1.0
+    },
+    {
+      "source": "vendor_products_page",
+      "target": "vendor_productList_alpine",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro",
+      "source_location": "line 6",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_ProductController",
+      "target": "manage_products_CreateProductSchema",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 152",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_ProductController",
+      "target": "manage_products_UpdateProductSchema",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 171",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_ProductController",
+      "target": "manage_products_AddImageSchema",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 222",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_ProductController",
+      "target": "manage_products_mapProduct",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 165",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_ProductController",
+      "target": "manage_products_addImage",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 107",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_ProductController",
+      "target": "manage_products_deleteImage",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 119",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_addImage",
+      "target": "manage_products_verifyProductOwner",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 220",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_deleteImage",
+      "target": "manage_products_verifyProductOwner",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 265",
+      "weight": 1.0
+    },
+    {
+      "source": "manage_products_addImage",
+      "target": "migration_product_images_table",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 238",
+      "weight": 0.9
+    },
+    {
+      "source": "manage_products_deleteImage",
+      "target": "migration_product_images_table",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": "line 279",
+      "weight": 0.9
+    },
+    {
+      "source": "migration_00032",
+      "target": "migration_product_images_table",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00032_product_images_gallery.sql",
+      "source_location": "line 4",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00032",
+      "target": "migration_rls_public_read",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00032_product_images_gallery.sql",
+      "source_location": "line 19",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_00032",
+      "target": "migration_rls_vendor_write",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/migrations/00032_product_images_gallery.sql",
+      "source_location": "line 25",
+      "weight": 1.0
+    },
+    {
+      "source": "migration_product_images_table",
+      "target": "rationale_normalized_images_table",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7",
+      "weight": 1.0
+    },
+    {
+      "source": "catalog_CatalogProduct",
+      "target": "migration_product_images_table",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts",
+      "source_location": "line 13",
+      "weight": 0.9
+    },
+    {
+      "source": "product_admin_AdminProduct",
+      "target": "migration_product_images_table",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 30",
+      "weight": 0.9
+    },
+    {
+      "source": "product_admin_AdminProduct",
+      "target": "rationale_image_url_primary_compat",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7",
+      "weight": 1.0
+    },
+    {
+      "source": "catalog_CatalogProduct",
+      "target": "product_admin_AdminProduct",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "manage_products_addImage",
+      "target": "product_admin_addProductImage",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "supabase/functions/manage-products/index.ts",
+      "source_location": null,
+      "weight": 0.7
+    },
+    {
+      "source": "handoff_doc",
+      "target": "manage_products_ProductController",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§2",
+      "weight": 1.0
+    },
+    {
+      "source": "handoff_doc",
+      "target": "migration_00032",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7",
+      "weight": 1.0
+    },
+    {
+      "source": "handoff_doc",
+      "target": "rationale_normalized_images_table",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7",
+      "weight": 1.0
+    },
+    {
+      "source": "handoff_doc",
+      "target": "rationale_alpine_custom_events",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/HANDOFF.md",
+      "source_location": "§7",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_doc",
+      "target": "migration_00032",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "PT-IMG-030-A1",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_doc",
+      "target": "manage_products_ProductController",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "PT-IMG-030-A2",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_doc",
+      "target": "product_admin_addProductImage",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "PT-IMG-030-B1",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_doc",
+      "target": "vendor_products_page",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "PT-IMG-030-B2",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_doc",
+      "target": "catalog_CatalogProduct",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "PT-IMG-030-C1",
+      "weight": 1.0
+    },
+    {
+      "source": "pending_tasks_doc",
+      "target": "slug_astro_page",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/implementation/PENDING_TASKS.md",
+      "source_location": "PT-IMG-030-C2",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_microstore",
+      "target": "migration_product_images_table",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "§Galería de imágenes",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_microstore",
+      "target": "manage_products_ProductController",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "§Backend",
+      "weight": 1.0
+    },
+    {
+      "source": "product_admin_triggerRebuild",
+      "target": "readme_microstore",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "apps/vendor-admin/src/lib/products/product-admin.ts",
+      "source_location": "line 164",
+      "weight": 0.6
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "product_images_gallery_full_stack",
+      "label": "Product Images Gallery Full-Stack Feature",
+      "nodes": [
+        "migration_product_images_table",
+        "manage_products_addImage",
+        "product_admin_addProductImage",
+        "catalog_CatalogProduct",
+        "slug_galleryStore"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "docs/HANDOFF.md"
+    },
+    {
+      "id": "product_crud_pipeline",
+      "label": "Product CRUD Admin Pipeline",
+      "nodes": [
+        "vendor_productList_alpine",
+        "product_admin_loadProducts",
+        "manage_products_ProductController"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/vendor-admin/src/pages/products/index.astro"
+    },
+    {
+      "id": "catalog_read_pipeline",
+      "label": "Storefront Catalog Read Pipeline",
+      "nodes": [
+        "catalog_getVisibleProducts",
+        "catalog_getProductBySlug",
+        "slug_astro_page"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/storefront/src/lib/catalog/catalog.ts"
+    }
+  ],
+  "input_tokens": 64533,
+  "output_tokens": 0
+}
