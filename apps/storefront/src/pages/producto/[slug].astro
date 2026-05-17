@@ -1,7 +1,7 @@
 ---
 export const prerender = process.env.NODE_ENV === 'production';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getProductBySlug, getAllProductSlugs } from '../../lib/catalog/catalog.ts';
+import { getProductBySlug, getAllProductSlugs } from '../../lib/catalog/catalog';
 import { getStockBadge } from '@micro-store/core/utils';
 
 export async function getStaticPaths() {
@@ -243,7 +243,7 @@ const imagesJson = JSON.stringify(images);
       lightboxOpen: false,
 
       init() {
-        const el = this.$el;
+        const el = this.$el!;
         try {
           this.images = JSON.parse(el.dataset.images || '[]');
         } catch (_) {
@@ -253,7 +253,7 @@ const imagesJson = JSON.stringify(images);
 
         // Sync lightbox open state across the two x-data instances via a
         // custom event on the document so thumbnail clicks open the lightbox.
-        this.$el.addEventListener('gallery:open-lightbox', () => {
+        el.addEventListener('gallery:open-lightbox', () => {
           this.lightboxOpen = true;
         });
         document.addEventListener('gallery:close', () => {

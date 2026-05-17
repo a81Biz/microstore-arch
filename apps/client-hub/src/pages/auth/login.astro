@@ -57,7 +57,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 </ClientHubLayout>
 
 <script>
-  import { signInWithEmail, signInWithGoogle } from '../../lib/auth/auth-client.ts';
+  import { signInWithEmail, signInWithGoogle } from '../../lib/auth/auth-client';
 
   window.loginForm = () => ({
     email: '',
@@ -73,9 +73,9 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
         const result = await signInWithEmail(this.email, this.password);
 
         if (result.success) {
-          // No guardar el token en localStorage — el cliente Supabase lo gestiona internamente
-          // almacenándolo de forma segura. La sesión se recupera con supabaseClient.auth.getSession()
-          window.location.href = '/';
+          const returnUrl = sessionStorage.getItem('returnUrl') || '/';
+          sessionStorage.removeItem('returnUrl');
+          window.location.href = returnUrl;
         } else {
           this.error = result.message || 'Error al iniciar sesión';
         }

@@ -234,7 +234,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     addProductImage,
     deleteProductImage,
     triggerRebuild
-  } from '../../lib/products/product-admin.ts';
+  } from '../../lib/products/product-admin';
   import { supabaseClient } from '../../lib/supabase-client';
 
   window.productList = () => ({
@@ -331,14 +331,15 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
         await this.loadProducts();
         this.closeModal();
       } catch (err) {
-        this.formError = err.message || 'Error al guardar producto';
+        this.formError = (err instanceof Error ? err.message : null) || 'Error al guardar producto';
       } finally {
         this.formLoading = false;
       }
     },
 
     async handleImageUpload(event) {
-      const file = event.target.files[0];
+      const input = event.target as HTMLInputElement | null;
+      const file = input?.files?.[0];
       if (!file) return;
 
       const productId = this.editingProduct?.id;
@@ -357,10 +358,10 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
           this.form.images.push({ id: null, url, sortOrder: this.form.images.length, altText: null });
         }
       } catch (err) {
-        this.formError = err.message || 'Error al subir imagen';
+        this.formError = (err instanceof Error ? err.message : null) || 'Error al subir imagen';
       } finally {
         this.uploadingImage = false;
-        if (this.$refs.imageInput) this.$refs.imageInput.value = '';
+        if (this.$refs?.imageInput) (this.$refs.imageInput as HTMLInputElement).value = '';
       }
     },
 
@@ -372,7 +373,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
         }
         this.form.images = this.form.images.filter(i => i !== img);
       } catch (err) {
-        this.formError = err.message || 'Error al eliminar imagen';
+        this.formError = (err instanceof Error ? err.message : null) || 'Error al eliminar imagen';
       }
     },
 
@@ -400,7 +401,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
         await triggerRebuild();
         await this.loadProducts();
       } catch (err) {
-        alert(err.message || 'Error al eliminar producto');
+        alert(err instanceof Error ? err.message : 'Error al eliminar producto');
       }
     }
   });

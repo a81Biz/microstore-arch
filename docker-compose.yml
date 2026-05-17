@@ -215,6 +215,11 @@ services:
       GOTRUE_SMTP_HOST: inbucket
       GOTRUE_SMTP_PORT: 2500
       GOTRUE_SMTP_ADMIN_EMAIL: noreply@micro-store.local
+      # Google OAuth — deshabilitado por defecto; activar copiando credenciales de Google Cloud Console
+      GOTRUE_EXTERNAL_GOOGLE_ENABLED: "${GOOGLE_OAUTH_ENABLED:-false}"
+      GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOTRUE_EXTERNAL_GOOGLE_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+      GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: "http://localhost:8000/auth/v1/callback"
     depends_on:
       db-migrate:
         condition: service_completed_successfully
@@ -391,6 +396,18 @@ services:
             -d '{"email":"admin@tienda.com","password":"Admin1234!","email_confirm":true}' \
             && echo "=== Admin creado: admin@tienda.com / Admin1234! ===" \
             || echo "Error al crear admin"
+        fi
+        echo "=== Verificando usuario cliente de prueba ==="
+        if curl -sf -H "Authorization: Bearer $$SERVICE_ROLE_KEY" \
+             http://supabase-auth:9999/admin/users 2>/dev/null | grep -q "cliente@test.com"; then
+          echo "=== Cliente ya existe ==="
+        else
+          curl -sf -X POST http://supabase-auth:9999/admin/users \
+            -H "Authorization: Bearer $$SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"email":"cliente@test.com","password":"Cliente1234!","email_confirm":true,"user_metadata":{"role":"customer"}}' \
+            && echo "=== Cliente creado: cliente@test.com / Cliente1234! ===" \
+            || true
         fi
     depends_on:
       db-migrate:

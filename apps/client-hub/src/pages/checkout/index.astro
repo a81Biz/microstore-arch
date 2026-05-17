@@ -81,7 +81,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 
               <!-- Formulario: nueva dirección (siempre visible si no hay guardadas; condicional si las hay) -->
               <template x-if="savedAddresses.length === 0 || selectedAddressId === 'new'">
-                <form @submit.prevent="nextToPayment()" class="form-stack" style="margin-top: 1.5rem;">
+                <form @submit.prevent="nextToPayment()" class="form-stack" style="margin-top: 1.5rem;" novalidate>
                   <div class="form-group">
                     <label for="street">Calle y número</label>
                     <input type="text" id="street" x-model="shipping.street" required placeholder="Av. Siempre Viva 123" />
@@ -94,7 +94,10 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
                     </div>
                     <div class="form-group">
                       <label for="postal_code">Código Postal</label>
-                      <input type="text" id="postal_code" x-model="shipping.postalCode" required placeholder="06700" pattern="\d{4,6}" title="Código postal de 4 a 6 dígitos" minlength="4" maxlength="6" />
+                      <input type="text" id="postal_code" x-model="shipping.postalCode" placeholder="06700" inputmode="numeric" />
+                      <template x-if="postalCodeError">
+                        <p class="field-error" x-text="postalCodeError"></p>
+                      </template>
                     </div>
                   </div>
 
@@ -242,6 +245,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
     loading: true,
     processingPayment: false,
     error: '',
+    postalCodeError: '',
     items: [],
     total: 0,
     shipping: {
@@ -261,6 +265,20 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 
     async init() {
       const params = new URLSearchParams(window.location.search);
+
+      if (params.get('paypal_confirm') === '1') {
+        this.displayId = sessionStorage.getItem('paypal_pending_display_id') ?? '';
+        sessionStorage.removeItem('paypal_pending_display_id');
+        this.step = 'confirmed';
+        this.loading = false;
+        return;
+      }
+
+      if (params.get('paypal_cancel') === '1') {
+        this.error = 'El pago con PayPal fue cancelado. Puedes intentarlo de nuevo.';
+        this.step = 'payment';
+      }
+
       const cartParam = params.get('cart');
       const productId  = params.get('product');
 
@@ -314,6 +332,13 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 
       const { data: { session } } = await supabaseClient.auth.getSession();
       this.isAuthenticated = !!session;
+
+      if (!session && this.items.length > 0) {
+        sessionStorage.setItem('returnUrl', window.location.pathname + window.location.search);
+        window.location.href = '/auth/login';
+        return;
+      }
+
       if (this.isAuthenticated) {
         try {
           this.savedAddresses = await loadSavedAddresses();
@@ -357,6 +382,13 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
     },
 
     async nextToPayment() {
+      const cp = this.shipping.postalCode.trim();
+      if (!/^[0-9]{4,6}$/.test(cp)) {
+        this.postalCodeError = 'Código postal inválido. Ingresa entre 4 y 6 dígitos numéricos.';
+        return;
+      }
+      this.postalCodeError = '';
+
       if (this.saveNewAddress && this.isAuthenticated && this.selectedAddressId === 'new') {
         try {
           await saveAddressToAccount({
@@ -375,21 +407,21 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
     },
 
     getMethodName(method) {
-      const names = { stripe: 'Tarjeta', paypal: 'PayPal', mercadopago: 'Mercado Pago', hey_banco: 'Hey Banco' };
+      const names: Record<string, string> = { stripe: 'Tarjeta', paypal: 'PayPal', mercadopago: 'Mercado Pago', hey_banco: 'Hey Banco' };
       return names[method] || method;
     },
 
     getGatewayIcon(method) {
-      const icons = { stripe: '💳', paypal: '🅿️', mercadopago: '🤝', hey_banco: '🏦' };
+      const icons: Record<string, string> = { stripe: '💳', paypal: '🅿️', mercadopago: '🤝', hey_banco: '🏦' };
       return icons[method] || '💰';
     },
 
     getGatewayDesc(method) {
-      const descs = { 
-        stripe: 'Crédito y Débito', 
-        paypal: 'Saldo y Tarjetas', 
-        mercadopago: 'Pagos locales', 
-        hey_banco: 'Transferencia CLABE' 
+      const descs: Record<string, string> = {
+        stripe: 'Crédito y Débito',
+        paypal: 'Saldo y Tarjetas',
+        mercadopago: 'Pagos locales',
+        hey_banco: 'Transferencia CLABE'
       };
       return descs[method] || '';
     },
@@ -402,7 +434,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
         const result = await createOrder(this.items, this.shipping, this.selectedMethod);
 
         if (!result.success) {
-          this.error = result.error;
+          this.error = result.error ?? 'Error al procesar el pago';
           this.processingPayment = false;
           return;
         }
@@ -411,12 +443,22 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
         this.displayId = result.displayId;
         this.step = 'redirecting';
 
-        if (this.selectedMethod === 'mercadopago') {
+        if (this.selectedMethod === 'paypal') {
+          const approvalUrl = this.paymentResult?.approvalUrl as string | undefined;
+          if (approvalUrl) {
+            sessionStorage.setItem('paypal_pending_display_id', this.displayId);
+            window.location.href = approvalUrl;
+          } else {
+            this.error = 'No se pudo obtener el enlace de aprobación de PayPal. Intenta de nuevo.';
+            this.step = 'payment';
+          }
+        } else if (this.selectedMethod === 'mercadopago') {
           setTimeout(() => {
-            if (this.paymentResult.sandboxInitPoint) window.location.href = this.paymentResult.sandboxInitPoint;
+            const pr = this.paymentResult;
+            if (pr?.sandboxInitPoint) window.location.href = pr.sandboxInitPoint;
           }, 1500);
         } else if (this.selectedMethod !== 'hey_banco') {
-          // Simulamos confirmación para Stripe/PayPal en este prototipo
+          // Stripe: auto-confirm temporal hasta integrar Stripe.js
           setTimeout(() => { this.step = 'confirmed'; }, 2000);
         }
       } catch (err) {
@@ -488,6 +530,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
   .space-between { display: flex; justify-content: space-between; align-items: center; }
 
   .error-alert { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500; }
+  .field-error { color: #b91c1c; font-size: 0.8rem; margin-top: 0.25rem; }
 
   .redirect-state { text-align: center; padding: 2rem 0; }
   .spinner-large { width: 64px; height: 64px; border: 5px solid #f1f5f9; border-top-color: #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 2rem; }

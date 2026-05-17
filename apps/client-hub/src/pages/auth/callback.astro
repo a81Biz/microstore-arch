@@ -20,8 +20,8 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 </ClientHubLayout>
 
 <script>
-  import { supabaseClient } from '../../lib/supabase-client.ts';
-  import { syncCartOnLogin } from '../../lib/auth/auth-client.ts';
+  import { supabaseClient } from '../../lib/supabase-client';
+  import { syncCartOnLogin } from '../../lib/auth/auth-client';
 
   window.authCallback = () => ({
     loading: true,

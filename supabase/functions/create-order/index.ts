@@ -131,9 +131,15 @@ class CreateOrderController extends BaseController {
   }
 
   private async createStripePayment(amount: number, orderId: string, email: string): Promise<Record<string, unknown>> {
-    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    const { data: credJson, error: credError } = await this.dbAdmin.rpc('get_payment_credentials', {
+      p_gateway: 'stripe'
+    });
+    if (credError || !credJson) {
+      throw new BusinessError('GATEWAY_NOT_CONFIGURED', 'Stripe no está configurado. Configure las credenciales en el panel de administración.', 503);
+    }
+    const stripeKey = credJson.secretKey as string;
     if (!stripeKey) {
-      throw new BusinessError('GATEWAY_NOT_CONFIGURED', 'Stripe no está configurado en el servidor', 503);
+      throw new BusinessError('GATEWAY_MISCONFIGURED', 'Las credenciales de Stripe están incompletas.', 503);
     }
 
     const response = await fetch('https://api.stripe.com/v1/payment_intents', {
@@ -160,10 +166,16 @@ class CreateOrderController extends BaseController {
   }
 
   private async createPayPalPayment(amount: number, orderId: string, currency: string): Promise<Record<string, unknown>> {
-    const paypalClientId = Deno.env.get('PAYPAL_CLIENT_ID');
-    const paypalSecret = Deno.env.get('PAYPAL_SECRET');
+    const { data: credJson, error: credError } = await this.dbAdmin.rpc('get_payment_credentials', {
+      p_gateway: 'paypal'
+    });
+    if (credError || !credJson) {
+      throw new BusinessError('GATEWAY_NOT_CONFIGURED', 'PayPal no está configurado. Configure las credenciales en el panel de administración.', 503);
+    }
+    const paypalClientId = credJson.clientId as string;
+    const paypalSecret = credJson.secret as string;
     if (!paypalClientId || !paypalSecret) {
-      throw new BusinessError('GATEWAY_NOT_CONFIGURED', 'PayPal no está configurado en el servidor', 503);
+      throw new BusinessError('GATEWAY_MISCONFIGURED', 'Las credenciales de PayPal están incompletas.', 503);
     }
 
     // Leer entorno desde variable de entorno — NUNCA hardcodear sandbox en código de producción
@@ -185,6 +197,8 @@ class CreateOrderController extends BaseController {
 
     const authData = await authResponse.json();
 
+    const clientHubUrl = Deno.env.get('PUBLIC_CLIENT_HUB_URL') ?? 'http://client.localhost';
+
     const orderResponse = await fetch(`${paypalBase}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
@@ -199,7 +213,11 @@ class CreateOrderController extends BaseController {
             currency_code: currency,
             value: (amount / 100).toFixed(2)
           }
-        }]
+        }],
+        application_context: {
+          return_url: `${clientHubUrl}/checkout?paypal_confirm=1&orderId=${orderId}`,
+          cancel_url: `${clientHubUrl}/checkout?paypal_cancel=1`
+        }
       })
     });
 
@@ -208,13 +226,21 @@ class CreateOrderController extends BaseController {
     }
 
     const orderData = await orderResponse.json();
-    return { gateway: 'paypal', orderId: orderData.id, clientId: paypalClientId };
+    const approvalUrl = (orderData.links as Array<{ rel: string; href: string }> | undefined)
+      ?.find(l => l.rel === 'approve')?.href;
+    return { gateway: 'paypal', orderId: orderData.id, clientId: paypalClientId, approvalUrl };
   }
 
   private async createMercadoPagoPayment(amount: number, orderId: string, email: string): Promise<Record<string, unknown>> {
-    const mpAccessToken = Deno.env.get('MERCADOPAGO_ACCESS_TOKEN');
+    const { data: credJson, error: credError } = await this.dbAdmin.rpc('get_payment_credentials', {
+      p_gateway: 'mercadopago'
+    });
+    if (credError || !credJson) {
+      throw new BusinessError('GATEWAY_NOT_CONFIGURED', 'MercadoPago no está configurado. Configure las credenciales en el panel de administración.', 503);
+    }
+    const mpAccessToken = credJson.accessToken as string;
     if (!mpAccessToken) {
-      throw new BusinessError('GATEWAY_NOT_CONFIGURED', 'MercadoPago no está configurado en el servidor', 503);
+      throw new BusinessError('GATEWAY_MISCONFIGURED', 'Las credenciales de MercadoPago están incompletas.', 503);
     }
 
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {

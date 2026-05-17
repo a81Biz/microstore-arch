@@ -1,0 +1,191 @@
+---
+import VendorAdminLayout from '../layouts/VendorAdminLayout.astro';
+
+if (!import.meta.env.DEV) {
+  return Astro.redirect('/');
+}
+
+const envChecks = [
+  { name: 'SUPABASE_URL',            set: !!import.meta.env.SUPABASE_URL },
+  { name: 'PUBLIC_SUPABASE_URL',     set: !!import.meta.env.PUBLIC_SUPABASE_URL },
+  { name: 'SUPABASE_ANON_KEY',       set: !!import.meta.env.SUPABASE_ANON_KEY },
+  { name: 'SUPABASE_SERVICE_ROLE_KEY', set: !!import.meta.env.SUPABASE_SERVICE_ROLE_KEY },
+  { name: 'ENCRYPTION_KEY',          set: !!import.meta.env.ENCRYPTION_KEY },
+  { name: 'GOOGLE_CLIENT_ID',        set: !!import.meta.env.GOOGLE_CLIENT_ID },
+  { name: 'GOOGLE_CLIENT_SECRET',    set: !!import.meta.env.GOOGLE_CLIENT_SECRET },
+  { name: 'RESEND_API_KEY',          set: !!import.meta.env.RESEND_API_KEY },
+  { name: 'EMAIL_FROM',              set: !!import.meta.env.EMAIL_FROM },
+];
+---
+
+<VendorAdminLayout title="Dev Setup">
+  <div class="dev-setup-page">
+    <header class="dev-header">
+      <div class="dev-badge">Solo desarrollo</div>
+      <h1>Guía de Configuración</h1>
+      <p>Esta página solo es visible en modo <code>dev</code>. En producción redirige a <code>/</code>.</p>
+    </header>
+
+    <!-- Credenciales de Desarrollo -->
+    <section class="dev-section">
+      <h2>Credenciales de Desarrollo</h2>
+      <div class="creds-grid">
+        <div class="cred-card">
+          <div class="cred-role">Vendedor (Admin)</div>
+          <div class="cred-field"><span>Email:</span> <code>admin@tienda.com</code></div>
+          <div class="cred-field"><span>Contraseña:</span> <code>Admin1234!</code></div>
+          <div class="cred-note">Requiere cambio de contraseña + TOTP en primer login</div>
+        </div>
+        <div class="cred-card">
+          <div class="cred-role">Cliente (Prueba)</div>
+          <div class="cred-field"><span>Email:</span> <code>cliente@test.com</code></div>
+          <div class="cred-field"><span>Contraseña:</span> <code>Cliente1234!</code></div>
+          <div class="cred-note">Pre-confirmado en db-seed. Login directo en client-hub.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Variables de Entorno -->
+    <section class="dev-section">
+      <h2>Variables de Entorno</h2>
+      <p class="section-desc">Copiar <code>.env.example</code> → <code>.env</code> y completar los valores.</p>
+      <div class="env-list">
+        {envChecks.map(e => (
+          <div class="env-item">
+            <code class="env-name">{e.name}</code>
+            {e.set
+              ? <span class="env-ok">✓ Configurada</span>
+              : <span class="env-missing">✗ Faltante</span>
+            }
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Google OAuth -->
+    <section class="dev-section">
+      <h2>Configurar Google OAuth</h2>
+      <p class="section-desc">
+        Necesario para que el botón "Registrarse con Google" funcione. Sin esto el botón falla silenciosamente.
+      </p>
+      <ol class="steps-list">
+        <li>Abre <strong>Google Cloud Console</strong> → selecciona o crea un proyecto.</li>
+        <li>Ve a <strong>APIs & Services → Credentials</strong> → <strong>Create Credentials → OAuth 2.0 Client ID</strong>.</li>
+        <li>Tipo de aplicación: <strong>Web application</strong>.</li>
+        <li>
+          En <strong>Authorized redirect URIs</strong> añade:<br />
+          <code>http://localhost:8000/auth/v1/callback</code>
+        </li>
+        <li>Copia <strong>Client ID</strong> y <strong>Client Secret</strong> generados.</li>
+        <li>
+          En tu <code>.env</code>, establece:
+          <pre class="code-block">GOOGLE_OAUTH_ENABLED=true
+GOOGLE_CLIENT_ID=&lt;tu-client-id&gt;
+GOOGLE_CLIENT_SECRET=&lt;tu-client-secret&gt;</pre>
+        </li>
+        <li>Reinicia el contenedor: <code>docker compose restart supabase-auth</code></li>
+      </ol>
+    </section>
+
+    <!-- Resend -->
+    <section class="dev-section">
+      <h2>Configurar Email Transaccional (Resend)</h2>
+      <p class="section-desc">
+        En local, los emails van a Inbucket (no a tu bandeja real). Resend solo es necesario en producción.<br />
+        Si <code>RESEND_API_KEY</code> no está definida, las Edge Functions de email loguean un warning y continúan sin fallar.
+      </p>
+      <ol class="steps-list">
+        <li>Crea una cuenta en <a href="https://resend.com" target="_blank" rel="noopener">resend.com</a>.</li>
+        <li>Ve a <strong>API Keys → Create API Key</strong> con permisos <em>Full Access</em>.</li>
+        <li>Verifica un dominio de envío o usa el sandbox <code>onboarding@resend.dev</code>.</li>
+        <li>
+          En tu <code>.env</code>:
+          <pre class="code-block">RESEND_API_KEY=re_...
+EMAIL_FROM=noreply@tu-dominio.com</pre>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Servicios Locales -->
+    <section class="dev-section">
+      <h2>Servicios Locales</h2>
+      <div class="services-grid">
+        <a href="http://localhost:8025" target="_blank" rel="noopener" class="service-card">
+          <div class="service-icon">📬</div>
+          <div>
+            <strong>Inbucket</strong>
+            <div class="service-url">localhost:8025</div>
+            <div class="service-desc">Captura todos los emails enviados en local</div>
+          </div>
+        </a>
+        <a href="http://localhost:8323" target="_blank" rel="noopener" class="service-card">
+          <div class="service-icon">🗄️</div>
+          <div>
+            <strong>Supabase Studio</strong>
+            <div class="service-url">localhost:8323</div>
+            <div class="service-desc">Explorador de base de datos y autenticación</div>
+          </div>
+        </a>
+        <a href="http://client.localhost" target="_blank" rel="noopener" class="service-card">
+          <div class="service-icon">🛒</div>
+          <div>
+            <strong>Client Hub</strong>
+            <div class="service-url">client.localhost</div>
+            <div class="service-desc">Portal del cliente (auth, pedidos, checkout)</div>
+          </div>
+        </a>
+        <a href="http://localhost" target="_blank" rel="noopener" class="service-card">
+          <div class="service-icon">🏪</div>
+          <div>
+            <strong>Storefront</strong>
+            <div class="service-url">localhost</div>
+            <div class="service-desc">Catálogo público de productos</div>
+          </div>
+        </a>
+      </div>
+    </section>
+  </div>
+</VendorAdminLayout>
+
+<style>
+  .dev-setup-page { padding: 3rem; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 2.5rem; }
+
+  .dev-header { border-bottom: 2px solid #e5e7eb; padding-bottom: 2rem; }
+  .dev-badge { display: inline-block; background: #fef9c3; color: #713f12; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.25rem 0.75rem; border-radius: 6px; margin-bottom: 1rem; border: 1px solid #fde68a; }
+  .dev-header h1 { font-size: 2rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem; }
+  .dev-header p { color: #6b7280; }
+  .dev-header code { background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.875rem; }
+
+  .dev-section { background: white; border-radius: 16px; border: 1px solid #e5e7eb; padding: 2rem; }
+  .dev-section h2 { font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem; }
+  .section-desc { color: #6b7280; font-size: 0.9rem; margin-bottom: 1.25rem; line-height: 1.6; }
+  .section-desc code { background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 4px; font-family: monospace; }
+
+  .creds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .cred-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.25rem; }
+  .cred-role { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; margin-bottom: 0.75rem; }
+  .cred-field { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.4rem; font-size: 0.9rem; }
+  .cred-field span { color: #6b7280; min-width: 80px; }
+  .cred-field code { background: #e5e7eb; padding: 0.15rem 0.5rem; border-radius: 4px; font-family: monospace; font-weight: 600; }
+  .cred-note { font-size: 0.75rem; color: #9ca3af; margin-top: 0.75rem; font-style: italic; }
+
+  .env-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .env-item { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; }
+  .env-name { font-family: monospace; font-size: 0.875rem; color: #374151; min-width: 240px; }
+  .env-ok { font-size: 0.8rem; font-weight: 600; color: #065f46; background: #ecfdf5; padding: 0.2rem 0.6rem; border-radius: 6px; }
+  .env-missing { font-size: 0.8rem; font-weight: 600; color: #991b1b; background: #fef2f2; padding: 0.2rem 0.6rem; border-radius: 6px; }
+
+  .steps-list { list-style: decimal; padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .steps-list li { font-size: 0.9rem; color: #374151; line-height: 1.6; }
+  .steps-list li a { color: #16213e; font-weight: 600; }
+  .steps-list code { background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.875rem; }
+  .code-block { background: #111827; color: #e5e7eb; padding: 0.75rem 1rem; border-radius: 8px; font-family: monospace; font-size: 0.825rem; margin-top: 0.4rem; line-height: 1.6; overflow-x: auto; }
+
+  .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .service-card { display: flex; gap: 1rem; align-items: flex-start; padding: 1.25rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; text-decoration: none; color: inherit; transition: border-color 0.2s, box-shadow 0.2s; }
+  .service-card:hover { border-color: #16213e; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .service-icon { font-size: 1.75rem; flex-shrink: 0; }
+  .service-card strong { font-size: 0.95rem; font-weight: 700; color: #111827; }
+  .service-url { font-family: monospace; font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem; }
+  .service-desc { font-size: 0.8rem; color: #9ca3af; margin-top: 0.25rem; }
+</style>

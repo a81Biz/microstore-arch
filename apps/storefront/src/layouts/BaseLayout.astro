@@ -119,7 +119,7 @@ const fullTitle = `${title} | ${siteName}`;
 </html>
 
 <script>
-  import { registerCartStore } from '../lib/cart/cart-store.ts';
+  import { registerCartStore } from '../lib/cart/cart-store';
   document.addEventListener('alpine:init', () => {
     registerCartStore();
   });

@@ -3,6 +3,7 @@ import { supabaseClient } from '../supabase-client';
 export interface AuthResult {
   success: boolean;
   nextStep?: 'complete';
+  autoConfirmed?: boolean;
   user?: {
     id: string;
     email: string;
@@ -51,9 +52,14 @@ export async function signUpWithEmail(email: string, password: string): Promise<
     return { success: false, message: error.message };
   }
 
+  const autoConfirmed = !!data.user?.email_confirmed_at;
+
   return {
     success: true,
-    message: 'Revisa tu email para verificar tu cuenta',
+    autoConfirmed,
+    message: autoConfirmed
+      ? 'Cuenta creada. Puedes iniciar sesión ahora.'
+      : 'Revisa tu email para verificar tu cuenta',
     user: data.user ? { id: data.user.id, email: data.user.email!, role: 'customer' } : undefined
   };
 }

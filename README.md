@@ -52,9 +52,9 @@ Primera vez tarda ~5–8 min (descarga imágenes Docker, incluyendo el edge runt
 
 ## Acceso al panel de vendedor (local)
 
-La migración `00026_seed_admin_user.sql` crea automáticamente el usuario administrador al levantar el stack.
+El servicio `db-seed` crea automáticamente los usuarios de desarrollo al levantar el stack.
 
-**Credenciales iniciales:**
+**Credenciales de desarrollo (vendor-admin):**
 
 | Campo | Valor |
 |-------|-------|
@@ -62,6 +62,18 @@ La migración `00026_seed_admin_user.sql` crea automáticamente el usuario admin
 | Email | `admin@tienda.com` |
 | Contraseña | `Admin1234!` |
 | Contraseña | `Admin1234!**` |
+
+**Credenciales de desarrollo (client-hub — cliente de prueba):**
+
+| Campo | Valor |
+|-------|-------|
+| URL | http://client.localhost |
+| Email | `cliente@test.com` |
+| Contraseña | `Cliente1234!` |
+
+Client ID: AXjPETt0Ho7c_6psiByHlOTQ7XJTSQu4thEepQfix8Uw0fma9LiOZGWr8K_YxOfpq2Cip4uU2WNdv5L5 Secret: EM5eKNEDZsz10XFBT1utePDxTe9ASOYoQtojvVhSWuIovrVZkusslYyhUsRfFsl22xpetHHXNzfaUX5c 
+
+> Guía interactiva de configuración disponible en `http://localhost:5174/dev-setup` (solo en modo dev).
 
 **Flujo de primer ingreso** (obligatorio, en este orden):
 
@@ -352,6 +364,9 @@ docker compose down -v && docker compose up --build
 | `RESEND_API_KEY` | API key de Resend para emails transaccionales (pedidos, envíos) |
 | `EMAIL_FROM` | Dirección FROM verificada en Resend (ej. `noreply@tienda.com`) |
 | `LOGFLARE_API_KEY` | API key de Logflare para logs estructurados en producción |
+| `GOOGLE_OAUTH_ENABLED` | `true`/`false` — activa Google OAuth en GoTrue (default: `false`) |
+| `GOOGLE_CLIENT_ID` | Client ID de la app OAuth en Google Cloud Console |
+| `GOOGLE_CLIENT_SECRET` | Client Secret de la app OAuth en Google Cloud Console |
 
 ---
 

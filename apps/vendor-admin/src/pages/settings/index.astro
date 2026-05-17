@@ -137,6 +137,32 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       </div>
     </template>
   </div>
+    <!-- Sección de Configuración de Email (solo lectura SSR — no expone secretos al cliente) -->
+    <div class="email-config-section">
+      <h2>Configuración de Email</h2>
+      <p class="email-config-desc">Los emails transaccionales (pedido, envío, entrega) se envían vía Resend. Configura las variables en tu archivo <code>.env</code>.</p>
+      <div class="email-status-grid">
+        <div class="email-status-item">
+          <span class="status-label">RESEND_API_KEY</span>
+          {import.meta.env.RESEND_API_KEY
+            ? <span class="status-badge status-on">Configurada ✓</span>
+            : <span class="status-badge status-off">No configurada ✗</span>
+          }
+        </div>
+        <div class="email-status-item">
+          <span class="status-label">EMAIL_FROM</span>
+          {import.meta.env.EMAIL_FROM
+            ? <span class="status-badge status-on">{import.meta.env.EMAIL_FROM}</span>
+            : <span class="status-badge status-off">No configurada ✗</span>
+          }
+        </div>
+      </div>
+      <div class="email-links">
+        <a href="http://localhost:8025" target="_blank" rel="noopener" class="email-link">Inbucket (emails locales) →</a>
+        <a href="https://resend.com/api-keys" target="_blank" rel="noopener" class="email-link">Obtener API key en Resend →</a>
+      </div>
+    </div>
+  </div>
 </VendorAdminLayout>
 
 <script>
@@ -195,12 +221,12 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     },
 
     getGatewayName(gateway) {
-      const names = { stripe: 'Stripe (Tarjetas)', paypal: 'PayPal', mercadopago: 'Mercado Pago', hey_banco: 'Hey Banco' };
+      const names: Record<string, string> = { stripe: 'Stripe (Tarjetas)', paypal: 'PayPal', mercadopago: 'Mercado Pago', hey_banco: 'Hey Banco' };
       return names[gateway] || gateway;
     },
 
     getGatewayIcon(gateway) {
-      const icons = { stripe: '💳', paypal: '🅿️', mercadopago: '🤝', hey_banco: '🏦' };
+      const icons: Record<string, string> = { stripe: '💳', paypal: '🅿️', mercadopago: '🤝', hey_banco: '🏦' };
       return icons[gateway] || '💰';
     },
 
@@ -260,14 +286,15 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
           body: JSON.stringify({
             gateway,
             is_enabled: gw?.is_enabled ?? false,
-            credentials: this.credentials[gateway]
+            credentials: (this.credentials as unknown as Record<string, unknown>)[gateway]
           })
         });
 
         if (response.ok) {
           this.saveMessage[gateway] = 'Configuración guardada exitosamente';
           // Limpiar campos sensibles después de guardar
-          Object.keys(this.credentials[gateway]).forEach(k => { this.credentials[gateway][k] = ''; });
+          const creds = (this.credentials as unknown as Record<string, Record<string, string>>)[gateway];
+          if (creds) Object.keys(creds).forEach(k => { creds[k] = ''; });
           setTimeout(() => { this.showForm = null; }, 2000);
         } else {
           const data = await response.json();
@@ -341,4 +368,15 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
   .loading-state { text-align: center; padding: 5rem; color: #6b7280; }
   .spinner { width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top: 4px solid #16213e; border-radius: 50%; margin: 0 auto 1rem; animation: spin 1s linear infinite; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  .email-config-section { margin-top: 3rem; background: white; border-radius: 20px; border: 1px solid #e5e7eb; padding: 2rem; }
+  .email-config-section h2 { font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem; }
+  .email-config-desc { color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .email-config-desc code { background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 4px; font-family: monospace; }
+  .email-status-grid { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .email-status-item { display: flex; align-items: center; gap: 1rem; }
+  .status-label { font-size: 0.875rem; font-weight: 600; color: #374151; min-width: 160px; font-family: monospace; }
+  .email-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .email-link { font-size: 0.875rem; color: #16213e; font-weight: 600; text-decoration: none; }
+  .email-link:hover { text-decoration: underline; }
 </style>

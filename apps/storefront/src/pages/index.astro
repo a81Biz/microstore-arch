@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductCard from '../components/product/ProductCard.astro';
-import { getVisibleProducts } from '../lib/catalog/catalog.ts';
+import { getVisibleProducts } from '../lib/catalog/catalog';
 
 const products = await getVisibleProducts();
 ---

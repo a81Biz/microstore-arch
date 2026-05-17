@@ -72,12 +72,18 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 
 <script>
   import { loadCustomerOrders } from '../../lib/orders/order-client';
+  import { supabaseClient } from '../../lib/supabase-client';
 
   window.orderList = () => ({
     orders: [],
     loading: true,
 
     async init() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        window.location.href = '/auth/login';
+        return;
+      }
       await this.fetchOrders();
     },
 
@@ -99,7 +105,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
     },
 
     getStatusLabel(status) {
-      const labels = {
+      const labels: Record<string, string> = {
         pending:       'Pendiente',
         paid:          'Pago confirmado',
         in_production: 'Preparando',

@@ -4,6 +4,7 @@ interface Props {
 }
 
 const { title } = Astro.props;
+const storefrontUrl = import.meta.env.PUBLIC_STOREFRONT_URL || 'http://localhost';
 ---
 
 <!doctype html>
@@ -22,6 +23,7 @@ const { title } = Astro.props;
         <div class="container">
           <a href="/orders" class="logo">Micro-Store <span>Hub</span></a>
           <nav>
+            <a href={storefrontUrl} class="nav-back-store">← Tienda</a>
             <a href="/orders" class:list={[{ active: Astro.url.pathname.startsWith('/orders') }]}>Mis Compras</a>
             <a href="/profile" class:list={[{ active: Astro.url.pathname.startsWith('/profile') }]}>Perfil</a>
             <button id="logout-btn">Salir</button>
@@ -101,6 +103,8 @@ const { title } = Astro.props;
   nav { display: flex; align-items: center; gap: 2rem; }
   nav a { text-decoration: none; color: var(--text-muted); font-weight: 500; }
   nav a:hover { color: var(--primary); }
+  .nav-back-store { font-size: 0.85rem; border: 1px solid #e2e8f0; padding: 0.35rem 0.75rem; border-radius: 8px; transition: border-color 0.2s, color 0.2s; }
+  .nav-back-store:hover { color: var(--primary); border-color: var(--primary); }
 
   #logout-btn {
     background: #f1f5f9;

@@ -235,10 +235,44 @@ PUBLIC_VENDOR_ADMIN_URL=https://admin.tienda.com
 | Stripe | https://dashboard.stripe.com/apikeys | Restricted key (webhooks + charges) |
 | PayPal | https://developer.paypal.com | App credentials |
 | MercadoPago | https://www.mercadopago.com/developers | App credentials |
+| Google OAuth | https://console.cloud.google.com/apis/credentials | OAuth 2.0 Client ID |
+
+### Credenciales de desarrollo (db-seed — no van a producción)
+
+| Usuario | Email | Contraseña | Rol |
+|---------|-------|-----------|-----|
+| Admin vendedor | `admin@tienda.com` | `Admin1234!` | vendor |
+| Cliente prueba | `cliente@test.com` | `Cliente1234!` | customer |
+
+> Guía interactiva disponible en `http://localhost:5174/dev-setup` (solo en modo `dev`).
 
 ---
 
-## 7. Galería de Imágenes por Producto (PT-IMG-030)
+## 7. PT-AUTH-035 · Registro, OAuth y Config Dev (2026-05-16)
+
+### Cambios aplicados
+
+| Brecha | Archivo(s) | Cambio |
+|--------|-----------|--------|
+| B1 — UX registro | `auth-client.ts`, `register.astro` | `signUpWithEmail` detecta `email_confirmed_at`; si auto-confirm → mensaje positivo + redirect a login a los 2s |
+| B2 — Seed cliente | `docker-compose.yml` db-seed | Añade `cliente@test.com / Cliente1234!` con idempotencia (`\|\| true`) |
+| B3 — Google OAuth | `docker-compose.yml` supabase-auth, `.env.example` | `GOTRUE_EXTERNAL_GOOGLE_*` añadidos (ENABLED=false por defecto); activar con credenciales de Google Cloud Console |
+| B4 — Config email | `settings/index.astro` | Sección SSR con estado de `RESEND_API_KEY` (sin exponer valor) + links a Inbucket/Resend |
+| B5 — Dev setup | `dev-setup.astro` (nuevo) | Página gateada por `import.meta.env.DEV`; incluye credenciales, checklist de env vars, pasos OAuth y Resend, links a servicios |
+
+### Variables de entorno nuevas
+
+```
+GOOGLE_OAUTH_ENABLED=false       # Activar cuando se configuren credenciales reales
+GOOGLE_CLIENT_ID=                # Google Cloud Console → Credentials → OAuth 2.0
+GOOGLE_CLIENT_SECRET=
+```
+
+URI de redirección autorizada para dev: `http://localhost:8000/auth/v1/callback`
+
+---
+
+## 8. Galería de Imágenes por Producto (PT-IMG-030)
 
 ### Modelo de datos
 
@@ -286,7 +320,7 @@ Migración: `supabase/migrations/00032_product_images_gallery.sql`
 
 ---
 
-## 8. Arquitectura del Carrito de Compras (PT-CART-029)
+## 9. Arquitectura del Carrito de Compras (PT-CART-029)
 
 ### Flujo general
 
@@ -328,7 +362,7 @@ checkout/index.astro (client-hub)
 
 ---
 
-## 9. Próximos Pasos Recomendados
+## 10. Próximos Pasos Recomendados
 
 ### Prioridad media — Producción
 
@@ -351,7 +385,7 @@ checkout/index.astro (client-hub)
 
 ---
 
-## 10. Comandos de referencia rápida
+## 11. Comandos de referencia rápida
 
 ```bash
 # Desarrollo local

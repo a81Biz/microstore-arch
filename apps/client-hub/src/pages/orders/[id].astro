@@ -136,7 +136,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
       await this.fetchDetail(orderId);
       
       // Suscribirse a cambios en tiempo real
-      if (this.order) {
+      if (this.order && orderId) {
         this.unsubscribe = subscribeToOrderUpdates(orderId, (updated) => {
           this.order = updated;
         });
@@ -144,6 +144,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
     },
 
     async fetchDetail(orderId) {
+      if (!orderId) { this.loading = false; return; }
       this.loading = true;
       try {
         this.order = await loadOrderDetail(orderId);
@@ -167,7 +168,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
     },
 
     getStatusLabel(status) {
-      const labels = {
+      const labels: Record<string, string> = {
         pending:       'Pendiente',
         paid:          'Pago confirmado',
         in_production: 'Preparando',
@@ -182,13 +183,13 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
     },
 
     getTrackingUrl(carrier, trackingId) {
-      const urls = {
+      const urls: Record<string, string> = {
         dhl: `https://www.dhl.com/mx-es/home/tracking/tracking-express.html?submit=1&tracking-id=${trackingId}`,
         fedex: `https://www.fedex.com/fedextrack/?trknbr=${trackingId}`,
         estafeta: `https://www.estafeta.com/Herramientas/Rastreo?trackingNumber=${trackingId}`,
         correos_mexico: `https://www.correosdemexico.gob.mx/SSLServicios/ConsultaEnvios/ConsultaEnvio.aspx?envio=${trackingId}`
       };
-      return urls[carrier?.toLowerCase()] || '#';
+      return urls[(carrier ?? '').toLowerCase()] || '#';
     },
 
     destroyed() {

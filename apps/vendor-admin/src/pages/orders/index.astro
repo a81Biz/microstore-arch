@@ -97,7 +97,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       <div class="modal-overlay" @click.self="showDetail = false">
         <div class="modal modal-lg" x-transition>
           <header class="modal-header">
-            <h2 x-text="'Pedido ' + selectedOrder?.displayId"></h2>
+            <h2 x-text="'Pedido ' + (selectedOrder?.displayId ?? '—')"></h2>
             <button @click="showDetail = false" class="btn-close">×</button>
           </header>
 
@@ -226,9 +226,38 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
 
                   <template x-if="selectedOrder.trackingId">
                     <div class="tracking-info-box">
-                      <h3>Tracking</h3>
+                      <h3>Tracking Actual</h3>
                       <p><strong x-text="selectedOrder.carrier.toUpperCase()"></strong></p>
                       <p class="code" x-text="selectedOrder.trackingId"></p>
+                    </div>
+                  </template>
+
+                  <template x-if="!TERMINAL_STATUSES.includes(selectedOrder.status)">
+                    <div class="tracking-edit-box">
+                      <h3>Guía de Envío</h3>
+                      <div class="form-group-sm">
+                        <label>Paquetería</label>
+                        <select x-model="detailCarrier" class="status-select">
+                          <option value="">Seleccionar...</option>
+                          <option value="dhl">DHL</option>
+                          <option value="fedex">FedEx</option>
+                          <option value="estafeta">Estafeta</option>
+                          <option value="correos_mexico">Correos de México</option>
+                          <option value="j_t">J&T Express</option>
+                        </select>
+                      </div>
+                      <div class="form-group-sm">
+                        <label>Número de Guía</label>
+                        <input type="text" x-model="detailTrackingId" placeholder="Ej: 1234567890" class="tracking-input" />
+                      </div>
+                      <button
+                        @click="submitDetailTracking()"
+                        class="btn-primary"
+                        :disabled="!detailCarrier || !detailTrackingId || processingTracking"
+                      >
+                        <span x-show="!processingTracking">Guardar y Notificar</span>
+                        <span x-show="processingTracking">Enviando...</span>
+                      </button>
                     </div>
                   </template>
                 </aside>
@@ -301,6 +330,9 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     trackingData: { orderId: '', carrier: '', id: '' },
     processingTracking: false,
 
+    detailCarrier: '',
+    detailTrackingId: '',
+
     async init() {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (!session) {
@@ -332,6 +364,8 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
       try {
         this.selectedOrder = await loadOrderDetail(orderId);
         this.statusUpdate = '';
+        this.detailCarrier = this.selectedOrder?.carrier ?? '';
+        this.detailTrackingId = this.selectedOrder?.trackingId ?? '';
       } catch (err) {
         console.error('Error loading order detail:', err);
       } finally {
@@ -347,9 +381,23 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
         await this.openDetail(this.selectedOrder.id);
         await this.fetchOrders();
       } catch (err) {
-        alert(err.message);
+        alert(err instanceof Error ? err.message : 'Error al actualizar estado');
       } finally {
         this.processingStatus = false;
+      }
+    },
+
+    async submitDetailTracking() {
+      if (!this.selectedOrder) return;
+      this.processingTracking = true;
+      try {
+        await updateTracking(this.selectedOrder.id, this.detailTrackingId, this.detailCarrier);
+        await this.openDetail(this.selectedOrder.id);
+        await this.fetchOrders();
+      } catch (err) {
+        alert(err instanceof Error ? err.message : 'Error al actualizar tracking');
+      } finally {
+        this.processingTracking = false;
       }
     },
 
@@ -369,7 +417,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
         this.showTracking = false;
         await this.fetchOrders();
       } catch (err) {
-        alert(err.message);
+        alert(err instanceof Error ? err.message : 'Error al actualizar tracking');
       } finally {
         this.processingTracking = false;
       }
@@ -394,7 +442,7 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
     },
 
     getStatusLabel(status) {
-      const labels = {
+      const labels: Record<string, string> = {
         pending:       'Pago pendiente',
         paid:          'Pago confirmado',
         in_production: 'Preparando pedido',
@@ -486,8 +534,11 @@ import VendorAdminLayout from '../../layouts/VendorAdminLayout.astro';
   .history-arrow { color: #9ca3af; font-size: 0.8rem; }
 
   .detail-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
-  .status-change-box, .tracking-info-box { background: #f9fafb; padding: 1.25rem; border-radius: 12px; border: 1px solid #f3f4f6; }
-  .status-change-box h3, .tracking-info-box h3 { font-size: 0.75rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+  .status-change-box, .tracking-info-box, .tracking-edit-box { background: #f9fafb; padding: 1.25rem; border-radius: 12px; border: 1px solid #f3f4f6; }
+  .status-change-box h3, .tracking-info-box h3, .tracking-edit-box h3 { font-size: 0.75rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+  .form-group-sm { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.75rem; }
+  .form-group-sm label { font-size: 0.75rem; font-weight: 600; color: #6b7280; }
+  .tracking-input { width: 100%; padding: 0.45rem 0.6rem; border-radius: 8px; border: 1px solid #d1d5db; font-size: 0.875rem; }
   .status-select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid #d1d5db; }
 
   .btn-primary { width: 100%; background: #16213e; color: white; padding: 0.6rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }

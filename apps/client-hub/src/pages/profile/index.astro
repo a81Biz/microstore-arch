@@ -208,11 +208,11 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 </ClientHubLayout>
 
 <script>
-  import { getCurrentUser, signOut } from '../../lib/auth/auth-client.ts';
+  import { getCurrentUser, signOut } from '../../lib/auth/auth-client';
   import {
     updateProfile, updatePassword,
     loadAddresses, createAddress, updateAddress, deleteAddress, setDefaultAddress
-  } from '../../lib/profile/profile-client.ts';
+  } from '../../lib/profile/profile-client';
 
   window.profilePage = () => ({
     loading: true,
@@ -262,8 +262,10 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
       this.errorMsg = '';
       try {
         await updateProfile(this.form.name, this.form.phone);
-        this.profile.name = this.form.name;
-        this.profile.phone = this.form.phone;
+        if (this.profile) {
+          this.profile.name = this.form.name;
+          this.profile.phone = this.form.phone;
+        }
         this.successMsg = 'Perfil actualizado correctamente';
         setTimeout(() => { this.successMsg = ''; }, 3000);
       } catch (e) {

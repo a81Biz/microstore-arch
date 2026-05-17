@@ -167,26 +167,35 @@ class OrderManagementController extends BaseController {
     return data;
   }
 
-  private async triggerEmail(orderId: string, type: string, status?: string): Promise<void> {
-    let functionName: string | null = null;
-
-    if (type === 'shipping') {
-      functionName = 'send-shipping-email';
-    } else if (type === 'status_update' && status === 'delivered') {
-      functionName = 'send-delivery-email';
-    } else {
-      logger.info('No email configured for this event', { orderId, type, status });
-      return;
-    }
-
+  private async invokeEmailFunction(functionName: string, payload: Record<string, unknown>): Promise<void> {
     await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/${functionName}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ orderId }),
+      body: JSON.stringify(payload),
     });
+  }
+
+  private async triggerEmail(orderId: string, type: string, status?: string): Promise<void> {
+    if (type === 'shipping') {
+      await this.invokeEmailFunction('send-shipping-email', { orderId });
+      return;
+    }
+
+    if (type === 'status_update' && status) {
+      if (status === 'delivered') {
+        await this.invokeEmailFunction('send-delivery-email', { orderId });
+      } else if (['packaged', 'shipped', 'in_transit', 'cancelled'].includes(status)) {
+        await this.invokeEmailFunction('send-status-email', { orderId, status });
+      } else {
+        logger.info('No email configured for this status', { orderId, status });
+      }
+      return;
+    }
+
+    logger.info('No email configured for this event', { orderId, type, status });
   }
 }
 

@@ -55,7 +55,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 </ClientHubLayout>
 
 <script>
-  import { signUpWithEmail, signInWithGoogle } from '../../lib/auth/auth-client.ts';
+  import { signUpWithEmail, signInWithGoogle } from '../../lib/auth/auth-client';
 
   window.registerForm = () => ({
     email: '',
@@ -80,6 +80,9 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 
         if (result.success) {
           this.success = result.message || 'Registro exitoso';
+          if (result.autoConfirmed) {
+            setTimeout(() => { window.location.href = '/auth/login'; }, 2000);
+          }
         } else {
           this.error = result.message || 'Error al registrarse';
         }
