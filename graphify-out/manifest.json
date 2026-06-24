@@ -1,890 +1,720 @@
 {
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\package.json": {
-    "mtime": 1778848595.602966,
-    "ast_hash": "89deb6c2db04ec6b56ef8592a9d49fe5",
-    "semantic_hash": "89deb6c2db04ec6b56ef8592a9d49fe5"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\tsconfig.json": {
-    "mtime": 1778375074.1661606,
-    "ast_hash": "a22f33e190a6f2e8644ca479359be435",
-    "semantic_hash": "a22f33e190a6f2e8644ca479359be435"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\astro.config.mjs": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\astro.config.mjs": {
     "mtime": 1778474934.4222667,
     "ast_hash": "23be70fbfbfb86a477edf2a84a90173e",
     "semantic_hash": "23be70fbfbfb86a477edf2a84a90173e"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\package.json": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\package.json": {
     "mtime": 1778845259.098483,
     "ast_hash": "f248478d4327707eb742213941dcdecb",
     "semantic_hash": "f248478d4327707eb742213941dcdecb"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\env.d.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\env.d.ts": {
     "mtime": 1778971520.323973,
     "ast_hash": "0bf69ea0a0b3ad6a1e612ad14c1aff81",
     "semantic_hash": "0bf69ea0a0b3ad6a1e612ad14c1aff81"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\layouts\\ClientHubLayout.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\layouts\\ClientHubLayout.astro": {
     "mtime": 1778969840.1830404,
     "ast_hash": "5514577bc25db84e24e794b3d03410f5",
     "semantic_hash": "5514577bc25db84e24e794b3d03410f5"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\lib\\supabase-client.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\lib\\supabase-client.ts": {
     "mtime": 1778380081.9546337,
     "ast_hash": "951e9c9c1480c704a70b2cd778e24788",
     "semantic_hash": "951e9c9c1480c704a70b2cd778e24788"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\lib\\auth\\auth-client.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\lib\\auth\\auth-client.ts": {
     "mtime": 1778975005.1870613,
     "ast_hash": "e489c0febccca2582d9e30414c66a733",
     "semantic_hash": "e489c0febccca2582d9e30414c66a733"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\lib\\auth\\__tests__\\auth-client.test.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\lib\\auth\\__tests__\\auth-client.test.ts": {
     "mtime": 1778837141.6405485,
     "ast_hash": "ee526f70c1532ae981285de10144ff35",
     "semantic_hash": "ee526f70c1532ae981285de10144ff35"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\lib\\checkout\\checkout-client.ts": {
-    "mtime": 1778932779.8996334,
-    "ast_hash": "074713f537efa99e567f08558722cb85",
-    "semantic_hash": "074713f537efa99e567f08558722cb85"
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\lib\\checkout\\checkout-client.ts": {
+    "mtime": 1780116170.0114152,
+    "ast_hash": "b10c9c22721e1df65c1a907e7a046216",
+    "semantic_hash": "b10c9c22721e1df65c1a907e7a046216"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\lib\\orders\\order-client.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\lib\\orders\\order-client.ts": {
     "mtime": 1778934833.8325186,
     "ast_hash": "f2de7e583431ad7275192c142bce398d",
     "semantic_hash": "f2de7e583431ad7275192c142bce398d"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\lib\\orders\\__tests__\\order-client.test.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\lib\\orders\\__tests__\\order-client.test.ts": {
     "mtime": 1778377330.1131277,
     "ast_hash": "3aa36d73b6ff9b54163916b7a7e8e95c",
     "semantic_hash": "3aa36d73b6ff9b54163916b7a7e8e95c"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\lib\\profile\\profile-client.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\lib\\profile\\profile-client.ts": {
     "mtime": 1778933012.9951365,
     "ast_hash": "bbf549282e237ee46129d88c923eefae",
     "semantic_hash": "bbf549282e237ee46129d88c923eefae"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\pages\\index.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\pages\\index.astro": {
     "mtime": 1778497344.1868048,
     "ast_hash": "37993b05728453fd618ace023092b475",
     "semantic_hash": "37993b05728453fd618ace023092b475"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\pages\\auth\\callback.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\pages\\auth\\callback.astro": {
     "mtime": 1778972973.1607127,
     "ast_hash": "7a6baa2a7e8e454d7865a3d6d3d5b126",
     "semantic_hash": "7a6baa2a7e8e454d7865a3d6d3d5b126"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\pages\\auth\\login.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\pages\\auth\\login.astro": {
     "mtime": 1778972977.4273868,
     "ast_hash": "89195647c1817d848584dfb39b8f0d0b",
     "semantic_hash": "89195647c1817d848584dfb39b8f0d0b"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\pages\\auth\\register.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\pages\\auth\\register.astro": {
     "mtime": 1778975010.3317218,
     "ast_hash": "3e9312317473aa44ad210a69d4ede145",
     "semantic_hash": "3e9312317473aa44ad210a69d4ede145"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\pages\\checkout\\index.astro": {
-    "mtime": 1778988273.7302613,
-    "ast_hash": "4221a9bc3391f8f6b3743b2d6adb34d1",
-    "semantic_hash": "4221a9bc3391f8f6b3743b2d6adb34d1"
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\pages\\checkout\\index.astro": {
+    "mtime": 1780116240.2990098,
+    "ast_hash": "61e8de2d774108bb3e69ef24d1651da1",
+    "semantic_hash": "61e8de2d774108bb3e69ef24d1651da1"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\pages\\orders\\index.astro": {
-    "mtime": 1778988175.9438193,
-    "ast_hash": "c8e24e575dcf63cb8c5e86bcbaede8b1",
-    "semantic_hash": "c8e24e575dcf63cb8c5e86bcbaede8b1"
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\pages\\orders\\index.astro": {
+    "mtime": 1780116263.2137241,
+    "ast_hash": "7dfe51e37c464c2e6bff877fe5d3ae1d",
+    "semantic_hash": "7dfe51e37c464c2e6bff877fe5d3ae1d"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\pages\\orders\\[id].astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\pages\\orders\\[id].astro": {
     "mtime": 1778972733.9066854,
     "ast_hash": "e01070683af74aa50af0eefe69b65098",
     "semantic_hash": "e01070683af74aa50af0eefe69b65098"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\pages\\profile\\index.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\pages\\profile\\index.astro": {
     "mtime": 1778972968.6952884,
     "ast_hash": "5c1597a1e7451bf002324c46fc9b4d58",
     "semantic_hash": "5c1597a1e7451bf002324c46fc9b4d58"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\client-hub\\src\\__tests__\\e2e\\checkout-flow.test.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\client-hub\\src\\__tests__\\e2e\\checkout-flow.test.ts": {
     "mtime": 1778845227.975014,
     "ast_hash": "9a4e593aaa5495d69076d47df1e99499",
     "semantic_hash": "9a4e593aaa5495d69076d47df1e99499"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\astro.config.mjs": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\astro.config.mjs": {
     "mtime": 1778922066.2724073,
     "ast_hash": "f383c550f0893cf7091d781cfd87b57a",
     "semantic_hash": "f383c550f0893cf7091d781cfd87b57a"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\package.json": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\package.json": {
     "mtime": 1778385870.4293272,
     "ast_hash": "3bab69fb65e932121f03673652934b70",
     "semantic_hash": "3bab69fb65e932121f03673652934b70"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\env.d.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\env.d.ts": {
     "mtime": 1778972987.9501054,
     "ast_hash": "c693ebdd9941deff8d429153db3f8dcf",
     "semantic_hash": "c693ebdd9941deff8d429153db3f8dcf"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\components\\product\\ProductCard.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\components\\product\\ProductCard.astro": {
     "mtime": 1778925729.2150373,
     "ast_hash": "6fd9b45f66914f7455040b8406054270",
     "semantic_hash": "6fd9b45f66914f7455040b8406054270"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\layouts\\BaseLayout.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\layouts\\BaseLayout.astro": {
     "mtime": 1778973001.910154,
     "ast_hash": "0f38186e57f55299b0d67324c04d8ac4",
     "semantic_hash": "0f38186e57f55299b0d67324c04d8ac4"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\lib\\supabase-client.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\lib\\supabase-client.ts": {
     "mtime": 1778497018.1679099,
     "ast_hash": "59c0dc085d35dd453af2a121e472bdcb",
     "semantic_hash": "59c0dc085d35dd453af2a121e472bdcb"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\lib\\cart\\cart-store.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\lib\\cart\\cart-store.ts": {
     "mtime": 1778925678.7527838,
     "ast_hash": "c14b76a385ba9e85b40f599d5e65dc0c",
     "semantic_hash": "c14b76a385ba9e85b40f599d5e65dc0c"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\lib\\catalog\\catalog.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\lib\\catalog\\catalog.ts": {
     "mtime": 1778930534.2579024,
     "ast_hash": "6d52e02fbe943b04e6d92efb0c2629cc",
     "semantic_hash": "6d52e02fbe943b04e6d92efb0c2629cc"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\pages\\cart.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\pages\\cart.astro": {
     "mtime": 1778925797.4049804,
     "ast_hash": "cef2d13af93cbadff18215bb2e67f0dd",
     "semantic_hash": "cef2d13af93cbadff18215bb2e67f0dd"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\pages\\index.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\pages\\index.astro": {
     "mtime": 1778973006.29066,
     "ast_hash": "9fd5708a0dc2d9ff1f3e515231975bfe",
     "semantic_hash": "9fd5708a0dc2d9ff1f3e515231975bfe"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\pages\\robots.txt.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\pages\\robots.txt.ts": {
     "mtime": 1778375980.2342012,
     "ast_hash": "ad953ae6c4ed3596123c8365151b83b0",
     "semantic_hash": "ad953ae6c4ed3596123c8365151b83b0"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\pages\\sitemap.xml.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\pages\\sitemap.xml.ts": {
     "mtime": 1778375975.9754553,
     "ast_hash": "eb4ee2ef7190f44400ade0713febad5a",
     "semantic_hash": "eb4ee2ef7190f44400ade0713febad5a"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\storefront\\src\\pages\\producto\\[slug].astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\storefront\\src\\pages\\producto\\[slug].astro": {
     "mtime": 1778972998.1127841,
     "ast_hash": "ac822f1a02ef8437ba473f281ba758ae",
     "semantic_hash": "ac822f1a02ef8437ba473f281ba758ae"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\astro.config.mjs": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\astro.config.mjs": {
     "mtime": 1778868409.3697479,
     "ast_hash": "e1a32335f702a3d3b23b679744d2ec6f",
     "semantic_hash": "e1a32335f702a3d3b23b679744d2ec6f"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\package.json": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\package.json": {
     "mtime": 1778868414.7227628,
     "ast_hash": "f9f61f191b1fbff0c094c0f08bce6eeb",
     "semantic_hash": "f9f61f191b1fbff0c094c0f08bce6eeb"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\env.d.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\env.d.ts": {
     "mtime": 1778973044.0021987,
     "ast_hash": "9846cf24940148945e948d5e0f39c50d",
     "semantic_hash": "9846cf24940148945e948d5e0f39c50d"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\layouts\\AuthLayout.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\layouts\\AuthLayout.astro": {
     "mtime": 1778481909.6985075,
     "ast_hash": "86b33fdd3bc954e8a1c97fbe57e48c6f",
     "semantic_hash": "86b33fdd3bc954e8a1c97fbe57e48c6f"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\layouts\\VendorAdminLayout.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\layouts\\VendorAdminLayout.astro": {
     "mtime": 1778496021.8724492,
     "ast_hash": "1de0499477b3df93daac049e906ff23c",
     "semantic_hash": "1de0499477b3df93daac049e906ff23c"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\lib\\supabase-client.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\lib\\supabase-client.ts": {
     "mtime": 1778380086.4674659,
     "ast_hash": "951e9c9c1480c704a70b2cd778e24788",
     "semantic_hash": "951e9c9c1480c704a70b2cd778e24788"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\lib\\auth\\auth-client.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\lib\\auth\\auth-client.ts": {
     "mtime": 1778495168.0626745,
     "ast_hash": "8afa564307b218c65c7695405dac1822",
     "semantic_hash": "8afa564307b218c65c7695405dac1822"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\lib\\auth\\__tests__\\vendor-auth.test.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\lib\\auth\\__tests__\\vendor-auth.test.ts": {
     "mtime": 1778375724.349138,
     "ast_hash": "72da869dcfd362f5ead10cd526f3a92f",
     "semantic_hash": "72da869dcfd362f5ead10cd526f3a92f"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\lib\\orders\\order-admin.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\lib\\orders\\order-admin.ts": {
     "mtime": 1778934689.550183,
     "ast_hash": "8b4550927e5292c409ac94cf51533bab",
     "semantic_hash": "8b4550927e5292c409ac94cf51533bab"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\lib\\products\\product-admin.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\lib\\products\\product-admin.ts": {
     "mtime": 1778930455.385355,
     "ast_hash": "cd218c89c05393dd1d101dc78dc1c24a",
     "semantic_hash": "cd218c89c05393dd1d101dc78dc1c24a"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\pages\\dev-setup.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\pages\\dev-setup.astro": {
     "mtime": 1778975168.4844687,
     "ast_hash": "3170ad7468879fe04123fc5b873272e4",
     "semantic_hash": "3170ad7468879fe04123fc5b873272e4"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\pages\\index.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\pages\\index.astro": {
     "mtime": 1778480548.373312,
     "ast_hash": "d34abadebbb174883e5f048f86664d55",
     "semantic_hash": "d34abadebbb174883e5f048f86664d55"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\pages\\auth\\login.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\pages\\auth\\login.astro": {
     "mtime": 1778973010.1551912,
     "ast_hash": "2aa7b8d193603809006b8d7f269c74e5",
     "semantic_hash": "2aa7b8d193603809006b8d7f269c74e5"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\pages\\orders\\index.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\pages\\orders\\index.astro": {
     "mtime": 1778988339.7391257,
     "ast_hash": "9fac4a7076c868e66ef881ac8d969045",
     "semantic_hash": "9fac4a7076c868e66ef881ac8d969045"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\pages\\products\\index.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\pages\\products\\index.astro": {
     "mtime": 1778973071.8014927,
     "ast_hash": "9fbeafb1630aad1add4b33fde2d0e862",
     "semantic_hash": "9fbeafb1630aad1add4b33fde2d0e862"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\apps\\vendor-admin\\src\\pages\\settings\\index.astro": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\apps\\vendor-admin\\src\\pages\\settings\\index.astro": {
     "mtime": 1778975095.1194792,
     "ast_hash": "5f6e3946f8d99338cd0b31371a227ed3",
     "semantic_hash": "5f6e3946f8d99338cd0b31371a227ed3"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docker\\Dockerfile.astro": {
-    "mtime": 1778474889.5615582,
-    "ast_hash": "64850b5a756592d77242cec2d421d943",
-    "semantic_hash": "64850b5a756592d77242cec2d421d943"
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\docker\\Dockerfile.astro": {
+    "mtime": 1782281308.503414,
+    "ast_hash": "19639cb8551879eca63d0a94ebd51502",
+    "semantic_hash": "19639cb8551879eca63d0a94ebd51502"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\config-eslint\\package.json": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\config-eslint\\package.json": {
     "mtime": 1778385915.7078533,
     "ast_hash": "72081907aaa478468ee87fcdf0276843",
     "semantic_hash": "72081907aaa478468ee87fcdf0276843"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\package.json": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\package.json": {
     "mtime": 1778844228.5558846,
     "ast_hash": "16fa849df62752534471736175e408d9",
     "semantic_hash": "16fa849df62752534471736175e408d9"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\tsconfig.json": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\tsconfig.json": {
     "mtime": 1778375125.5157232,
     "ast_hash": "d42baab1a0137a702df62d3507ba190d",
     "semantic_hash": "d42baab1a0137a702df62d3507ba190d"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\api-routes.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\api-routes.ts": {
     "mtime": 1778497079.351287,
     "ast_hash": "f0d8750185e9eae4c653ce3dfdbe8ee7",
     "semantic_hash": "f0d8750185e9eae4c653ce3dfdbe8ee7"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\index.ts": {
     "mtime": 1778495094.593848,
     "ast_hash": "c2c4a31f7d4a68161f9dd628b901be67",
     "semantic_hash": "c2c4a31f7d4a68161f9dd628b901be67"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\enums\\fulfillment-status.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\enums\\fulfillment-status.ts": {
     "mtime": 1778375135.7471752,
     "ast_hash": "d6c19cde628c12c486c8d5a18921557b",
     "semantic_hash": "d6c19cde628c12c486c8d5a18921557b"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\enums\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\enums\\index.ts": {
     "mtime": 1778375149.8512213,
     "ast_hash": "4461e8446078e175c567e4cef7934590",
     "semantic_hash": "4461e8446078e175c567e4cef7934590"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\enums\\order-status.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\enums\\order-status.ts": {
     "mtime": 1778934590.1666756,
     "ast_hash": "b109697fa7fc817a234d36000012da7b",
     "semantic_hash": "b109697fa7fc817a234d36000012da7b"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\enums\\payment-gateway.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\enums\\payment-gateway.ts": {
     "mtime": 1778375140.6280663,
     "ast_hash": "403fda4969fa6a2b636d9c1a57a23b2d",
     "semantic_hash": "403fda4969fa6a2b636d9c1a57a23b2d"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\enums\\user-role.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\enums\\user-role.ts": {
     "mtime": 1778375145.1509545,
     "ast_hash": "2ca02d08ae38bb5baba109c6164999d9",
     "semantic_hash": "2ca02d08ae38bb5baba109c6164999d9"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\models\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\models\\index.ts": {
     "mtime": 1778375168.307641,
     "ast_hash": "0106db00dc172c61e2166a4c7185a6a6",
     "semantic_hash": "0106db00dc172c61e2166a4c7185a6a6"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\models\\order.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\models\\order.ts": {
     "mtime": 1778375159.619458,
     "ast_hash": "82a2a832f002e403721c67c217be347b",
     "semantic_hash": "82a2a832f002e403721c67c217be347b"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\models\\product.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\models\\product.ts": {
     "mtime": 1778375154.785862,
     "ast_hash": "b0f1ade172cca3a7de9942b73b0344e9",
     "semantic_hash": "b0f1ade172cca3a7de9942b73b0344e9"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\models\\user.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\models\\user.ts": {
     "mtime": 1778375163.798284,
     "ast_hash": "eed762fbc3c0d3f60e32222aac914a27",
     "semantic_hash": "eed762fbc3c0d3f60e32222aac914a27"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\schemas\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\schemas\\index.ts": {
     "mtime": 1778375177.9167583,
     "ast_hash": "27ff08d52f0dacba61f69596db950b41",
     "semantic_hash": "27ff08d52f0dacba61f69596db950b41"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\schemas\\order.schema.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\schemas\\order.schema.ts": {
     "mtime": 1778375174.1373005,
     "ast_hash": "16be856094ee2430805236169cd64d25",
     "semantic_hash": "16be856094ee2430805236169cd64d25"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\utils\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\utils\\index.ts": {
     "mtime": 1778375193.9927163,
     "ast_hash": "071b75f63f8902bebbbeec0b01645061",
     "semantic_hash": "071b75f63f8902bebbbeec0b01645061"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\utils\\order-status-calculator.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\utils\\order-status-calculator.ts": {
     "mtime": 1778375189.308767,
     "ast_hash": "5ffe9023a902fcbe77e182c21635abe2",
     "semantic_hash": "5ffe9023a902fcbe77e182c21635abe2"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\packages\\core\\src\\utils\\stock-utils.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\packages\\core\\src\\utils\\stock-utils.ts": {
     "mtime": 1778375183.7036073,
     "ast_hash": "d3aedd570b48ff96e6865314a5f80dd2",
     "semantic_hash": "d3aedd570b48ff96e6865314a5f80dd2"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\scripts\\check-architecture.sh": {
-    "mtime": 1778400005.5088885,
-    "ast_hash": "d160ab386226cff9287748d269d85359",
-    "semantic_hash": "d160ab386226cff9287748d269d85359"
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\scripts\\check-architecture.sh": {
+    "mtime": 1782281362.4360752,
+    "ast_hash": "b443d033c7b0571e25977a476e6a2007",
+    "semantic_hash": "b443d033c7b0571e25977a476e6a2007"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\scripts\\verify-fixes.sh": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\scripts\\verify-fixes.sh": {
     "mtime": 1778380152.6697862,
     "ast_hash": "3626d5a9b87f26c7e8ffc6322daec81f",
     "semantic_hash": "3626d5a9b87f26c7e8ffc6322daec81f"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\scripts\\deploy\\backup-production.sh": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\scripts\\deploy\\backup-production.sh": {
     "mtime": 1778378575.8251193,
     "ast_hash": "cbb6e774d520468acb6ad9511ba9e484",
     "semantic_hash": "cbb6e774d520468acb6ad9511ba9e484"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\scripts\\deploy\\deploy-all.sh": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\scripts\\deploy\\deploy-all.sh": {
     "mtime": 1778377507.6131692,
     "ast_hash": "7e79a7e0af9445294ba35e14424e8525",
     "semantic_hash": "7e79a7e0af9445294ba35e14424e8525"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\scripts\\dev\\diagnose-admin.sh": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\scripts\\dev\\diagnose-admin.sh": {
     "mtime": 1778870994.7512097,
     "ast_hash": "8ba863958228481a8aab5de93fe0e35c",
     "semantic_hash": "8ba863958228481a8aab5de93fe0e35c"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\scripts\\dev\\get-local-otp.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\scripts\\dev\\get-local-otp.ts": {
     "mtime": 1778848534.2147207,
     "ast_hash": "83667ebf213dd3c6551e3aeccc8a2473",
     "semantic_hash": "83667ebf213dd3c6551e3aeccc8a2473"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\scripts\\security\\check-security.sh": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\scripts\\security\\check-security.sh": {
     "mtime": 1778377547.679399,
     "ast_hash": "e879440b73ec87d52457c32c59e78dd0",
     "semantic_hash": "e879440b73ec87d52457c32c59e78dd0"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\scripts\\test\\smoke-test.sh": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\scripts\\test\\smoke-test.sh": {
     "mtime": 1778845371.8772838,
     "ast_hash": "5481b8b053cd07e3b9e0870e1de1e9c0",
     "semantic_hash": "5481b8b053cd07e3b9e0870e1de1e9c0"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\change-password\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\capture-paypal-order\\index.ts": {
+    "mtime": 1780116214.6117127,
+    "ast_hash": "5370a516e2b1005e6c87651faf7fc5de",
+    "semantic_hash": "5370a516e2b1005e6c87651faf7fc5de"
+  },
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\change-password\\index.ts": {
     "mtime": 1778387999.5364454,
     "ast_hash": "a0be5b882891a081ed168e7ce19a6865",
     "semantic_hash": "a0be5b882891a081ed168e7ce19a6865"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\confirm-totp\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\confirm-totp\\index.ts": {
     "mtime": 1778387726.6036696,
     "ast_hash": "b1a02955f0b37376736a115280130e32",
     "semantic_hash": "b1a02955f0b37376736a115280130e32"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\create-order\\index.ts": {
-    "mtime": 1778988261.5697517,
-    "ast_hash": "f7c6ea391ae20cb87c6644733a3f5b35",
-    "semantic_hash": "f7c6ea391ae20cb87c6644733a3f5b35"
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\create-order\\index.ts": {
+    "mtime": 1780118893.9771538,
+    "ast_hash": "4a1dbf7dd6cedcf593c4bb1000cf6f4e",
+    "semantic_hash": "4a1dbf7dd6cedcf593c4bb1000cf6f4e"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\health\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\health\\index.ts": {
     "mtime": 1778836831.7275405,
     "ast_hash": "acab856d4851a318a5cbba35b712f0ab",
     "semantic_hash": "acab856d4851a318a5cbba35b712f0ab"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\login\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\login\\index.ts": {
     "mtime": 1778844450.6355493,
     "ast_hash": "da9a7fc62e2f6dcd49677fc809ebb5ed",
     "semantic_hash": "da9a7fc62e2f6dcd49677fc809ebb5ed"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\main\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\main\\index.ts": {
     "mtime": 1778493706.2692335,
     "ast_hash": "071a16965c3c58d8e83cebb4b6f7e1ec",
     "semantic_hash": "071a16965c3c58d8e83cebb4b6f7e1ec"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\manage-addresses\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\manage-addresses\\index.ts": {
     "mtime": 1778932562.3868494,
     "ast_hash": "1d2dbaf971666bebb62c86ee94fba616",
     "semantic_hash": "1d2dbaf971666bebb62c86ee94fba616"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\manage-cart\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\manage-cart\\index.ts": {
     "mtime": 1778933183.9939468,
     "ast_hash": "d161424b1d778ee1ac082c0448c96d02",
     "semantic_hash": "d161424b1d778ee1ac082c0448c96d02"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\manage-orders\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\manage-orders\\index.ts": {
     "mtime": 1778988397.7229178,
     "ast_hash": "73fa65cf6d1963a44a0e4526e479e538",
     "semantic_hash": "73fa65cf6d1963a44a0e4526e479e538"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\manage-payment-gateways\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\manage-payment-gateways\\index.ts": {
     "mtime": 1778903801.663184,
     "ast_hash": "b620b3c4e70c819065e992862634811a",
     "semantic_hash": "b620b3c4e70c819065e992862634811a"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\manage-products\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\manage-products\\index.ts": {
     "mtime": 1778931119.900701,
     "ast_hash": "e266553803b026f01ac3faff84c84890",
     "semantic_hash": "e266553803b026f01ac3faff84c84890"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\manage-products\\__tests__\\products.test.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\manage-products\\__tests__\\products.test.ts": {
     "mtime": 1778376023.3089483,
     "ast_hash": "12c7d7ae10f3a569f84f9b9772255366",
     "semantic_hash": "12c7d7ae10f3a569f84f9b9772255366"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\payment-webhook\\index.ts": {
-    "mtime": 1778387866.716758,
-    "ast_hash": "8323b81012c0fd5f4e43a947c8b3f9f1",
-    "semantic_hash": "8323b81012c0fd5f4e43a947c8b3f9f1"
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\payment-webhook\\index.ts": {
+    "mtime": 1780116163.3785715,
+    "ast_hash": "726384e901db1fadba30306fb0dd6bd2",
+    "semantic_hash": "726384e901db1fadba30306fb0dd6bd2"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\payment-webhook\\__tests__\\webhook.test.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\payment-webhook\\__tests__\\webhook.test.ts": {
     "mtime": 1778388079.809365,
     "ast_hash": "374c63634e4984aca81f37b6a90e4208",
     "semantic_hash": "374c63634e4984aca81f37b6a90e4208"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\send-delivery-email\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\send-delivery-email\\index.ts": {
     "mtime": 1778933300.8257382,
     "ast_hash": "361613f269867d4fa2d8e73b76842912",
     "semantic_hash": "361613f269867d4fa2d8e73b76842912"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\send-order-email\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\send-order-email\\index.ts": {
     "mtime": 1778849937.9416087,
     "ast_hash": "8bde89e3fcd814a5358980e1449f11d0",
     "semantic_hash": "8bde89e3fcd814a5358980e1449f11d0"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\send-shipping-email\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\send-shipping-email\\index.ts": {
     "mtime": 1778849955.8973532,
     "ast_hash": "d48c9ad9301107f22ac3396e51ab9336",
     "semantic_hash": "d48c9ad9301107f22ac3396e51ab9336"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\send-status-email\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\send-status-email\\index.ts": {
     "mtime": 1778988416.5552833,
     "ast_hash": "4c331531e6ef84eeab5d8cd2bd56a291",
     "semantic_hash": "4c331531e6ef84eeab5d8cd2bd56a291"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\setup-totp\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\setup-totp\\index.ts": {
     "mtime": 1778387700.6175783,
     "ast_hash": "bca26323d3180d1dcafd7a5b2c8ff7d8",
     "semantic_hash": "bca26323d3180d1dcafd7a5b2c8ff7d8"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\setup-totp\\__tests__\\totp.test.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\setup-totp\\__tests__\\totp.test.ts": {
     "mtime": 1778844167.838796,
     "ast_hash": "22ac392924c2f276cb5847e0e594ab38",
     "semantic_hash": "22ac392924c2f276cb5847e0e594ab38"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\trigger-rebuild\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\trigger-rebuild\\index.ts": {
     "mtime": 1778836873.007549,
     "ast_hash": "872c1463ee53b53ae6a8391b11937727",
     "semantic_hash": "872c1463ee53b53ae6a8391b11937727"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\verify-totp\\index.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\verify-totp\\index.ts": {
     "mtime": 1778390874.349916,
     "ast_hash": "5ac356caf0fc8502e8166c9d25006a16",
     "semantic_hash": "5ac356caf0fc8502e8166c9d25006a16"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\_core\\base-controller.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\_core\\base-controller.ts": {
     "mtime": 1778988170.8668356,
     "ast_hash": "fe4b5353816cb27555bc80e49be1d496",
     "semantic_hash": "fe4b5353816cb27555bc80e49be1d496"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\_shared\\error-handler.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\_shared\\error-handler.ts": {
     "mtime": 1778495051.7786405,
     "ast_hash": "cbfb12cc596941bb448bc9336c24eb9d",
     "semantic_hash": "cbfb12cc596941bb448bc9336c24eb9d"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\_shared\\logger.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\_shared\\logger.ts": {
     "mtime": 1778377526.6297226,
     "ast_hash": "6112e340a4db9627d2a71c6eeee2f1e9",
     "semantic_hash": "6112e340a4db9627d2a71c6eeee2f1e9"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\_shared\\supabase-client.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\_shared\\supabase-client.ts": {
     "mtime": 1778375203.996763,
     "ast_hash": "f938827592b089ad18dc0cf9d937817b",
     "semantic_hash": "f938827592b089ad18dc0cf9d937817b"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\functions\\_shared\\monitoring\\logflare.ts": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\functions\\_shared\\monitoring\\logflare.ts": {
     "mtime": 1778377513.3871293,
     "ast_hash": "893d0aba2e29aa41c12a38d89b7acc04",
     "semantic_hash": "893d0aba2e29aa41c12a38d89b7acc04"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00000b_auth_helpers.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00000b_auth_helpers.sql": {
     "mtime": 1778872291.0838933,
     "ast_hash": "93c96f17868571d36cbdfe3c338a10b7",
     "semantic_hash": "93c96f17868571d36cbdfe3c338a10b7"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00000_realtime_schema.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00000_realtime_schema.sql": {
     "mtime": 1778478311.4283175,
     "ast_hash": "393d8aa6babd42846a9631f52b0434fb",
     "semantic_hash": "393d8aa6babd42846a9631f52b0434fb"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00001_initial_schema.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00001_initial_schema.sql": {
     "mtime": 1778401505.3561528,
     "ast_hash": "d7ba7afa0ca4fec909af3ae98ea3bca4",
     "semantic_hash": "d7ba7afa0ca4fec909af3ae98ea3bca4"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00002_auth_triggers.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00002_auth_triggers.sql": {
     "mtime": 1778401505.361923,
     "ast_hash": "512fbe0391973727889b7aafa6dccd01",
     "semantic_hash": "512fbe0391973727889b7aafa6dccd01"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00003_product_images.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00003_product_images.sql": {
     "mtime": 1778401505.3674917,
     "ast_hash": "8c4a9a8809a551951e914ce514209264",
     "semantic_hash": "8c4a9a8809a551951e914ce514209264"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00004_payment_extension.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00004_payment_extension.sql": {
     "mtime": 1778402216.1924243,
     "ast_hash": "fdf269260bca69b0efba003d675df6ed",
     "semantic_hash": "fdf269260bca69b0efba003d675df6ed"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00005_create_order_atomic.sql": {
-    "mtime": 1778402224.9900205,
-    "ast_hash": "6f462aa4063f84d8e16d00df5d6a7330",
-    "semantic_hash": "6f462aa4063f84d8e16d00df5d6a7330"
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00005_create_order_atomic.sql": {
+    "mtime": 1780118880.2576108,
+    "ast_hash": "22c3143722f7a178c19606cc89742543",
+    "semantic_hash": "22c3143722f7a178c19606cc89742543"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00006_confirm_order_payment.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00006_confirm_order_payment.sql": {
     "mtime": 1778432882.7829149,
     "ast_hash": "8ef5011de805222b46d401fe64aa8f17",
     "semantic_hash": "8ef5011de805222b46d401fe64aa8f17"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00007_save_payment_credentials.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00007_save_payment_credentials.sql": {
     "mtime": 1778432887.6711943,
     "ast_hash": "f65687c672a584615db29d2c72895296",
     "semantic_hash": "f65687c672a584615db29d2c72895296"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00008_get_active_payment_methods.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00008_get_active_payment_methods.sql": {
     "mtime": 1778432889.2004864,
     "ast_hash": "0ce7fa23924c8900a8a802e622411f86",
     "semantic_hash": "0ce7fa23924c8900a8a802e622411f86"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00009_update_order_tracking.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00009_update_order_tracking.sql": {
     "mtime": 1778432898.58228,
     "ast_hash": "41f921ecfab3df7a9a2578c091bbc0ab",
     "semantic_hash": "41f921ecfab3df7a9a2578c091bbc0ab"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00010_update_order_status_manual.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00010_update_order_status_manual.sql": {
     "mtime": 1778432903.449797,
     "ast_hash": "65855fa9b208f73ab1ce22b212fa8fac",
     "semantic_hash": "65855fa9b208f73ab1ce22b212fa8fac"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00011_update_item_fulfillment.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00011_update_item_fulfillment.sql": {
     "mtime": 1778432906.7074642,
     "ast_hash": "0bcef2d40a1d63783ee798872f709a9b",
     "semantic_hash": "0bcef2d40a1d63783ee798872f709a9b"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00012_search_orders.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00012_search_orders.sql": {
     "mtime": 1778432914.3151374,
     "ast_hash": "a4d2f7d5e678ac338ae163fdd1144152",
     "semantic_hash": "a4d2f7d5e678ac338ae163fdd1144152"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00013_realtime_policy.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00013_realtime_policy.sql": {
     "mtime": 1778432915.7662365,
     "ast_hash": "eba38068a3cf0cdd30de19f8385e2c86",
     "semantic_hash": "eba38068a3cf0cdd30de19f8385e2c86"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00014_webhook_idempotency.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00014_webhook_idempotency.sql": {
     "mtime": 1778401505.3896773,
     "ast_hash": "4155c8d1b41d5155f111022c983bd7da",
     "semantic_hash": "4155c8d1b41d5155f111022c983bd7da"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00015_storage_hardening.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00015_storage_hardening.sql": {
     "mtime": 1778914037.7197483,
     "ast_hash": "3a55fde0103f3ebd69c54996016df3fb",
     "semantic_hash": "3a55fde0103f3ebd69c54996016df3fb"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00016_rate_limiting.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00016_rate_limiting.sql": {
     "mtime": 1778401505.3947241,
     "ast_hash": "bbfea060c2b91552a2f65e0f63fc3b4f",
     "semantic_hash": "bbfea060c2b91552a2f65e0f63fc3b4f"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00017_fix_security_claims.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00017_fix_security_claims.sql": {
     "mtime": 1778401505.3982544,
     "ast_hash": "704aa27866fedcddf2ac7dc044b42379",
     "semantic_hash": "704aa27866fedcddf2ac7dc044b42379"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00018_fix_payment_encryption.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00018_fix_payment_encryption.sql": {
     "mtime": 1778401505.4017873,
     "ast_hash": "06c549d5a07003d68c6ad511fecd5a25",
     "semantic_hash": "06c549d5a07003d68c6ad511fecd5a25"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00019_fix_order_cancellation.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00019_fix_order_cancellation.sql": {
     "mtime": 1778401505.4048467,
     "ast_hash": "b4187cf141bc18486e4f78d1fda01fe2",
     "semantic_hash": "b4187cf141bc18486e4f78d1fda01fe2"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00020_audit_payment_tables.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00020_audit_payment_tables.sql": {
     "mtime": 1778401505.408462,
     "ast_hash": "aad839c7279d57e396a9efb89a9d1cce",
     "semantic_hash": "aad839c7279d57e396a9efb89a9d1cce"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00021_vendor_whitelist.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00021_vendor_whitelist.sql": {
     "mtime": 1778432921.3731582,
     "ast_hash": "65d7090189784d8038092ee1c324bd51",
     "semantic_hash": "65d7090189784d8038092ee1c324bd51"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00022_handle_new_user.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00022_handle_new_user.sql": {
     "mtime": 1778432923.5939908,
     "ast_hash": "12496ae2f32a9ebb32305485eddf73b2",
     "semantic_hash": "12496ae2f32a9ebb32305485eddf73b2"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00023_cleanup_amr_policy.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00023_cleanup_amr_policy.sql": {
     "mtime": 1778432925.9182103,
     "ast_hash": "f2381805cef7990a42df6c919ac3d7b0",
     "semantic_hash": "f2381805cef7990a42df6c919ac3d7b0"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00024_save_payment_credentials.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00024_save_payment_credentials.sql": {
     "mtime": 1778432933.224314,
     "ast_hash": "d1077810f71bed67a528a6e3f49363b9",
     "semantic_hash": "d1077810f71bed67a528a6e3f49363b9"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00025_get_payment_credentials.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00025_get_payment_credentials.sql": {
     "mtime": 1778432939.108869,
     "ast_hash": "7fcaff41ad7052a4ac1935d017b7aab4",
     "semantic_hash": "7fcaff41ad7052a4ac1935d017b7aab4"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00026_seed_admin_user.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00026_seed_admin_user.sql": {
     "mtime": 1778494075.139242,
     "ast_hash": "b7e6b25e81617e4b4791f70bdc4c5cd2",
     "semantic_hash": "b7e6b25e81617e4b4791f70bdc4c5cd2"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00028_save_credentials_with_key.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00028_save_credentials_with_key.sql": {
     "mtime": 1778877650.3271713,
     "ast_hash": "f11a4e0b357d195d373630d041da805e",
     "semantic_hash": "f11a4e0b357d195d373630d041da805e"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00029_fix_crypto_schema.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00029_fix_crypto_schema.sql": {
     "mtime": 1778893594.7532597,
     "ast_hash": "4eec9396caebe5e95dbc9655809aa9ac",
     "semantic_hash": "4eec9396caebe5e95dbc9655809aa9ac"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00030_storage_rls_fix.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00030_storage_rls_fix.sql": {
     "mtime": 1778913267.6136012,
     "ast_hash": "4dbf9161e57cb6a14016e94dcac4abcd",
     "semantic_hash": "4dbf9161e57cb6a14016e94dcac4abcd"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00031_product_image_url.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00031_product_image_url.sql": {
     "mtime": 1778915090.7678182,
     "ast_hash": "80a8f295a1b7f2e3a0119f684dc9b834",
     "semantic_hash": "80a8f295a1b7f2e3a0119f684dc9b834"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00032_product_images_gallery.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00032_product_images_gallery.sql": {
     "mtime": 1778930383.272874,
     "ast_hash": "3d4fec5493156966f63d7e462f2e9e56",
     "semantic_hash": "3d4fec5493156966f63d7e462f2e9e56"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00033_customer_addresses.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00033_customer_addresses.sql": {
     "mtime": 1778932543.1806874,
     "ast_hash": "e8dd467491b92b5251cfda99517741e3",
     "semantic_hash": "e8dd467491b92b5251cfda99517741e3"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00034_cart_items.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00034_cart_items.sql": {
     "mtime": 1778933158.8064413,
     "ast_hash": "4634672ac9f74a4f57559f121dda4f79",
     "semantic_hash": "4634672ac9f74a4f57559f121dda4f79"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00035_extend_order_status_and_profiles.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00035_extend_order_status_and_profiles.sql": {
     "mtime": 1778934588.78059,
     "ast_hash": "dc576fc67dddaaf95a1beba092a30aac",
     "semantic_hash": "dc576fc67dddaaf95a1beba092a30aac"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00036_order_status_history.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00036_order_status_history.sql": {
     "mtime": 1778934623.4723463,
     "ast_hash": "80f7b08d4cd3aa00bba06d9b7cf8f951",
     "semantic_hash": "80f7b08d4cd3aa00bba06d9b7cf8f951"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\migrations\\00037_order_payments_and_rpc.sql": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\migrations\\00037_order_payments_and_rpc.sql": {
     "mtime": 1778934634.1666882,
     "ast_hash": "e47e37a320a84062ae981984babdd0bb",
     "semantic_hash": "e47e37a320a84062ae981984babdd0bb"
   },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\CLAUDE.md": {
-    "mtime": 1778920929.8428955,
-    "ast_hash": "111b61e9ef3c6d8ffdf9006dd5621e7b",
-    "semantic_hash": "111b61e9ef3c6d8ffdf9006dd5621e7b"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docker-compose.yml": {
-    "mtime": 1778975064.0292296,
-    "ast_hash": "f949a17247bca9b2975d46cd1d4669c5",
-    "semantic_hash": "f949a17247bca9b2975d46cd1d4669c5"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\README.md": {
-    "mtime": 1778987021.034765,
-    "ast_hash": "26c52693279d674ed9377732ee8f9cb0",
-    "semantic_hash": "26c52693279d674ed9377732ee8f9cb0"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\ARCHITECTURE.md": {
-    "mtime": 1778377572.730448,
-    "ast_hash": "5433509ea84bbff5d5077a82417aaaf0",
-    "semantic_hash": "5433509ea84bbff5d5077a82417aaaf0"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Correcciones Finales.md": {
-    "mtime": 1778379948.7113035,
-    "ast_hash": "5d5079518659b933c193fed8bbd6f821",
-    "semantic_hash": "5d5079518659b933c193fed8bbd6f821"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Documentaci\u00f3n T\u00e9cnica.md": {
-    "mtime": 1778378954.9862564,
-    "ast_hash": "f570920f90b414b6392f9599169af5ed",
-    "semantic_hash": "f570920f90b414b6392f9599169af5ed"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Documento de Dise\u00f1o de Software (SDD).md": {
-    "mtime": 1778378945.4857216,
-    "ast_hash": "ba00a5616a0aa372e9d25e18ab42d874",
-    "semantic_hash": "ba00a5616a0aa372e9d25e18ab42d874"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Especificaci\u00f3n de Requisitos de Software (SRS).md": {
-    "mtime": 1778378963.320306,
-    "ast_hash": "f305c60e1dcb61274c355b7040a8e293",
-    "semantic_hash": "f305c60e1dcb61274c355b7040a8e293"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Fix & Hardening Runbook.md": {
-    "mtime": 1778378391.3459194,
-    "ast_hash": "ed18f7532debfdd5a5b8c47eceea642b",
-    "semantic_hash": "ed18f7532debfdd5a5b8c47eceea642b"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\HANDOFF.md": {
-    "mtime": 1778975331.9002726,
-    "ast_hash": "c6dd72558e52bea4a263b157d2e8d221",
-    "semantic_hash": "c6dd72558e52bea4a263b157d2e8d221"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\RUNBOOK.md": {
-    "mtime": 1778377565.8210838,
-    "ast_hash": "d6ec136fe48ecad9b3f422f88a4996c0",
-    "semantic_hash": "d6ec136fe48ecad9b3f422f88a4996c0"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Sprint 0.md": {
-    "mtime": 1778374398.0762165,
-    "ast_hash": "c76d3a128120cc42ff4c1f4d23946bdc",
-    "semantic_hash": "c76d3a128120cc42ff4c1f4d23946bdc"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Sprint 1.md": {
-    "mtime": 1778369972.4014559,
-    "ast_hash": "47487534558625e9027c7446f74853fb",
-    "semantic_hash": "47487534558625e9027c7446f74853fb"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Sprint 2.md": {
-    "mtime": 1778369977.5288258,
-    "ast_hash": "4123fada92baf14dde9c24443c871ca5",
-    "semantic_hash": "4123fada92baf14dde9c24443c871ca5"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Sprint 3.md": {
-    "mtime": 1778369987.988885,
-    "ast_hash": "881392971c85a70c95c9ce5369942d91",
-    "semantic_hash": "881392971c85a70c95c9ce5369942d91"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Sprint 4.md": {
-    "mtime": 1778369997.0418746,
-    "ast_hash": "6fab0b6edb4c1d725fc3d337965a5d26",
-    "semantic_hash": "6fab0b6edb4c1d725fc3d337965a5d26"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\Sprint 5.md": {
-    "mtime": 1778370006.2087324,
-    "ast_hash": "5d0d2e65198aa3b5d7e34dc90e8501be",
-    "semantic_hash": "5d0d2e65198aa3b5d7e34dc90e8501be"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\audit\\AUDITOR\u00cdA T\u00c9CNICA PROFUNDA.md": {
-    "mtime": 1778387363.966139,
-    "ast_hash": "bea2736a7f191955481d8ac66932911b",
-    "semantic_hash": "bea2736a7f191955481d8ac66932911b"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\audit\\AUDITOR\u00cdA-T\u00c9CNICA-2-SEGUNDA-RONDA.md": {
-    "mtime": 1778390323.381949,
-    "ast_hash": "464f0e9158f2ddcc1e40358d9430a992",
-    "semantic_hash": "464f0e9158f2ddcc1e40358d9430a992"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\audit\\REMEDIATION-2.md": {
-    "mtime": 1778399301.1845355,
-    "ast_hash": "ed50c1d756fc719950f85a596f8c0171",
-    "semantic_hash": "ed50c1d756fc719950f85a596f8c0171"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\audit\\REMEDIATION.md": {
-    "mtime": 1778388327.9253757,
-    "ast_hash": "42924ebdd1c2e64cc973b7057922652d",
-    "semantic_hash": "42924ebdd1c2e64cc973b7057922652d"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\dod\\Correcciones_Finales.md": {
-    "mtime": 1778380208.1956692,
-    "ast_hash": "0c8004f1a1f0b0875fb155c92f922265",
-    "semantic_hash": "0c8004f1a1f0b0875fb155c92f922265"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\dod\\Fix_Hardening.md": {
-    "mtime": 1778378644.950489,
-    "ast_hash": "318b800e411fdd29d7827d51d9ba9b62",
-    "semantic_hash": "318b800e411fdd29d7827d51d9ba9b62"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\dod\\Sprint 0.md": {
-    "mtime": 1778375429.1347747,
-    "ast_hash": "a6e13215579585f1896981724e3337a6",
-    "semantic_hash": "a6e13215579585f1896981724e3337a6"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\dod\\Sprint 1.md": {
-    "mtime": 1778375786.3968732,
-    "ast_hash": "37055c737128413249f259f9cd3a6f8a",
-    "semantic_hash": "37055c737128413249f259f9cd3a6f8a"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\dod\\Sprint 2.md": {
-    "mtime": 1778376953.3631191,
-    "ast_hash": "ad72cb454df33be2100876776a110c0b",
-    "semantic_hash": "ad72cb454df33be2100876776a110c0b"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\dod\\Sprint 3.md": {
-    "mtime": 1778377193.3820748,
-    "ast_hash": "537d6ef9f012f9283b17d81277322b7f",
-    "semantic_hash": "537d6ef9f012f9283b17d81277322b7f"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\dod\\Sprint 4.md": {
-    "mtime": 1778377468.3093042,
-    "ast_hash": "96d24ecdd7b650a5fdc3fa398fd34669",
-    "semantic_hash": "96d24ecdd7b650a5fdc3fa398fd34669"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\dod\\Sprint 5.md": {
-    "mtime": 1778377703.4338403,
-    "ast_hash": "f059bdc714fde542e50f1a11726074ca",
-    "semantic_hash": "f059bdc714fde542e50f1a11726074ca"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\implementation\\OPERATING_MODELS.md": {
-    "mtime": 1778878136.0585268,
-    "ast_hash": "bd70a2769dfc035561a15bac9ae5fbb3",
-    "semantic_hash": "bd70a2769dfc035561a15bac9ae5fbb3"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\implementation\\PENDING_TASKS.md": {
-    "mtime": 1778988538.3315952,
-    "ast_hash": "7895c9e98142859f89c98e6c1ab6f375",
-    "semantic_hash": "7895c9e98142859f89c98e6c1ab6f375"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\implementation\\PLAN_ACTUAL.md": {
-    "mtime": 1778988541.341404,
-    "ast_hash": "68b329da9893e34099c7d8ad5cb9c940",
-    "semantic_hash": "68b329da9893e34099c7d8ad5cb9c940"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\docs\\implementation\\SESSION_SUMMARY.md": {
-    "mtime": 1778988544.165911,
-    "ast_hash": "68b329da9893e34099c7d8ad5cb9c940",
-    "semantic_hash": "68b329da9893e34099c7d8ad5cb9c940"
-  },
-  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\supabase\\kong.yml": {
+  "C:\\DevOps\\Desarrollos\\MicroStore-Arch\\src\\supabase\\kong.yml": {
     "mtime": 1778909307.390864,
     "ast_hash": "75297b4857339f2614502f64e09de1d9",
     "semantic_hash": "75297b4857339f2614502f64e09de1d9"

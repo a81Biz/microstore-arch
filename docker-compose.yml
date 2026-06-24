@@ -32,8 +32,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./src/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./src/nginx/conf.d:/etc/nginx/conf.d:ro
     depends_on:
       - storefront
       - client-hub
@@ -45,9 +45,9 @@ services:
   # STOREFRONT — Catálogo público (Astro + Alpine.js)
   # ---------------------------------------------------------------------------
   storefront:
-    build: { context: ., dockerfile: docker/Dockerfile.astro }
+    build: { context: ., dockerfile: src/docker/Dockerfile.astro }
     container_name: microstore-storefront
-    working_dir: /workspace/apps/storefront
+    working_dir: /workspace/src/apps/storefront
     expose: ["4321"]
     environment:
       - PUBLIC_SUPABASE_URL=http://api.localhost
@@ -73,9 +73,9 @@ services:
   # CLIENT HUB — Panel de cliente (Astro + React + Alpine.js)
   # ---------------------------------------------------------------------------
   client-hub:
-    build: { context: ., dockerfile: docker/Dockerfile.astro }
+    build: { context: ., dockerfile: src/docker/Dockerfile.astro }
     container_name: microstore-client-hub
-    working_dir: /workspace/apps/client-hub
+    working_dir: /workspace/src/apps/client-hub
     expose: ["5173"]
     environment:
       - PUBLIC_SUPABASE_URL=http://api.localhost
@@ -102,9 +102,9 @@ services:
   # VENDOR ADMIN — Panel de vendedor (Astro + React + Alpine.js)
   # ---------------------------------------------------------------------------
   vendor-admin:
-    build: { context: ., dockerfile: docker/Dockerfile.astro }
+    build: { context: ., dockerfile: src/docker/Dockerfile.astro }
     container_name: microstore-vendor-admin
-    working_dir: /workspace/apps/vendor-admin
+    working_dir: /workspace/src/apps/vendor-admin
     expose: ["5174"]
     environment:
       - PUBLIC_SUPABASE_URL=http://api.localhost
@@ -174,20 +174,33 @@ services:
       supabase-db:
         condition: service_healthy
     volumes:
-      - ./supabase/migrations:/migrations:ro
+      - ./src/supabase/migrations:/migrations:ro
     environment:
       PGPASSWORD: ${POSTGRES_PASSWORD:-supabase123}
     command:
       - sh
       - -c
       - |
-        set -e
         echo "=== Aplicando migraciones del proyecto ==="
+        ERRORS=0
         for f in $$(ls /migrations/*.sql | sort); do
           echo "-> $$(basename $$f)"
-          psql -h supabase-db -U supabase_admin -d postgres \
-               -v ON_ERROR_STOP=on -f "$$f"
+          output=$$(psql -h supabase-db -U supabase_admin -d postgres -f "$$f" 2>&1)
+          code=$$?
+          if [ $$code -ne 0 ]; then
+            if echo "$$output" | grep -qE "already exists|ya existe"; then
+              echo "   (omitido: objeto ya existia)"
+            else
+              echo "ERROR en $$(basename $$f):"
+              echo "$$output"
+              ERRORS=$$((ERRORS + 1))
+            fi
+          fi
         done
+        if [ $$ERRORS -gt 0 ]; then
+          echo "=== $$ERRORS migracion(es) fallaron con errores reales ==="
+          exit 1
+        fi
         echo "=== Migraciones completadas ==="
     networks: [microstore-network]
     restart: "no"
@@ -365,7 +378,7 @@ services:
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_PLUGINS: request-transformer,cors,key-auth,acl
     volumes:
-      - ./supabase/kong.yml:/var/lib/kong/kong.yml:ro
+      - ./src/supabase/kong.yml:/var/lib/kong/kong.yml:ro
     networks: [microstore-network]
     restart: unless-stopped
 
@@ -423,7 +436,7 @@ services:
     image: supabase/edge-runtime:v1.67.4
     container_name: microstore-supabase-functions
     volumes:
-      - ./supabase/functions:/home/deno/functions:ro
+      - ./src/supabase/functions:/home/deno/functions:ro
     environment:
       JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
       SUPABASE_URL: http://supabase-kong:8000

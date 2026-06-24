@@ -8,15 +8,15 @@
     "dev:reset": "docker compose down -v && docker compose up --build",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "test:core": "cd packages/core && npm run test",
+    "test:core": "cd src/packages/core && npm run test",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "check:architecture": "bash scripts/check-architecture.sh",
+    "check:architecture": "bash src/scripts/check-architecture.sh",
     "prepare": "husky"
   },
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "src/apps/*",
+    "src/packages/*"
   ],
   "devDependencies": {
     "husky": "^9.1.0",

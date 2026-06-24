@@ -1,0 +1,21 @@
+FROM node:22-alpine
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /workspace
+
+# Copiar manifiestos del workspace para cache de capas
+COPY package.json package-lock.json ./
+COPY src/apps/storefront/package.json ./src/apps/storefront/
+COPY src/apps/client-hub/package.json ./src/apps/client-hub/
+COPY src/apps/vendor-admin/package.json ./src/apps/vendor-admin/
+COPY src/packages/core/package.json ./src/packages/core/
+COPY src/packages/config-eslint/package.json ./src/packages/config-eslint/
+
+# npm ci falla si package-lock.json está desincronizado
+RUN npm ci --ignore-scripts
+
+RUN chown -R appuser:appgroup /workspace
+USER appuser
+
+EXPOSE 4321 5173 5174

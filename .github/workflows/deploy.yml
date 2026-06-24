@@ -6,7 +6,7 @@ on:
     paths-ignore:
       - 'docs/**'
       - '*.md'
-      - 'scripts/dev/**'
+      - 'src/scripts/dev/**'
 
 jobs:
   validate:
@@ -38,19 +38,19 @@ jobs:
         run: npm ci
 
       - name: Build Storefront
-        run: cd apps/storefront && npm run build
+        run: cd src/apps/storefront && npm run build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           PUBLIC_STOREFRONT_URL: ${{ secrets.PUBLIC_STOREFRONT_URL }}
 
       - name: Build Client Hub
-        run: cd apps/client-hub && npm run build
+        run: cd src/apps/client-hub && npm run build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           PUBLIC_API_BASE: ${{ secrets.SUPABASE_URL }}/functions/v1
 
       - name: Build Vendor Admin
-        run: cd apps/vendor-admin && npm run build
+        run: cd src/apps/vendor-admin && npm run build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           PUBLIC_API_BASE: ${{ secrets.SUPABASE_URL }}/functions/v1
@@ -59,28 +59,28 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          workingDirectory: apps/storefront
+          workingDirectory: src/apps/storefront
           command: pages deploy dist --project-name micro-store-storefront
 
       - name: Deploy Client Hub to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          workingDirectory: apps/client-hub
+          workingDirectory: src/apps/client-hub
           command: pages deploy dist --project-name micro-store-client
 
       - name: Deploy Vendor Admin to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          workingDirectory: apps/vendor-admin
+          workingDirectory: src/apps/vendor-admin
           command: pages deploy dist --project-name micro-store-admin
 
       - name: Deploy Edge Functions
-        run: supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: cd src && supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
 
       - name: Run Database Migrations
-        run: supabase db push
+        run: cd src && supabase db push
 
       - name: Health Check (retry 5x con backoff)
         run: |
@@ -89,7 +89,7 @@ jobs:
             || (echo "Health check failed after 5 attempts" && exit 1)
 
       - name: Smoke Test
-        run: bash scripts/test/smoke-test.sh
+        run: bash src/scripts/test/smoke-test.sh
         env:
           PUBLIC_STOREFRONT_URL: ${{ secrets.PUBLIC_STOREFRONT_URL }}
           PUBLIC_CLIENT_HUB_URL: ${{ secrets.PUBLIC_CLIENT_HUB_URL }}

@@ -133,7 +133,16 @@
       "PowerShell($va = Invoke-WebRequest -Uri \"http://localhost/orders\" -UseBasicParsing -TimeoutSec 10 -Headers @{Host=\"admin.localhost\"}; $ch = Invoke-WebRequest -Uri \"http://localhost/orders\" -UseBasicParsing -TimeoutSec 10 -Headers @{Host=\"client.localhost\"}; \"vendor-admin: $\\($va.StatusCode\\)\"; \"client-hub: $\\($ch.StatusCode\\)\")",
       "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost/orders\" -UseBasicParsing -TimeoutSec 10 -Headers @{Host=\"client.localhost\"}; $r.StatusCode)",
       "PowerShell($sf = Invoke-WebRequest -Uri \"http://localhost\" -UseBasicParsing -TimeoutSec 10; $ch = Invoke-WebRequest -Uri \"http://localhost/orders\" -UseBasicParsing -TimeoutSec 10 -Headers @{Host=\"client.localhost\"}; $va = Invoke-WebRequest -Uri \"http://localhost/orders\" -UseBasicParsing -TimeoutSec 10 -Headers @{Host=\"admin.localhost\"}; \"storefront: $\\($sf.StatusCode\\)\"; \"client-hub /orders: $\\($ch.StatusCode\\)\"; \"vendor-admin /orders: $\\($va.StatusCode\\)\")",
-      "Bash(npx astro *)"
+      "Bash(npx astro *)",
+      "Bash(curl -s -X POST http://localhost:8000/rest/v1/rpc/create_order_atomic -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA' -H 'Content-Type: application/json' -d '{\"p_customer_id\":\"65fc63fe-d1d3-4b9d-9a01-549ed22cdf8e\",\"p_shipping_address\":{\"street\":\"Test 123\",\"city\":\"CDMX\",\"postal_code\":\"06700\",\"country\":\"MX\"},\"p_items\":[{\"product_id\":\"a0d70c00-b798-41d8-9721-0dce0cf658eb\",\"quantity\":1}],\"p_payment_method\":\"paypal\"}')",
+      "Bash(curl -s --max-time 10 \"https://api-m.sandbox.paypal.com/v1/oauth2/token\" -X POST -H \"Content-Type: application/x-www-form-urlencoded\" -d \"grant_type=client_credentials\")",
+      "Bash(curl -s -X POST http://localhost:8000/functions/v1/create-order -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1sb2NhbCIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTM1MzE5ODUsImV4cCI6NDc2OTIwNTk4NX0.tWpFmTM_nlJqPZnZ3sfxUTBJX43KaPSufIkghx35BJA' -H 'Content-Type: application/json' -d '{ *)",
+      "PowerShell(Get-ChildItem \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\" -Name | Where-Object { $_ -notmatch \"node_modules\" })",
+      "PowerShell(Get-ChildItem \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\src\" -Recurse -Name | Where-Object { $_ -notmatch \"node_modules\" } | Select-Object -First 200)",
+      "PowerShell(Get-ChildItem \"c:\\\\DevOps\\\\Desarrollos\\\\MicroStore-Arch\\\\src\\\\supabase\\\\functions\" -Recurse -Name | Where-Object { $_ -notmatch \"node_modules\" })",
+      "Read(//c/DevOps/Desarrollos/MicroStore-Arch/graphify-out/**)",
+      "Read(//c//**)",
+      "Bash(ls /git-error-1782328681370)"
     ],
     "additionalDirectories": [
       "c:\\DevOps\\Desarrol·los\\MicroStore-Arch\\docs\\implementation"

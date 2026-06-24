@@ -1,0 +1,604 @@
+---
+import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
+---
+
+<ClientHubLayout title="Checkout">
+  <div class="checkout-page" x-data="checkoutForm()" x-init="init()">
+    <header class="checkout-header">
+      <h1>Finalizar Compra</h1>
+      <p class="subtitle">Estás a un paso de completar tu pedido</p>
+    </header>
+
+    <div class="checkout-grid">
+      <!-- Sección Izquierda: Formulario -->
+      <div class="checkout-main">
+        <!-- Pasos del Indicador -->
+        <div class="steps-indicator">
+          <div class="step" :class="{ active: step === 'shipping', completed: ['payment', 'redirecting', 'confirmed'].includes(step) }">
+            <span class="step-num">1</span>
+            <span class="step-label">Envío</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" :class="{ active: step === 'payment', completed: ['redirecting', 'confirmed'].includes(step) }">
+            <span class="step-num">2</span>
+            <span class="step-label">Pago</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" :class="{ active: step === 'confirmed' }">
+            <span class="step-num">3</span>
+            <span class="step-label">Confirmación</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <!-- Estado: carrito vacío -->
+          <template x-if="step === 'empty'">
+            <div class="empty-state" x-transition>
+              <div class="empty-icon">🛒</div>
+              <h2>Tu carrito está vacío</h2>
+              <p>Agrega productos antes de continuar con la compra.</p>
+              <a href="/" class="btn-primary">Ver catálogo</a>
+            </div>
+          </template>
+
+          <!-- Paso 1: Dirección de envío -->
+          <template x-if="step === 'shipping'">
+            <div x-transition>
+              <h2 class="card-title">Dirección de Envío</h2>
+
+              <!-- Selector de direcciones guardadas -->
+              <template x-if="savedAddresses.length > 0">
+                <div class="saved-addresses">
+                  <p class="section-sub">Selecciona una dirección guardada o ingresa una nueva</p>
+                  <div class="address-list">
+                    <template x-for="addr in savedAddresses" :key="addr.id">
+                      <label class="address-option" :class="{ selected: selectedAddressId === addr.id }">
+                        <input type="radio" name="saved_address" :value="addr.id" x-model="selectedAddressId" @change="selectAddress(addr)" />
+                        <div class="address-option-content">
+                          <div class="addr-top">
+                            <span class="addr-label" x-text="{ home: 'Casa', office: 'Oficina', other: 'Otro' }[addr.label]"></span>
+                            <template x-if="addr.is_default"><span class="addr-badge">Predeterminada</span></template>
+                          </div>
+                          <span class="addr-detail" x-text="addr.street + ', ' + addr.city + ', CP ' + addr.postal_code + ' ' + addr.country"></span>
+                        </div>
+                      </label>
+                    </template>
+                    <label class="address-option address-option--new" :class="{ selected: selectedAddressId === 'new' }">
+                      <input type="radio" name="saved_address" value="new" x-model="selectedAddressId" @change="shipping = { street: '', city: '', postalCode: '', country: 'MX' }" />
+                      <div class="address-option-content">
+                        <span class="addr-label">+ Nueva dirección</span>
+                      </div>
+                    </label>
+                  </div>
+                  <!-- CTA directa si eligió dirección guardada -->
+                  <template x-if="selectedAddressId !== 'new'">
+                    <div class="form-actions" style="margin-top: 1.5rem;">
+                      <button type="button" @click="nextToPayment()" class="btn-primary">Continuar al pago</button>
+                    </div>
+                  </template>
+                </div>
+              </template>
+
+              <!-- Formulario: nueva dirección (siempre visible si no hay guardadas; condicional si las hay) -->
+              <template x-if="savedAddresses.length === 0 || selectedAddressId === 'new'">
+                <form @submit.prevent="nextToPayment()" class="form-stack" style="margin-top: 1.5rem;" novalidate>
+                  <div class="form-group">
+                    <label for="street">Calle y número</label>
+                    <input type="text" id="street" x-model="shipping.street" required placeholder="Av. Siempre Viva 123" />
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="city">Ciudad</label>
+                      <input type="text" id="city" x-model="shipping.city" required placeholder="México DF" />
+                    </div>
+                    <div class="form-group">
+                      <label for="postal_code">Código Postal</label>
+                      <input type="text" id="postal_code" x-model="shipping.postalCode" placeholder="06700" inputmode="numeric" />
+                      <template x-if="postalCodeError">
+                        <p class="field-error" x-text="postalCodeError"></p>
+                      </template>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="country">País</label>
+                    <select id="country" x-model="shipping.country" required>
+                      <option value="MX">México</option>
+                      <option value="US">Estados Unidos</option>
+                      <option value="ES">España</option>
+                    </select>
+                  </div>
+
+                  <template x-if="isAuthenticated">
+                    <div class="form-group">
+                      <label class="checkbox-label">
+                        <input type="checkbox" x-model="saveNewAddress" />
+                        <span>Guardar esta dirección en mi cuenta</span>
+                      </label>
+                    </div>
+                  </template>
+
+                  <div class="form-actions">
+                    <button type="submit" class="btn-primary">Continuar al pago</button>
+                  </div>
+                </form>
+              </template>
+            </div>
+          </template>
+
+          <!-- Paso 2: Método de pago -->
+          <template x-if="step === 'payment'">
+            <div x-transition>
+              <h2 class="card-title">Método de Pago</h2>
+              <p class="card-subtitle">Selecciona tu forma de pago preferida</p>
+
+              <div class="payment-grid">
+                <template x-for="method in activeMethods" :key="method">
+                  <label class="payment-card" :class="{ selected: selectedMethod === method }">
+                    <input type="radio" name="payment_method" :value="method" x-model="selectedMethod" />
+                    <div class="payment-content">
+                      <div class="payment-icon" x-text="getGatewayIcon(method)"></div>
+                      <div class="payment-info">
+                        <span class="payment-name" x-text="getMethodName(method)"></span>
+                        <span class="payment-desc" x-text="getGatewayDesc(method)"></span>
+                      </div>
+                    </div>
+                  </label>
+                </template>
+              </div>
+
+              <template x-if="error">
+                <div class="error-alert" x-text="error"></div>
+              </template>
+
+              <div class="form-actions space-between">
+                <button @click="step = 'shipping'" class="btn-ghost">← Volver</button>
+                <button @click="processPayment()" class="btn-primary" :disabled="processingPayment || !selectedMethod">
+                  <span x-show="!processingPayment">Procesar Pedido</span>
+                  <span x-show="processingPayment">Procesando...</span>
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <!-- Paso 3: Redirección / Instrucciones -->
+          <template x-if="step === 'redirecting'">
+            <div class="redirect-state" x-transition>
+              <div class="spinner-large"></div>
+              <h2>Procesando tu pago</h2>
+              <p>Estamos conectando con <strong x-text="getMethodName(selectedMethod)"></strong></p>
+              
+              <template x-if="paymentResult?.gateway === 'hey_banco'">
+                <div class="hey-banco-card">
+                  <h3>Transferencia Bancaria</h3>
+                  <div class="bank-details">
+                    <div class="detail"><small>Monto</small><strong x-text="'$' + paymentResult.instructions.amount"></strong></div>
+                    <div class="detail"><small>CLABE</small><strong x-text="paymentResult.instructions.clabe"></strong></div>
+                    <div class="detail"><small>Referencia</small><strong x-text="paymentResult.instructions.reference"></strong></div>
+                  </div>
+                  <button @click="step = 'confirmed'" class="btn-primary">Ya realicé mi transferencia</button>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <!-- Paso 4: Confirmación -->
+          <template x-if="step === 'confirmed'">
+            <div class="success-state" x-transition>
+              <div class="success-icon">✨</div>
+              <h2>¡Pedido Recibido!</h2>
+              <p>Tu orden <strong x-text="displayId"></strong> ha sido registrada.</p>
+              <p class="muted">Te hemos enviado un correo de confirmación.</p>
+              <div class="success-actions">
+                <a href="/orders" class="btn-primary">Ver mis pedidos</a>
+                <a href={import.meta.env.PUBLIC_STOREFRONT_URL || 'http://localhost'} class="btn-ghost">Seguir comprando</a>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Sección Derecha: Resumen -->
+      <aside class="checkout-sidebar">
+        <div class="card summary-card">
+          <h2 class="card-title">Resumen</h2>
+          
+          <div class="cart-items">
+            <template x-for="item in items" :key="item.productId">
+              <div class="cart-item">
+                <div class="item-info">
+                  <span class="item-name" x-text="item.name"></span>
+                  <span class="item-qty" x-text="'x' + item.quantity"></span>
+                </div>
+                <span class="item-price" x-text="'$' + (item.price * item.quantity).toFixed(2)"></span>
+              </div>
+            </template>
+          </div>
+
+          <div class="summary-totals">
+            <div class="total-row">
+              <span>Subtotal</span>
+              <span x-text="'$' + total.toFixed(2)"></span>
+            </div>
+            <div class="total-row">
+              <span>Envío</span>
+              <span class="free">Gratis</span>
+            </div>
+            <div class="total-row final">
+              <span>Total</span>
+              <span x-text="'$' + total.toFixed(2)"></span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</ClientHubLayout>
+
+<script>
+  import { createOrder, getActivePaymentMethods, loadSavedAddresses, saveAddressToAccount } from '../../lib/checkout/checkout-client';
+  import { supabaseClient } from '../../lib/supabase-client';
+
+  window.checkoutForm = () => ({
+    step: 'shipping',
+    loading: true,
+    processingPayment: false,
+    error: '',
+    postalCodeError: '',
+    items: [],
+    total: 0,
+    shipping: {
+      street: '',
+      city: '',
+      postalCode: '',
+      country: 'MX'
+    },
+    savedAddresses: [],
+    selectedAddressId: '',
+    saveNewAddress: false,
+    isAuthenticated: false,
+    selectedMethod: '',
+    activeMethods: [],
+    paymentResult: null,
+    displayId: '',
+
+    async init() {
+      const params = new URLSearchParams(window.location.search);
+
+      if (params.get('paypal_confirm') === '1') {
+        this.loading = false;
+        const token   = params.get('token');
+        const orderId = params.get('orderId');
+        if (!token || !orderId) {
+          this.error = 'Error en el retorno de PayPal. Si realizaste el pago, contacta soporte con tu ID de orden.';
+          this.step = 'payment';
+          return;
+        }
+        try {
+          const { data: { session } } = await supabaseClient.auth.getSession();
+          const authHeader = session ? `Bearer ${session.access_token}` : '';
+          const captureRes = await fetch(`${import.meta.env.PUBLIC_API_BASE}/functions/v1/capture-paypal-order`, {
+            method: 'POST',
+            headers: { 'Authorization': authHeader, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paypalOrderId: token, orderId }),
+          });
+          if (!captureRes.ok) throw new Error('capture failed');
+          const captured = await captureRes.json();
+          this.displayId = captured.displayId ?? sessionStorage.getItem('paypal_pending_display_id') ?? '';
+          sessionStorage.removeItem('paypal_pending_display_id');
+          sessionStorage.removeItem('paypal_pending_shipping');
+          this.step = 'confirmed';
+        } catch {
+          this.error = 'No se pudo confirmar el pago con PayPal. Si el cargo aparece en tu cuenta, contacta soporte.';
+          this.step = 'payment';
+        }
+        return;
+      }
+
+      if (params.get('paypal_cancel') === '1') {
+        this.error = 'El pago con PayPal fue cancelado. Puedes intentarlo de nuevo.';
+        const savedShipping = sessionStorage.getItem('paypal_pending_shipping');
+        if (savedShipping) {
+          try {
+            this.shipping = JSON.parse(savedShipping);
+            sessionStorage.removeItem('paypal_pending_shipping');
+          } catch { /* mantener shipping vacío */ }
+        }
+        this.step = 'payment';
+      }
+
+      const cartParam = params.get('cart');
+      const productId  = params.get('product');
+
+      if (cartParam) {
+        // Multi-item cart from storefront (?cart=URL-encoded-JSON)
+        try {
+          const parsed = JSON.parse(cartParam) as unknown;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            localStorage.setItem('cart', JSON.stringify(parsed));
+          }
+        } catch {
+          // fallback to existing localStorage
+        }
+      } else if (productId) {
+        // Single-product legacy flow (?product=id)
+        try {
+          const { data: product } = await supabaseClient
+            .from('products')
+            .select('id, name, price, slug')
+            .eq('id', productId)
+            .eq('is_visible', true)
+            .single();
+          if (product) {
+            const buyNowCart = [{
+              productId: product.id,
+              name:      product.name,
+              price:     product.price,
+              quantity:  1
+            }];
+            localStorage.setItem('cart', JSON.stringify(buyNowCart));
+          }
+        } catch {
+          // fallback to existing localStorage
+        }
+      }
+
+      let cart = [];
+      try {
+        cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        if (!Array.isArray(cart)) cart = [];
+      } catch {
+        cart = [];
+      }
+      if (cart.length === 0) {
+        this.step = 'empty';
+        return;
+      }
+      this.items = cart;
+      this.calculateTotal();
+      this.loadPaymentMethods();
+
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      this.isAuthenticated = !!session;
+
+      if (!session && this.items.length > 0) {
+        sessionStorage.setItem('returnUrl', window.location.pathname + window.location.search);
+        window.location.href = '/auth/login';
+        return;
+      }
+
+      if (this.isAuthenticated) {
+        try {
+          this.savedAddresses = await loadSavedAddresses();
+          if (this.savedAddresses.length > 0) {
+            const def = this.savedAddresses.find(a => a.is_default) || this.savedAddresses[0];
+            this.selectedAddressId = def.id;
+            this.selectAddress(def);
+          } else {
+            this.selectedAddressId = 'new';
+          }
+        } catch {
+          this.selectedAddressId = 'new';
+        }
+      } else {
+        this.selectedAddressId = 'new';
+      }
+    },
+
+    selectAddress(addr) {
+      this.shipping.street     = addr.street;
+      this.shipping.city       = addr.city;
+      this.shipping.postalCode = addr.postal_code;
+      this.shipping.country    = addr.country;
+    },
+
+    calculateTotal() {
+      this.total = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    },
+
+    async loadPaymentMethods() {
+      try {
+        this.activeMethods = await getActivePaymentMethods();
+        if (this.activeMethods.length === 0) {
+          this.activeMethods = ['stripe', 'paypal', 'mercadopago', 'hey_banco']; // Fallback
+        }
+      } catch (err) {
+        this.error = 'Error al cargar pasarelas';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async nextToPayment() {
+      const cp = this.shipping.postalCode.trim();
+      if (!/^[0-9]{4,6}$/.test(cp)) {
+        this.postalCodeError = 'Código postal inválido. Ingresa entre 4 y 6 dígitos numéricos.';
+        return;
+      }
+      this.postalCodeError = '';
+
+      if (this.saveNewAddress && this.isAuthenticated && this.selectedAddressId === 'new') {
+        try {
+          await saveAddressToAccount({
+            label: 'home',
+            street: this.shipping.street,
+            city: this.shipping.city,
+            postal_code: this.shipping.postalCode,
+            country: this.shipping.country,
+          });
+        } catch {
+          // Non-fatal: continue even if save fails
+        }
+      }
+      this.step = 'payment';
+      window.scrollTo(0, 0);
+    },
+
+    getMethodName(method) {
+      const names: Record<string, string> = { stripe: 'Tarjeta', paypal: 'PayPal', mercadopago: 'Mercado Pago', hey_banco: 'Hey Banco' };
+      return names[method] || method;
+    },
+
+    getGatewayIcon(method) {
+      const icons: Record<string, string> = { stripe: '💳', paypal: '🅿️', mercadopago: '🤝', hey_banco: '🏦' };
+      return icons[method] || '💰';
+    },
+
+    getGatewayDesc(method) {
+      const descs: Record<string, string> = {
+        stripe: 'Crédito y Débito',
+        paypal: 'Saldo y Tarjetas',
+        mercadopago: 'Pagos locales',
+        hey_banco: 'Transferencia CLABE'
+      };
+      return descs[method] || '';
+    },
+
+    async processPayment() {
+      this.processingPayment = true;
+      this.error = '';
+
+      try {
+        const result = await createOrder(this.items, this.shipping, this.selectedMethod);
+
+        if (!result.success) {
+          this.error = result.error ?? 'Error al procesar el pago';
+          this.processingPayment = false;
+          return;
+        }
+
+        this.paymentResult = result.payment;
+        this.displayId = result.displayId;
+        this.step = 'redirecting';
+
+        if (this.selectedMethod === 'paypal') {
+          const approvalUrl = this.paymentResult?.approvalUrl as string | undefined;
+          if (approvalUrl) {
+            sessionStorage.setItem('paypal_pending_display_id', this.displayId);
+            sessionStorage.setItem('paypal_pending_shipping', JSON.stringify(this.shipping));
+            window.location.href = approvalUrl;
+          } else {
+            this.error = 'No se pudo obtener el enlace de aprobación de PayPal. Intenta de nuevo.';
+            this.step = 'payment';
+          }
+        } else if (this.selectedMethod === 'mercadopago') {
+          setTimeout(() => {
+            const pr = this.paymentResult;
+            if (pr?.sandboxInitPoint) window.location.href = pr.sandboxInitPoint;
+          }, 1500);
+        } else if (this.selectedMethod !== 'hey_banco') {
+          // Stripe: auto-confirm temporal hasta integrar Stripe.js
+          setTimeout(() => { this.step = 'confirmed'; }, 2000);
+        }
+      } catch (err) {
+        this.error = 'Error de comunicación con el servidor';
+      } finally {
+        this.processingPayment = false;
+      }
+    }
+  });
+</script>
+
+<style>
+  .checkout-page { padding: 2rem 0 5rem; }
+  .checkout-header { text-align: center; margin-bottom: 3rem; }
+  .checkout-header h1 { font-size: 2.5rem; font-weight: 800; color: #1e293b; margin-bottom: 0.5rem; }
+  .subtitle { color: #64748b; font-size: 1.1rem; }
+
+  .checkout-grid { display: grid; grid-template-columns: 1fr 380px; gap: 2.5rem; align-items: start; }
+
+  /* Indicador de pasos */
+  .steps-indicator { display: flex; align-items: center; justify-content: center; margin-bottom: 2.5rem; gap: 1rem; }
+  .step { display: flex; align-items: center; gap: 0.75rem; color: #94a3b8; }
+  .step.active { color: #4f46e5; }
+  .step.completed { color: #10b981; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem; }
+  .step.completed .step-num { background: #10b981; color: white; border-color: #10b981; }
+  .step-label { font-weight: 600; font-size: 0.9rem; }
+  .step-line { flex: 0 0 40px; height: 2px; background: #e2e8f0; }
+
+  .card { background: white; border-radius: 24px; padding: 2.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+  .card-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: #1e293b; }
+  .card-subtitle { color: #64748b; margin-bottom: 2rem; }
+
+  .form-stack { display: flex; flex-direction: column; gap: 1.5rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .form-group label { font-size: 0.875rem; font-weight: 600; color: #475569; }
+  .form-group input, .form-group select { padding: 0.75rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 1rem; transition: border-color 0.2s; }
+  .form-group input:focus { outline: none; border-color: #4f46e5; }
+
+  .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+  .payment-card { border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; cursor: pointer; transition: all 0.2s; position: relative; }
+  .payment-card:hover { border-color: #4f46e5; background: #f8faff; }
+  .payment-card.selected { border-color: #4f46e5; background: #f5f3ff; box-shadow: 0 0 0 1px #4f46e5; }
+  .payment-card input { position: absolute; opacity: 0; }
+  .payment-content { display: flex; align-items: center; gap: 1rem; }
+  .payment-icon { font-size: 1.5rem; }
+  .payment-info { display: flex; flex-direction: column; }
+  .payment-name { font-weight: 700; color: #1e293b; }
+  .payment-desc { font-size: 0.75rem; color: #64748b; }
+
+  .summary-card { position: sticky; top: 2rem; }
+  .cart-items { display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 2rem; }
+  .cart-item { display: flex; justify-content: space-between; align-items: center; }
+  .item-info { display: flex; flex-direction: column; }
+  .item-name { font-weight: 600; font-size: 0.95rem; color: #1e293b; }
+  .item-qty { font-size: 0.8rem; color: #64748b; }
+  .item-price { font-weight: 700; color: #1e293b; }
+
+  .summary-totals { border-top: 1px dashed #e2e8f0; padding-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .total-row { display: flex; justify-content: space-between; color: #64748b; font-weight: 500; }
+  .total-row.final { border-top: 1px solid #e2e8f0; margin-top: 0.5rem; padding-top: 1rem; font-size: 1.25rem; color: #1e293b; font-weight: 800; }
+  .free { color: #10b981; font-weight: 700; }
+
+  .btn-primary { background: #4f46e5; color: white; border: none; padding: 1rem 2rem; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.2s; width: 100%; }
+  .btn-primary:hover { background: #4338ca; }
+  .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+  .btn-ghost { background: none; border: none; color: #64748b; font-weight: 600; cursor: pointer; padding: 1rem; }
+  .space-between { display: flex; justify-content: space-between; align-items: center; }
+
+  .error-alert { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500; }
+  .field-error { color: #b91c1c; font-size: 0.8rem; margin-top: 0.25rem; }
+
+  .redirect-state { text-align: center; padding: 2rem 0; }
+  .spinner-large { width: 64px; height: 64px; border: 5px solid #f1f5f9; border-top-color: #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 2rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hey-banco-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; margin-top: 2rem; text-align: left; }
+  .bank-details { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .detail { display: flex; flex-direction: column; }
+  .detail small { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+  .detail strong { font-size: 1.1rem; color: #1e293b; }
+
+  .success-state { text-align: center; padding: 2rem 0; }
+  .success-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+  .success-state h2 { color: #059669; font-size: 2rem; margin-bottom: 1rem; }
+  .success-actions { display: flex; flex-direction: column; gap: 1rem; margin-top: 2.5rem; }
+
+  .empty-state { text-align: center; padding: 3rem 0; }
+  .empty-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+  .empty-state h2 { color: #1e293b; font-size: 1.75rem; margin-bottom: 0.75rem; }
+  .empty-state p { color: #64748b; margin-bottom: 2rem; }
+
+  .section-sub { font-size: 0.875rem; color: #64748b; margin-bottom: 1rem; }
+  .address-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .address-option { display: flex; align-items: flex-start; gap: 0.75rem; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem 1.25rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+  .address-option:hover { border-color: #4f46e5; background: #f8faff; }
+  .address-option.selected { border-color: #4f46e5; background: #f5f3ff; box-shadow: 0 0 0 1px #4f46e5; }
+  .address-option input[type="radio"] { margin-top: 3px; accent-color: #4f46e5; }
+  .address-option-content { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+  .addr-top { display: flex; align-items: center; gap: 0.5rem; }
+  .addr-label { font-weight: 700; font-size: 0.9rem; color: #1e293b; }
+  .addr-badge { background: #dbeafe; color: #1d4ed8; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+  .addr-detail { font-size: 0.82rem; color: #64748b; }
+  .address-option--new .addr-label { color: #4f46e5; }
+  .checkbox-label { display: flex; align-items: center; gap: 0.625rem; cursor: pointer; font-size: 0.875rem; color: #475569; font-weight: 500; }
+  .checkbox-label input[type="checkbox"] { accent-color: #4f46e5; width: 16px; height: 16px; }
+
+  @media (max-width: 968px) {
+    .checkout-grid { grid-template-columns: 1fr; }
+    .checkout-sidebar { order: -1; }
+  }
+</style>

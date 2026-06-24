@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: Check Architecture Rules
-        run: bash scripts/check-architecture.sh
+        run: bash src/scripts/check-architecture.sh
 
       - name: Lint
         run: npm run lint
@@ -37,7 +37,7 @@ jobs:
 
       - name: Core Package Tests
         run: |
-          cd packages/core
+          cd src/packages/core
           npm run test
 
       - name: Setup Supabase CLI
@@ -46,7 +46,7 @@ jobs:
           version: 1.207.9
 
       - name: Start Supabase Local
-        run: supabase start --exclude studio,inbucket,edge-runtime,imgproxy,logflare,vector
+        run: cd src && supabase start --exclude studio,inbucket,edge-runtime,imgproxy,logflare,vector
         timeout-minutes: 6
 
       - name: Upload Test Results
@@ -54,4 +54,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: packages/core/coverage/
+          path: src/packages/core/coverage/
