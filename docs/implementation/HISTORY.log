@@ -1,0 +1,13 @@
+
+---
+
+## PT-020 — FEATURE TRIVIAL: npm audit CI gate
+Date: 2026-06-25
+Status: DONE
+Branch: feature/PT-020-audit-ci-gate
+Objective: Block merges that introduce HIGH or CRITICAL CVEs via CI gate
+Solution: Added `npm audit --audit-level=high` step to .github/workflows/ci.yml immediately after `npm ci`. Gate confirmed functional locally (returns exit 1 on main with astro@5 HIGH CVEs).
+Modified files:
+  - .github/workflows/ci.yml (1 step added: Security Audit)
+Evidence: docs/implementation/evidence/PT-020/
+Delta: No deviations from plan. Merge order dependency noted: PT-020 after PT-014.
