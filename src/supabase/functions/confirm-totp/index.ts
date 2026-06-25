@@ -30,14 +30,18 @@ serve(async (req: Request) => {
       throw new UnauthorizedError('Token inválido');
     }
 
-    // 2. Obtener secreto del perfil
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('totp_secret')
-      .eq('id', user.id)
-      .single();
+    // 2. Obtener secreto descifrado via RPC (pgp_sym_decrypt — mismo patrón que get_payment_credentials)
+    const encryptionKey = Deno.env.get('ENCRYPTION_KEY');
+    if (!encryptionKey || encryptionKey.length < 32) {
+      throw new Error('Error de configuración del servidor: ENCRYPTION_KEY requerida');
+    }
 
-    if (!profile?.totp_secret) {
+    const { data: decryptedSecret, error: secretError } = await supabaseAdmin.rpc('get_totp_secret_secure', {
+      p_user_id: user.id,
+      p_encryption_key: encryptionKey,
+    });
+
+    if (secretError || !decryptedSecret) {
       throw new UnauthorizedError('TOTP no configurado. Usa setup-totp primero.');
     }
 
@@ -48,7 +52,7 @@ serve(async (req: Request) => {
       algorithm: 'SHA1',
       digits: 6,
       period: 30,
-      secret: Secret.fromBase32(profile.totp_secret),
+      secret: Secret.fromBase32(decryptedSecret as string),
     });
 
     const delta = totp.validate({ token: String(totp_code), window: 1 });

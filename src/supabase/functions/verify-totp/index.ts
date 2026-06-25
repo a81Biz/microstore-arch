@@ -32,7 +32,7 @@ serve(async (req: Request) => {
     // 2. Verificar que el usuario es vendor — clientes no pasan por este flujo
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('totp_secret, totp_enabled, role')
+      .select('totp_enabled, role')
       .eq('id', user.id)
       .single();
 
@@ -44,12 +44,27 @@ serve(async (req: Request) => {
       throw new UnauthorizedError('Solo vendors pueden verificar TOTP');
     }
 
-    if (!profile.totp_enabled || !profile.totp_secret) {
+    if (!profile.totp_enabled) {
       throw new UnauthorizedError('TOTP no configurado para este usuario');
     }
 
-    // 3. Verificar código TOTP criptográficamente contra el secret único del usuario
-    const secret = Secret.fromBase32(profile.totp_secret);
+    // 3. Descifrar secreto TOTP via RPC (pgp_sym_decrypt — mismo patrón que get_payment_credentials)
+    const encryptionKey = Deno.env.get('ENCRYPTION_KEY');
+    if (!encryptionKey || encryptionKey.length < 32) {
+      throw new Error('Error de configuración del servidor: ENCRYPTION_KEY requerida');
+    }
+
+    const { data: decryptedSecret, error: secretError } = await supabaseAdmin.rpc('get_totp_secret_secure', {
+      p_user_id: user.id,
+      p_encryption_key: encryptionKey,
+    });
+
+    if (secretError || !decryptedSecret) {
+      throw new UnauthorizedError('TOTP no configurado para este usuario');
+    }
+
+    // 4. Verificar código TOTP criptográficamente contra el secret único del usuario
+    const secret = Secret.fromBase32(decryptedSecret as string);
     const totp = new TOTP({
       issuer: 'Micro-Store',
       label: user.email!,
@@ -66,7 +81,7 @@ serve(async (req: Request) => {
       throw new UnauthorizedError('Código TOTP inválido');
     }
 
-    // 4. Marcar MFA como verificado en app_metadata (solo service role puede escribir esto,
+    // 5. Marcar MFA como verificado en app_metadata (solo service role puede escribir esto,
     //    a diferencia de user_metadata que el propio usuario puede modificar desde el cliente)
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       user.id,
