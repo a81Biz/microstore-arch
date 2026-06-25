@@ -1,0 +1,342 @@
+## Foundation Protocol — Reverse-Engineering Run 1
+Date: 2026-06-24
+Status: VALIDATED
+Branch: main
+Objective: Reverse-engineer the full repository into verified enterprise documentation (docs/enterprise-documentation/)
+Solution: Generated 18 documents covering platform overview, PRD, TRD, app flows, UI/UX, backend/database/security architecture, API catalog, technical debt, conventions, and 6 inventory files.
+Modified files:
+  - docs/enterprise-documentation/README.md (created)
+  - docs/enterprise-documentation/01-Platform-Overview.md (created)
+  - docs/enterprise-documentation/02-PRD.md (created)
+  - docs/enterprise-documentation/03-TRD.md (created)
+  - docs/enterprise-documentation/04-App-Flow.md (created)
+  - docs/enterprise-documentation/05-UIUX-Brief.md (created)
+  - docs/enterprise-documentation/06-Backend-Architecture.md (created)
+  - docs/enterprise-documentation/07-Database-Architecture.md (created)
+  - docs/enterprise-documentation/08-API-Catalog.md (created)
+  - docs/enterprise-documentation/09-Security-Architecture.md (created)
+  - docs/enterprise-documentation/10-Technical-Debt.md (created)
+  - docs/enterprise-documentation/11-Conventions.md (created)
+  - docs/enterprise-documentation/inventory/routes.md (created)
+  - docs/enterprise-documentation/inventory/endpoints.md (created)
+  - docs/enterprise-documentation/inventory/entities.md (created)
+  - docs/enterprise-documentation/inventory/components.md (created)
+  - docs/enterprise-documentation/inventory/services.md (created)
+  - docs/enterprise-documentation/inventory/integrations.md (created)
+Evidence: docs/enterprise-documentation/ (18 files, all source-cited)
+Delta: Initial run — no prior documentation existed. Scope: full repository.
+Key findings: 11 technical debt items documented; D8 (vendor_whitelist enforcement) and D10 (missing migration 00027) flagged as needing investigation.
+
+---
+
+## PT-006 — BUG TRIVIAL: npm Dependency Vulnerabilities
+Date: 2026-06-24
+Status: CLOSED
+Branch: main
+Objective: Resolve npm audit vulnerabilities without breaking changes
+Solution: Updated vitest overrides in root package.json (^3.2.4 → ^3.2.6) and core/package.json (^3.2.0 → ^3.2.6). Ran npm install → vitest upgraded to 3.2.6. Critical GHSA-5xrq-8626-4rwp resolved.
+Modified files:
+  - package.json (overrides: vitest/mocker/vite-node ^3.2.4 → ^3.2.6)
+  - src/packages/core/package.json (devDependencies: vitest ^3.2.0 → ^3.2.6)
+  - package-lock.json (auto-updated)
+Evidence: docs/implementation/evidence/PT-006/
+Delta: 2 remaining vulnerabilities (vite + astro) deferred — both require astro@5→7 upgrade (breaking change, out of scope for TRIVIAL).
+Validation: Human confirmed `npm audit` in Docker container → 0 critical vulnerabilities (GHSA-5xrq-8626-4rwp resolved), 2 HIGH remaining (astro + vite, deferred to astro@7 upgrade). 2026-06-24.
+PTSA reference: H-005 CERRADA
+
+---
+
+## PT-007 — BUG TRIVIAL: Inline Styles Removed (RULE-02)
+Date: 2026-06-24
+Status: CLOSED
+Branch: main
+Objective: Remove all inline style= attributes from .astro files (PTSA H-004 / RULE-02)
+Solution: Removed 3 inline style occurrences: (1) checkout div → .form-actions--spaced CSS class, (2) checkout form → .form-stack--spaced CSS class, (3) lightbox div → replaced style="display:none" with x-show="lightboxOpen" (Alpine.js idiomatic).
+Modified files:
+  - src/apps/client-hub/src/pages/checkout/index.astro
+  - src/apps/storefront/src/pages/producto/[slug].astro
+Evidence: docs/implementation/evidence/PT-007/
+Delta: Lightbox fix used Alpine.js x-show instead of CSS class — cleaner because Alpine.js already controls this element's visibility via lightboxOpen state.
+Validation: Human confirmed checkout layout unchanged and lightbox show/hide working. 2026-06-24.
+PTSA reference: H-004 CERRADA
+
+---
+
+## PT-008 — BUG TRIVIAL: CLOUDFLARE_DEPLOY_HOOK_URL Missing from .env.example
+Date: 2026-06-24
+Status: CLOSED
+Branch: main
+Objective: Document missing environment variable (PTSA H-009)
+Solution: Added CLOUDFLARE_DEPLOY_HOOK_URL= with 4-line comment block to .env.example including instructions for obtaining the value from Cloudflare Dashboard.
+Modified files:
+  - .env.example
+Evidence: docs/implementation/evidence/PT-008/
+Delta: None — straightforward 5-line addition.
+Validation: Human confirmed .env.example contains CLOUDFLARE_DEPLOY_HOOK_URL with comment. 2026-06-24.
+PTSA reference: H-009 CERRADA
+
+---
+
+## PT-010 — FEATURE TRIVIAL: Cart Limit 15 SKUs — Server-Side Enforcement
+Date: 2026-06-24
+Status: DONE
+Branch: main
+Objective: Enforce BR-004 (max 15 SKUs) server-side in manage-cart Edge Function
+Solution: Test written first (RED). Added unique product_id Set check in syncCart(). Returns HTTP 400 with VALIDATION_ERROR if items.size > 15. Tests written against established project pattern (vi.fn mock of global.fetch).
+Modified files:
+  - src/supabase/functions/manage-cart/__tests__/cart.test.ts (created)
+  - src/supabase/functions/manage-cart/index.ts
+Evidence: docs/implementation/evidence/PT-010/
+Delta: Tests use mock pattern (not integration) — consistent with existing test files in project (manage-products, payment-webhook).
+PTSA reference: H-012
+
+---
+
+## PT-011 — INVESTIGATION TRIVIAL: Migration 00027 Gap
+Date: 2026-06-24
+Status: CLOSED
+Branch: main
+Objective: Determine if migration 00027 was deleted or never existed
+Root cause: git log --all --full-history -- "*00027*" returned no output → file never existed in repository at any commit.
+Solution: Investigation complete. No action required. Gap is a numbering skip (likely developer error), no functional impact on Supabase migration runner.
+Modified files: none
+Evidence: docs/implementation/evidence/PT-011/
+PTSA reference: H-008
+
+---
+
+## PT-012 — REFACTOR TRIVIAL: Document Zod Schema Duplication (Accepted Tech Debt)
+Date: 2026-06-24
+Status: DONE
+Branch: main
+Objective: Formalize accepted tech debt for Deno/npm schema duplication in create-order
+Solution: Enhanced comment in create-order/index.ts (lines 9–11) with reason, PT/PTSA traceability, sync instruction, and resolution path. Updated 10-Technical-Debt.md D1 entry with DEUDA ACEPTADA status and decision rationale.
+Modified files:
+  - src/supabase/functions/create-order/index.ts (comment lines 9–11)
+  - docs/enterprise-documentation/10-Technical-Debt.md (D1 entry)
+Evidence: docs/implementation/evidence/PT-012/
+Delta: Zero logic changes — documentation only.
+PTSA reference: H-007
+
+---
+
+## PT-001 — BUG STANDARD: Fix check-architecture.sh False Positives
+Date: 2026-06-24
+Status: CLOSED
+Branch: fix/PT-001-check-architecture-sh
+Objective: Fix CI architecture check failing on every push due to false positives from auto-generated files and missing email function exclusions
+Root cause: grep pattern `<[a-z][a-z0-9]*[^>]*>` matched TypeScript generics (Array<string>, Omit<X,Y>) and Astro reference directives (/// <reference types="astro/client" />) in .astro/ cache dirs and env.d.ts files. Additionally, send-delivery-email and send-status-email excluded from Rule 2 but not Rule 1.
+Solution: Added --exclude-dir=".astro", --exclude="*.d.ts", --exclude-dir="send-delivery-email", --exclude-dir="send-status-email" to Rule 1 grep. Added "Omit<\|Array<" to grep -v filter. Added --exclude-dir=".astro" to Rule 2 grep. check-architecture.sh now exits 0.
+Modified files:
+  - src/scripts/check-architecture.sh (Rules 1 and 2)
+  - .gitattributes (*.sh text eol=lf — commit 8ebe656)
+  - src/scripts/check-architecture.sh rewrite to find|xargs (BusyBox compat — commit 73354ae)
+Evidence: docs/implementation/evidence/PT-001/
+Delta: Validation revealed 2 additional bugs: (1) CRLF line endings on Windows caused bash failure in Docker; (2) BusyBox grep in Alpine does not support --include/--exclude-dir flags, causing silent false-pass. Both fixed in subsequent commits on main.
+Validation: Human confirmed EXIT 0 in Docker Alpine container (bash -c "cd /workspace && bash src/scripts/check-architecture.sh"). 2026-06-24.
+PTSA reference: H-001 CERRADA
+
+---
+
+## PT-002 — BUG STANDARD: Add @micro-store/core Unit Tests
+Date: 2026-06-24
+Status: CLOSED
+Branch: feat/PT-002-core-tests
+Objective: Replace false CI green (0 tests, --passWithNoTests) with real test coverage for the shared domain package
+Solution: Created 26 tests across 4 files covering all enums (7 OrderStatus + 5 ItemFulfillmentStatus + 4 PaymentGateway + 2 UserRole values), Zod schema validation (10 cases: happy + all required fields + edge cases), order-status-calculator (6 cases), and stock-utils (6 cases). Removed --passWithNoTests from core test script.
+Modified files:
+  - src/packages/core/src/enums/__tests__/enums.test.ts (NEW)
+  - src/packages/core/src/schemas/__tests__/order.schema.test.ts (NEW)
+  - src/packages/core/src/utils/__tests__/order-status-calculator.test.ts (NEW)
+  - src/packages/core/src/utils/__tests__/stock-utils.test.ts (NEW)
+  - src/packages/core/package.json (remove --passWithNoTests flag)
+Evidence: docs/implementation/evidence/PT-002/
+Validation: Human confirmed `npm run test -w @micro-store/core` → 26 tests passed (4 files), no --passWithNoTests in output. Validated in Docker container. 2026-06-24.
+PTSA reference: H-002 CERRADA
+
+---
+
+## PT-003 — BUG MAJOR: Edge Function Test Coverage (Phase 1)
+Date: 2026-06-24
+Status: CLOSED
+Branch: feat/PT-003-edge-function-tests
+Objective: Add automated tests for the 3 highest-risk uncovered Edge Functions and register functions workspace so all edge function tests run in CI
+Solution: Created 18 mock-based tests (vi.fn().mockResolvedValue pattern, HTTP contract tests) for create-order (6), login (6), manage-orders (6). Created src/supabase/functions/package.json and registered workspace in root package.json — this activated 45 previously orphaned tests (manage-cart, manage-products, payment-webhook, setup-totp). Total edge function tests in CI: 63. Total suite: 101 tests all GREEN.
+Modified files:
+  - src/supabase/functions/create-order/__tests__/create-order.test.ts (NEW)
+  - src/supabase/functions/login/__tests__/login.test.ts (NEW)
+  - src/supabase/functions/manage-orders/__tests__/manage-orders.test.ts (NEW)
+  - src/supabase/functions/package.json (NEW)
+  - package.json (workspaces: added "src/supabase/functions")
+  - package-lock.json (updated)
+Evidence: docs/implementation/evidence/PT-003/
+Delta: Discovered 45 previously orphaned tests (setup-totp 28, payment-webhook 13, manage-products 2, manage-cart 2) now registered. Integration tests deferred as PE-001.
+Validation: Human confirmed `npm test` → 76 edge function tests (9 files) passing in Docker container. Total suite: 114 tests ALL GREEN. 2026-06-24.
+PTSA reference: H-003 CERRADA
+
+---
+
+## PT-005 — FEATURE STANDARD: vendor_whitelist Enforcement in Login
+Date: 2026-06-24
+Status: DONE
+Branch: feat/PT-005-vendor-whitelist-login
+Objective: Enforce vendor_whitelist table in login Edge Function — blocked vendor accounts cannot authenticate
+Solution: Added whitelist check after profile fetch (step 3), before password_changed_at check. Uses supabaseAdmin.from('vendor_whitelist').select('email').eq('email', email.toLowerCase()).maybeSingle(). Fail-closed: DB error or no row → 403 VENDOR_NOT_AUTHORIZED. CUSTOMER logins bypass check. Added 4 contract tests. Added migration 00038_seed_vendor_whitelist.sql to backfill existing vendor emails pre-deploy.
+Modified files:
+  - src/supabase/functions/login/index.ts (whitelist check, +17 lines)
+  - src/supabase/functions/login/__tests__/login.test.ts (4 new tests)
+  - src/supabase/migrations/00038_seed_vendor_whitelist.sql (NEW)
+Evidence: docs/implementation/evidence/PT-005/
+Delta: vendor_whitelist uses email PK (not vendor_id as assumed in STATE 2). This simplified implementation — email already available in request body, no join needed.
+Validation: 4 ACs verified by contract tests. Human confirmed STATE 6 acceptance. Deploy requires migration 00038 before Edge Function. 2026-06-24.
+PTSA reference: H-010 CERRADA
+
+---
+
+## PT-009 — FEATURE STANDARD: Business Metrics to Logflare
+Date: 2026-06-24
+Status: DONE
+Branch: feat/PT-009-business-metrics
+Objective: Add observable business metrics to Logflare for operational visibility (orders, payments)
+Solution: Added metric() method to createLogger() in _shared/logger.ts. Method always sends to Logflare (bypasses warn/error filter), fire-and-forget with .catch(). Instrumented create-order (order.created, order.failed) and payment-webhook (payment.webhook.processed, payment.webhook.failed) — both with durationMs tracking. All metrics include errorCode on failure path.
+Modified files:
+  - src/supabase/functions/_shared/logger.ts (metric() method)
+  - src/supabase/functions/create-order/index.ts (metric instrumentation + try/catch wrap)
+  - src/supabase/functions/payment-webhook/index.ts (metric instrumentation + try/catch wrap)
+  - src/supabase/functions/create-order/__tests__/create-order.test.ts (1 new fire-and-forget test)
+Evidence: docs/implementation/evidence/PT-009/
+Delta: create-order handle() restructured to wrap business logic in try/catch (for order.failed metric). The restructure is additive — no change to error response shape.
+PTSA reference: H-011 CORREGIDA
+
+---
+
+## PT-004 — BUG STANDARD: TOTP Secret Encryption
+Date: 2026-06-24
+Status: CLOSED
+Branch: fix/PT-004-totp-encryption
+Objective: Fix plaintext TOTP secrets in profiles table — security regression vs encrypted payment_credentials
+Root cause: profiles.totp_secret TEXT stored TOTP seeds in plaintext. payment_credentials.credentials_encrypted BYTEA uses pgcrypto AES-256. Inconsistency exposed auth secrets in DB backups and logs.
+Solution: Migration 00039: ALTER profiles.totp_secret TEXT → BYTEA (encrypted). Created save_totp_secret_secure() and get_totp_secret_secure() DB functions (pgp_sym_encrypt/decrypt, AES-256, ENCRYPTION_KEY passed as transaction-local parameter — same pattern as migrations 00028/00029). Updated setup-totp (write via RPC), confirm-totp and verify-totp (read via RPC). ENCRYPTION_KEY validated at runtime (≥32 chars). Added 4+4 contract tests for confirm-totp and verify-totp.
+Modified files:
+  - src/supabase/migrations/00039_encrypt_totp_secret.sql (NEW)
+  - src/supabase/functions/setup-totp/index.ts (RPC write)
+  - src/supabase/functions/confirm-totp/index.ts (RPC read)
+  - src/supabase/functions/verify-totp/index.ts (split profile select + RPC read)
+  - src/supabase/functions/confirm-totp/__tests__/confirm-totp.test.ts (NEW)
+  - src/supabase/functions/verify-totp/__tests__/verify-totp.test.ts (NEW)
+Evidence: docs/implementation/evidence/PT-004/
+Delta: Migration 00039 used (00038 was used by PT-005). Existing totp_secret values NULLified rather than encrypted (pre-production safe — no real enrolled vendors). Production would need an out-of-band migration script.
+Validation: Human confirmed `SELECT data_type FROM information_schema.columns WHERE table_name='profiles' AND column_name='totp_secret'` → `bytea`. Migration 00039 applied in local Supabase DB (Docker). 2026-06-24.
+PTSA reference: H-006 CERRADA
+
+---
+
+## PT-018 — REFACTOR TRIVIAL: Actualizar API Catalog y Database Architecture
+Date: 2026-06-24
+Status: DONE
+Branch: main (documentation-only change, no branch needed per TRIVIAL policy)
+Objective: Sync enterprise documentation with S-001 sprint changes — add 403 VENDOR_NOT_AUTHORIZED to POST /login, document migrations 00038/00039 in DB Architecture doc
+Solution: Updated 08-API-Catalog.md (POST /login errors line + 403 detail block). Updated 07-Database-Architecture.md: header source range 00037→00039, profiles.totp_secret TEXT→BYTEA with migration citation, migration sequence table rows 00038+00039, DB functions table with save_totp_secret_secure+get_totp_secret_secure, total migration count 37→39, profiles source line updated.
+Modified files:
+  - docs/enterprise-documentation/08-API-Catalog.md (403 VENDOR_NOT_AUTHORIZED added to POST /login)
+  - docs/enterprise-documentation/07-Database-Architecture.md (totp_secret BYTEA, migrations 00038/00039, DB functions, total count)
+Evidence: docs/implementation/evidence/PT-018/self-review.md
+Delta: Exactly as planned in REFACTOR_SCOPE.md. No deviations.
+
+---
+
+## PT-019 — REFACTOR TRIVIAL: Actualizar Graphify Knowledge Graph
+Date: 2026-06-24
+Status: DONE
+Branch: main (no code change)
+Objective: Update graphify knowledge graph to reflect post-sprint S-001 state (new test files, migrations, proposal packages)
+Solution: Invoked /graphify src/ --update. Incremental detect reported "No files changed since last run" — graph was already updated earlier in the same session. GRAPH_REPORT.md shows date 2026-06-24 with 2442 nodes / 3652 edges / 220 communities. manifest.json reflects current src/ state.
+Modified files:
+  - graphify-out/GRAPH_REPORT.md (updated)
+  - graphify-out/graph.json (updated)
+  - graphify-out/graph.html (updated)
+  - graphify-out/manifest.json (updated)
+  - graphify-out/cost.json (updated)
+Evidence: docs/implementation/evidence/PT-019/self-review.md
+Delta: Graph was already current; --update confirmed no drift.
+
+---
+
+## PT-023 — FEATURE MAJOR: Edge Function Test Coverage Phase 2
+Date: 2026-06-25
+Status: DONE
+Branch: feature/PT-023-ef-phase2-tests
+Objective: Añadir cobertura de tests unitarios (mock-based) para manage-payment-gateways, manage-addresses y change-password — las Edge Functions con mayor prioridad sin cobertura tras PT-003.
+Solution: Creados 3 archivos de tests (4 scenarios cada uno) siguiendo el patrón global.fetch mock del proyecto. Total suite: 126 tests (de 114 pre-PT-023). Correcciones al ENRICHMENT.md inicial: change-password usa {temp_token, new_password} (flujo primer login, no current_password); POST de manage-payment-gateways retorna 200 no 201; DELETE de manage-addresses retorna 200 {success:true}.
+Modified files:
+  - src/supabase/functions/manage-payment-gateways/__tests__/manage-payment-gateways.test.ts (nuevo — 4 tests)
+  - src/supabase/functions/manage-addresses/__tests__/manage-addresses.test.ts (nuevo — 4 tests)
+  - src/supabase/functions/change-password/__tests__/change-password.test.ts (nuevo — 4 tests)
+  - src/supabase/functions/payment-webhook/__tests__/webhook.test.ts (fix flaky: suffix '00' collision → selección determinista)
+  - src/supabase/functions/manage-cart/__tests__/cart.test.ts (commit de archivo untracked pre-existente PT-010)
+  - changes/PT-023-ef-phase2-tests/ (Proposal Package completo)
+Evidence: docs/implementation/evidence/PT-023/test-run.md, self-review.md
+Delta (vs plan): Test scenarios ajustados tras leer código fuente (STATE 2). change-password: temp_token no current_password. manage-payment-gateways POST: 200 no 201. manage-addresses DELETE: 200 no 204. Flaky test en payment-webhook descubierto y corregido (fuera de scope original, necesario para AC-5).
+
+---
+
+## PT-021 — REFACTOR TRIVIAL: Documentar `payment_transactions` en 07-Database-Architecture.md
+Date: 2026-06-25
+Status: DONE
+Branch: main
+Objective: Resolver el gap de documentación descubierto en PT-013: la tabla payment_transactions existe en BD live (migration 00020) pero no estaba documentada en 07-Database-Architecture.md.
+Solution: Añadida sección §3.11 `payment_transactions` con schema completo verificado via BD live (docker exec psql \d). Schema: 12 columnas, 4 índices, CHECK constraints en amount y status, FK orders(id) ON DELETE CASCADE, RLS: customers SELECT own via orders join; vendors MFA SELECT all. Se renombró §3.11 Other Security/Utility Tables → §3.12. Se añadió fila en tabla RLS §5.
+Modified files:
+  - docs/enterprise-documentation/07-Database-Architecture.md (§3.11 nueva, §3.11→§3.12 renombrado, §5 RLS fila añadida)
+Evidence: docs/implementation/evidence/PT-021/schema-query.md, self-review.md
+Delta: ninguno vs plan. La tabla usa payment_gateway ENUM y los estados {initiated, pending, captured, failed, refunded, partially_refunded} — distintos de order_payments (que registra el pago confirmado, 1 por orden).
+
+---
+
+## PT-013 — INVESTIGATION TRIVIAL: Resolver PE-001 — BD Live + Queries PTSA
+Date: 2026-06-24
+Status: CLOSED
+Branch: main (no code change)
+Objective: Execute PTSA/PENDIENTES.md PE-001 verification queries against live local Supabase DB to resolve the excluded point that was reducing Confidence by ~10%
+Root cause: PE-001 was excluded because Docker Compose was not running during S-001 audit. All 14 services were already UP (healthy) — no docker compose up required.
+Solution: Used docker exec to run psql queries against microstore-supabase-db (port 54322). Executed all 5 query groups from PTSA/PENDIENTES.md. All results confirmed expected state. Updated PTSA/PENDIENTES.md (PE-001 RESUELTO). Confidence estimate: 89→~94.
+Modified files:
+  - PTSA/PENDIENTES.md (PE-001 RESUELTO, impact table updated)
+Evidence: docs/implementation/evidence/PT-013/pe001-queries.md, self-review.md
+Delta: Discovery — payment_transactions table exists in DB but not documented in 07-Database-Architecture.md (only order_payments appears). Registered as documentation gap in evidence. No PTSA finding opened — out of PT-013 scope.
+
+---
+
+## PT-014 — BUG STANDARD: astro@5→@7 Security Upgrade (7 HIGH CVEs)
+Date: 2026-06-25
+Status: DONE
+Branch: fix/PT-014-astro7-upgrade
+Objective: Upgrade astro@5 to astro@7.0.2 across all 3 apps to close 7 HIGH CVEs (5 astro + 2 vite)
+Root cause: astro@5 had 5 HIGH CVEs (GHSA-j687, GHSA-xr5h, GHSA-8hv8, GHSA-jrpj, GHSA-2pvr); vite dependency had 2 HIGH CVEs (GHSA-v6wh, GHSA-fx2h). All fixed in astro@7.0.2.
+Solution:
+  1. Identified exact target versions via `npx @astrojs/upgrade --dry-run` per app (tool is interactive, no --yes flag)
+  2. Applied versions manually to 3 app package.json files: astro@^7.0.2, @astrojs/alpinejs@^1.0.0, @astrojs/react@^6.0.0
+  3. Ran `npm install` (lockfile regenerated; @supabase/supabase-js bumped to 2.105.4 as side effect)
+  4. Fixed 4 breaking changes in src/:
+     - client-hub orders/[id].astro: added getStaticPaths() (astro@7 static mode requirement)
+     - storefront supabase-client.ts: added 'build-placeholder' fallback (supabase-js 2.105.4 validates key at constructor)
+     - vendor-admin settings/index.astro: removed orphan </div> (Rust compiler strict HTML)
+     - vendor-admin astro.config.mjs: converted manualChunks object → function (Rolldown API)
+  5. Ran `npm audit fix` (non-breaking) to fix vite CVEs
+  6. Verified: 0 vulnerabilities, 3 builds EXIT 0, 126 tests GREEN, typecheck EXIT 0, architecture check EXIT 0
+Modified files:
+  - package.json (engines.node: >=22.0.0 → >=22.12.0)
+  - package-lock.json (147 added, 49 removed)
+  - src/apps/storefront/package.json (astro ^5.x → ^7.0.2, @astrojs/alpinejs ^1.0.0)
+  - src/apps/client-hub/package.json (astro ^5.x → ^7.0.2, @astrojs/alpinejs ^1.0.0, @astrojs/react ^6.0.0)
+  - src/apps/vendor-admin/package.json (astro ^5.x → ^7.0.2, @astrojs/alpinejs ^1.0.0)
+  - src/apps/client-hub/src/pages/orders/[id].astro (added getStaticPaths)
+  - src/apps/storefront/src/lib/supabase-client.ts (build-placeholder fallback)
+  - src/apps/vendor-admin/astro.config.mjs (manualChunks function)
+  - src/apps/vendor-admin/src/pages/settings/index.astro (removed orphan </div>)
+Evidence: docs/implementation/evidence/PT-014/
+Delta vs Proposal Package:
+  - D-2 (direct v5→v7 jump) confirmed viable; fallback D-2-F (sequential) not needed
+  - Unexpected side effect: @supabase/supabase-js 2.105.4 installed via lockfile regeneration (not in spec-changes.md); mitigated with build-placeholder in storefront
+  - Architecture confidence raised from 65% to 88% after reading Astro migration guides before STATE 2
+PTSA reference: H-013 → CERRADA (7 HIGH CVEs resolved; D2 unblocked)

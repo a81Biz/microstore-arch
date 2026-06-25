@@ -11,8 +11,8 @@ export default defineConfig({
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vendor-supabase': ['@supabase/supabase-js'],
+          manualChunks: (id) => {
+            if (id.includes('@supabase/supabase-js')) return 'vendor-supabase';
           },
         },
       },
