@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Security Audit
+        run: npm audit --audit-level=high
+
       - name: Check Architecture Rules
         run: bash src/scripts/check-architecture.sh
 
