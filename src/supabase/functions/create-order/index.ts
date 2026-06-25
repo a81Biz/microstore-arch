@@ -6,8 +6,9 @@ import { handleError, BusinessError } from "../_shared/error-handler.ts";
 
 const logger = createLogger('create-order');
 
-// Esquemas redefinidos localmente porque Deno no puede importar desde packages/core directamente.
-// Mantener sincronizados con packages/core/src/schemas/order.schema.ts.
+// Schemas duplicados de @micro-store/core: Deno no puede importar paquetes npm directamente.
+// Deuda técnica aceptada (PT-012 / H-007). Mantener sincronizados con packages/core/src/schemas/order.schema.ts.
+// Revisar cuando Deno soporte imports npm sin restricciones (JSR o esm.sh como alternativa).
 const ShippingAddressSchema = z.object({
   street: z.string().min(5),
   city: z.string().min(2),
@@ -35,80 +36,98 @@ interface OrderRpcResult {
 class CreateOrderController extends BaseController {
 
   async handle(req: Request): Promise<Response> {
+    const startTime = Date.now();
     const authHeader = req.headers.get('Authorization') || '';
     const body = await req.json();
 
     const user = await this.authenticateUser(authHeader);
 
-    // Rate limiting: 10 pedidos por minuto por usuario
-    const withinLimit = await this.checkRateLimit(user.id, 'create-order', 10, 60);
-    if (!withinLimit) {
-      throw new BusinessError('RATE_LIMITED', 'Demasiados pedidos en poco tiempo. Por favor espera un minuto.', 429);
-    }
+    try {
+      // Rate limiting: 10 pedidos por minuto por usuario
+      const withinLimit = await this.checkRateLimit(user.id, 'create-order', 10, 60);
+      if (!withinLimit) {
+        throw new BusinessError('RATE_LIMITED', 'Demasiados pedidos en poco tiempo. Por favor espera un minuto.', 429);
+      }
 
-    // 1. Validar payload con Zod
-    const validated = CreateOrderPayloadSchema.parse(body);
+      // 1. Validar payload con Zod
+      const validated = CreateOrderPayloadSchema.parse(body);
 
-    logger.info('Creating order', { userId: user.id, paymentMethod: validated.payment_method });
+      logger.info('Creating order', { userId: user.id, paymentMethod: validated.payment_method });
 
-    // 2. Verificar que la pasarela esté activa
-    const { data: gateway } = await this.dbAdmin
-      .from('payment_credentials')
-      .select('is_enabled')
-      .eq('gateway', validated.payment_method)
-      .single();
+      // 2. Verificar que la pasarela esté activa
+      const { data: gateway } = await this.dbAdmin
+        .from('payment_credentials')
+        .select('is_enabled')
+        .eq('gateway', validated.payment_method)
+        .single();
 
-    if (!gateway?.is_enabled) {
-      throw new BusinessError(
-        'GATEWAY_DISABLED',
-        `La pasarela ${validated.payment_method} no está disponible`,
-        400
+      if (!gateway?.is_enabled) {
+        throw new BusinessError(
+          'GATEWAY_DISABLED',
+          `La pasarela ${validated.payment_method} no está disponible`,
+          400
+        );
+      }
+
+      // 3. Crear orden atómicamente con bloqueo pesimista en productos
+      const { data: order, error } = await this.dbAdmin.rpc('create_order_atomic', {
+        p_customer_id: user.id,
+        p_shipping_address: validated.shipping_address,
+        p_items: validated.items,
+        p_payment_method: validated.payment_method
+      });
+
+      if (error) {
+        if (error.message.includes('INSUFFICIENT_STOCK')) {
+          throw new BusinessError('INSUFFICIENT_STOCK', 'Stock insuficiente para el producto solicitado', 400);
+        }
+        if (error.message.includes('PRODUCT_NOT_FOUND')) {
+          throw new BusinessError('PRODUCT_NOT_FOUND', 'Uno o más productos del carrito ya no están disponibles. Por favor recarga la tienda y vuelve a intentarlo.', 400);
+        }
+        throw new BusinessError('ORDER_CREATION_FAILED', error.message || 'Error al crear la orden en base de datos', 500);
+      }
+
+      const typedOrder = order as OrderRpcResult;
+
+      // 4. Crear Payment Intent en la pasarela seleccionada
+      const paymentResult = await this.createPaymentIntent(
+        validated.payment_method,
+        typedOrder,
+        user.email!
       );
+
+      logger.info('Order created successfully', {
+        orderId: typedOrder.order_id,
+        displayId: typedOrder.display_id
+      });
+
+      logger.metric('order.created', {
+        orderId: typedOrder.order_id,
+        gateway: validated.payment_method,
+        totalAmount: typedOrder.total_amount,
+        currency: typedOrder.currency,
+        durationMs: Date.now() - startTime,
+      });
+
+      return new Response(JSON.stringify({
+        orderId: typedOrder.order_id,
+        displayId: typedOrder.display_id,
+        totalAmount: typedOrder.total_amount,
+        currency: typedOrder.currency,
+        payment: paymentResult
+      }), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+        // CORS gestionado en BaseController.start()
+      });
+    } catch (error) {
+      const code = (error as { code?: string }).code ?? 'UNKNOWN_ERROR';
+      logger.metric('order.failed', {
+        errorCode: code,
+        durationMs: Date.now() - startTime,
+      });
+      throw error;
     }
-
-    // 3. Crear orden atómicamente con bloqueo pesimista en productos
-    const { data: order, error } = await this.dbAdmin.rpc('create_order_atomic', {
-      p_customer_id: user.id,
-      p_shipping_address: validated.shipping_address,
-      p_items: validated.items,
-      p_payment_method: validated.payment_method
-    });
-
-    if (error) {
-      if (error.message.includes('INSUFFICIENT_STOCK')) {
-        throw new BusinessError('INSUFFICIENT_STOCK', 'Stock insuficiente para el producto solicitado', 400);
-      }
-      if (error.message.includes('PRODUCT_NOT_FOUND')) {
-        throw new BusinessError('PRODUCT_NOT_FOUND', 'Uno o más productos del carrito ya no están disponibles. Por favor recarga la tienda y vuelve a intentarlo.', 400);
-      }
-      throw new BusinessError('ORDER_CREATION_FAILED', error.message || 'Error al crear la orden en base de datos', 500);
-    }
-
-    const typedOrder = order as OrderRpcResult;
-
-    // 4. Crear Payment Intent en la pasarela seleccionada
-    const paymentResult = await this.createPaymentIntent(
-      validated.payment_method,
-      typedOrder,
-      user.email!
-    );
-
-    logger.info('Order created successfully', {
-      orderId: typedOrder.order_id,
-      displayId: typedOrder.display_id
-    });
-
-    return new Response(JSON.stringify({
-      orderId: typedOrder.order_id,
-      displayId: typedOrder.display_id,
-      totalAmount: typedOrder.total_amount,
-      currency: typedOrder.currency,
-      payment: paymentResult
-    }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' }
-      // CORS gestionado en BaseController.start()
-    });
   }
 
   private async createPaymentIntent(

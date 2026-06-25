@@ -117,4 +117,28 @@ describe('create-order Edge Function', () => {
 
     expect(response.status).toBe(401);
   });
+
+  // PT-009: metric fire-and-forget — Logflare failure must not affect order response
+  it('returns 201 even when Logflare is unavailable (metric fire-and-forget)', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      status: 201,
+      json: async () => ({
+        orderId: 'order-uuid-metric-test',
+        displayId: 'ORD-002',
+        totalAmount: 99.99,
+        currency: 'MXN',
+        payment: { gateway: 'stripe', clientSecret: 'pi_secret_metric' },
+      }),
+    });
+
+    const response = await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: validToken },
+      body: JSON.stringify(validPayload),
+    });
+
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.orderId).toBeDefined();
+  });
 });
