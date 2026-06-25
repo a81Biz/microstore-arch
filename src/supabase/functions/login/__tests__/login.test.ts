@@ -126,4 +126,90 @@ describe('login Edge Function', () => {
     expect(response.status).toBe(429);
     expect(response.headers.get('Retry-After')).toBe('300');
   });
+
+  // PT-005: vendor_whitelist enforcement
+  it('returns 403 VENDOR_NOT_AUTHORIZED when vendor email not in whitelist', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      status: 403,
+      json: async () => ({
+        error: 'VENDOR_NOT_AUTHORIZED',
+        message: 'Tu cuenta de vendedor no está autorizada. Contacta al administrador.',
+      }),
+    });
+
+    const response = await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'unknown-vendor@test.com', password: 'pass123' }),
+    });
+
+    expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body.error).toBe('VENDOR_NOT_AUTHORIZED');
+  });
+
+  it('returns 403 VENDOR_NOT_AUTHORIZED when whitelist DB query fails (fail-closed)', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      status: 403,
+      json: async () => ({
+        error: 'VENDOR_NOT_AUTHORIZED',
+        message: 'Tu cuenta de vendedor no está autorizada. Contacta al administrador.',
+      }),
+    });
+
+    const response = await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'vendor@test.com', password: 'pass123' }),
+    });
+
+    expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body.error).toBe('VENDOR_NOT_AUTHORIZED');
+  });
+
+  it('returns 200 for VENDOR email present in whitelist', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      status: 200,
+      json: async () => ({
+        next_step: 'verify_totp',
+        temp_token: 'temp-jwt-abc',
+        refresh_token: 'refresh-abc',
+        message: 'Ingresa el código de Google Authenticator',
+      }),
+    });
+
+    const response = await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'whitelisted-vendor@test.com', password: 'vendorpass' }),
+    });
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.next_step).toBe('verify_totp');
+  });
+
+  it('returns 200 for CUSTOMER without whitelist check', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      status: 200,
+      json: async () => ({
+        next_step: 'complete',
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+        refresh_token: 'refresh-customer',
+        user: { id: 'u2', email: 'customer@test.com', role: 'customer' },
+      }),
+    });
+
+    const response = await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'customer@test.com', password: 'customerpass' }),
+    });
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.next_step).toBe('complete');
+    expect(body.user.role).toBe('customer');
+  });
 });
