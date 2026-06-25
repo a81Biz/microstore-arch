@@ -340,3 +340,16 @@ Delta vs Proposal Package:
   - Unexpected side effect: @supabase/supabase-js 2.105.4 installed via lockfile regeneration (not in spec-changes.md); mitigated with build-placeholder in storefront
   - Architecture confidence raised from 65% to 88% after reading Astro migration guides before STATE 2
 PTSA reference: H-013 → CERRADA (7 HIGH CVEs resolved; D2 unblocked)
+
+---
+
+## PT-020 — FEATURE TRIVIAL: npm audit CI gate
+Date: 2026-06-25
+Status: DONE
+Branch: feature/PT-020-audit-ci-gate
+Objective: Block merges that introduce HIGH or CRITICAL CVEs via CI gate
+Solution: Added `npm audit --audit-level=high` step to .github/workflows/ci.yml immediately after `npm ci`. Gate confirmed functional locally (returns exit 1 on main with astro@5 HIGH CVEs).
+Modified files:
+  - .github/workflows/ci.yml (1 step added: Security Audit)
+Evidence: docs/implementation/evidence/PT-020/
+Delta: No deviations from plan. Merge order dependency noted: PT-020 after PT-014.
