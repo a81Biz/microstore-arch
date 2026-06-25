@@ -40,10 +40,23 @@ export function createLogger(functionName: string) {
     }
   };
 
+  const metric = (event: string, data: Record<string, unknown> = {}) => {
+    console.info(`[METRIC][${functionName}] ${event} ${JSON.stringify(data)}`);
+    // Always send metrics to Logflare (not gated by warn/error filter like baseLog)
+    if (logflare) {
+      logflare.sendLog('metric', event, {
+        type: 'metric',
+        function_name: functionName,
+        ...data,
+      }).catch(err => console.error('Logflare metric error:', err));
+    }
+  };
+
   return {
-    debug: (msg: string, ctx?: Record<string, unknown>) => baseLog('debug', msg, ctx),
-    info:  (msg: string, ctx?: Record<string, unknown>) => baseLog('info', msg, ctx),
-    warn:  (msg: string, ctx?: Record<string, unknown>) => baseLog('warn', msg, ctx),
-    error: (msg: string, ctx?: Record<string, unknown>) => baseLog('error', msg, ctx),
+    debug:  (msg: string, ctx?: Record<string, unknown>) => baseLog('debug', msg, ctx),
+    info:   (msg: string, ctx?: Record<string, unknown>) => baseLog('info', msg, ctx),
+    warn:   (msg: string, ctx?: Record<string, unknown>) => baseLog('warn', msg, ctx),
+    error:  (msg: string, ctx?: Record<string, unknown>) => baseLog('error', msg, ctx),
+    metric,
   };
 }

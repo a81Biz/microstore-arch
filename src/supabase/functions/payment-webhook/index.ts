@@ -125,27 +125,43 @@ async function verifyHeyBancoSignature(
 class PaymentWebhookController extends BaseController {
 
   async handle(req: Request): Promise<Response> {
+    const startTime = Date.now();
     const url = new URL(req.url);
     const gateway = url.pathname.split('/').pop();
     const body = await req.text();
 
     let result;
 
-    switch (gateway) {
-      case 'stripe':
-        result = await this.handleStripeWebhook(body, req.headers);
-        break;
-      case 'paypal':
-        result = await this.handlePayPalWebhook(body, req.headers);
-        break;
-      case 'mercadopago':
-        result = await this.handleMercadoPagoWebhook(body, req.headers);
-        break;
-      case 'hey_banco':
-        result = await this.handleHeyBancoWebhook(body, req.headers);
-        break;
-      default:
-        throw new BusinessError('INVALID_GATEWAY', 'Pasarela no soportada', 400);
+    try {
+      switch (gateway) {
+        case 'stripe':
+          result = await this.handleStripeWebhook(body, req.headers);
+          break;
+        case 'paypal':
+          result = await this.handlePayPalWebhook(body, req.headers);
+          break;
+        case 'mercadopago':
+          result = await this.handleMercadoPagoWebhook(body, req.headers);
+          break;
+        case 'hey_banco':
+          result = await this.handleHeyBancoWebhook(body, req.headers);
+          break;
+        default:
+          throw new BusinessError('INVALID_GATEWAY', 'Pasarela no soportada', 400);
+      }
+
+      logger.metric('payment.webhook.processed', {
+        gateway,
+        durationMs: Date.now() - startTime,
+      });
+    } catch (error) {
+      const code = (error as { code?: string }).code ?? 'UNKNOWN_ERROR';
+      logger.metric('payment.webhook.failed', {
+        gateway,
+        errorCode: code,
+        durationMs: Date.now() - startTime,
+      });
+      throw error;
     }
 
     return new Response(JSON.stringify(result), {
