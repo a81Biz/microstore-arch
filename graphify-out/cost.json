@@ -62,6 +62,13 @@
       "input_tokens": 0,
       "output_tokens": 0,
       "files": 144
+    },
+    {
+      "date": "2026-06-25T05:05:57.317037+00:00",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "files": 27,
+      "mode": "--update (code-only)"
     }
   ],
   "total_input_tokens": 133333,
