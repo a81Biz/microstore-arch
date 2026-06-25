@@ -72,7 +72,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
                   </div>
                   <!-- CTA directa si eligió dirección guardada -->
                   <template x-if="selectedAddressId !== 'new'">
-                    <div class="form-actions" style="margin-top: 1.5rem;">
+                    <div class="form-actions form-actions--spaced">
                       <button type="button" @click="nextToPayment()" class="btn-primary">Continuar al pago</button>
                     </div>
                   </template>
@@ -81,7 +81,7 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
 
               <!-- Formulario: nueva dirección (siempre visible si no hay guardadas; condicional si las hay) -->
               <template x-if="savedAddresses.length === 0 || selectedAddressId === 'new'">
-                <form @submit.prevent="nextToPayment()" class="form-stack" style="margin-top: 1.5rem;" novalidate>
+                <form @submit.prevent="nextToPayment()" class="form-stack form-stack--spaced" novalidate>
                   <div class="form-group">
                     <label for="street">Calle y número</label>
                     <input type="text" id="street" x-model="shipping.street" required placeholder="Av. Siempre Viva 123" />
@@ -523,6 +523,8 @@ import ClientHubLayout from '../../layouts/ClientHubLayout.astro';
   .card-subtitle { color: #64748b; margin-bottom: 2rem; }
 
   .form-stack { display: flex; flex-direction: column; gap: 1.5rem; }
+  .form-stack--spaced { margin-top: 1.5rem; }
+  .form-actions--spaced { margin-top: 1.5rem; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
   .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
   .form-group label { font-size: 0.875rem; font-weight: 600; color: #475569; }

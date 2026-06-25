@@ -64,6 +64,11 @@ class ManageCartController extends BaseController {
       });
     }
 
+    const uniqueProductIds = new Set(items.map(i => i.product_id));
+    if (uniqueProductIds.size > 15) {
+      throw new BusinessError('VALIDATION_ERROR', 'Cart cannot exceed 15 items', 400);
+    }
+
     // UPSERT: keeps GREATEST quantity to avoid overwriting a larger server cart.
     const rows = items.map(i => ({ user_id: user.id, product_id: i.product_id, quantity: i.quantity, updated_at: new Date().toISOString() }));
 

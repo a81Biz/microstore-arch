@@ -224,7 +224,7 @@ const imagesJson = JSON.stringify(images);
       @keydown.escape.window="closeLightbox()"
       @keydown.arrow-left.window="lightboxOpen && prevImage()"
       @keydown.arrow-right.window="lightboxOpen && nextImage()"
-      style="display:none"
+      x-show="lightboxOpen"
     >
       <button class="lightbox-prev" type="button" @click="prevImage()" aria-label="Imagen anterior">‹</button>
       <img :src="images[activeIdx]" :alt="productName" class="lightbox-img" />
