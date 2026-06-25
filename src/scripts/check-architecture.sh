@@ -36,14 +36,18 @@ echo "1. Verificando HTML en archivos TypeScript puros..."
 HTML_IN_TS=$(grep -rE '<[a-z][a-z0-9]*[^>]*>|</[a-z][a-z0-9]*>' \
   src/apps/ src/supabase/functions/ \
   --include="*.ts" \
+  --exclude="*.d.ts" \
   --exclude-dir="__tests__" \
+  --exclude-dir=".astro" \
   --exclude-dir="send-order-email" \
   --exclude-dir="send-shipping-email" \
+  --exclude-dir="send-delivery-email" \
+  --exclude-dir="send-status-email" \
   --exclude="*.test.ts" \
   --exclude="sitemap.xml.ts" \
   --exclude="robots.txt.ts" \
   | grep -v "node_modules" \
-  | grep -v "export type\|interface\|Promise<\|Record<\|z\.infer" \
+  | grep -v "export type\|interface\|Promise<\|Record<\|z\.infer\|Omit<\|Array<" \
   | wc -l || true)
 
 check_violation "HTML real en archivos .ts puros" "$HTML_IN_TS" ""
@@ -56,6 +60,7 @@ echo "2. Verificando estilos inline en .astro..."
 
 INLINE_STYLES=$(grep -rE 'style="[^"]*"' \
   src/apps/ --include="*.astro" \
+  --exclude-dir=".astro" \
   | grep -v "node_modules" \
   | wc -l || true)
 
