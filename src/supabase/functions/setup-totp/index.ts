@@ -41,14 +41,18 @@ serve(async (req: Request) => {
 
     const otpauthUrl = totp.toString();
 
-    // 3. Guardar secreto (base32) en el perfil — totp_enabled permanece false hasta confirmación
-    const { error: updateError } = await supabaseAdmin
-      .from('profiles')
-      .update({
-        totp_secret: secret.base32,
-        totp_enabled: false,
-      })
-      .eq('id', user.id);
+    // 3. Guardar secreto cifrado — pgp_sym_encrypt vía RPC (mismo patrón que save_gateway_credentials_secure)
+    const encryptionKey = Deno.env.get('ENCRYPTION_KEY');
+    if (!encryptionKey || encryptionKey.length < 32) {
+      logger.error('ENCRYPTION_KEY not configured or too short');
+      throw new Error('Error de configuración del servidor: ENCRYPTION_KEY requerida');
+    }
+
+    const { error: updateError } = await supabaseAdmin.rpc('save_totp_secret_secure', {
+      p_user_id: user.id,
+      p_secret: secret.base32,
+      p_encryption_key: encryptionKey,
+    });
 
     if (updateError) {
       logger.error('Failed to save TOTP secret', { error: updateError });
