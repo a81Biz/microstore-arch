@@ -63,7 +63,10 @@ describe('Stripe Webhook Signature Verification', () => {
   it('rechaza firma manipulada', async () => {
     const timestamp = Math.floor(Date.now() / 1000);
     const validSig = await computeStripeSignature(VALID_BODY, WEBHOOK_SECRET, timestamp);
-    const tamperedSig = validSig.slice(0, -2) + '00';
+    // Use a suffix guaranteed different from the original last 2 chars to avoid flaky failure
+    // when the HMAC result happens to end in '00'.
+    const suffix = validSig.slice(-2) === '00' ? 'ff' : '00';
+    const tamperedSig = validSig.slice(0, -2) + suffix;
 
     expect(tamperedSig).not.toBe(validSig);
   });
