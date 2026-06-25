@@ -75,9 +75,27 @@ serve(async (req: Request) => {
       throw new UnauthorizedError('Perfil no encontrado');
     }
 
+    // 3. Vendor whitelist check — fail-closed (DB error → deny)
+    if (profile.role === 'vendor') {
+      const { data: whitelisted, error: wlError } = await supabaseAdmin
+        .from('vendor_whitelist')
+        .select('email')
+        .eq('email', email.toLowerCase())
+        .maybeSingle();
+
+      if (wlError || !whitelisted) {
+        logger.warn('Vendor not in whitelist', { email, ip });
+        throw new BusinessError(
+          'VENDOR_NOT_AUTHORIZED',
+          'Tu cuenta de vendedor no está autorizada. Contacta al administrador.',
+          403
+        );
+      }
+    }
+
     const disableTotp = Deno.env.get("DISABLE_TOTP") === "true";
 
-    // 3. Vendor sin contraseña cambiada → forzar cambio en primer ingreso
+    // 4. Vendor sin contraseña cambiada → forzar cambio en primer ingreso
     if (profile.role === 'vendor' && !profile.password_changed_at) {
       logger.info('Vendor must change password', { userId: authData.user.id });
       return new Response(JSON.stringify({
