@@ -22,7 +22,7 @@
 
 **Validación:** `npm run test --workspaces --if-present` → manage-payment-gateways tests GREEN, resto sin regresión.
 
-**Status:** PENDING
+**Status:** DONE ✅
 
 ---
 
@@ -40,7 +40,7 @@
 
 **Validación:** Suite completa pasa sin regresión.
 
-**Status:** PENDING
+**Status:** DONE ✅
 
 ---
 
@@ -59,7 +59,7 @@
 
 **Validación:** Suite completa pasa sin regresión.
 
-**Status:** PENDING
+**Status:** DONE ✅
 
 ---
 
@@ -75,7 +75,7 @@
 
 **Validación:** Captura de output como evidencia (evidence/PT-023/).
 
-**Status:** PENDING
+**Status:** DONE ✅
 
 ---
 
