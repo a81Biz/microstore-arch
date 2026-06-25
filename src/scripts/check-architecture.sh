@@ -13,123 +13,117 @@ NC='\033[0m'
 check_violation() {
   local description=$1
   local count=$2
-  local details=$3
 
   if [ "$count" -gt 0 ]; then
     echo -e "${RED}❌ VIOLACIÓN: $description${NC}"
-    if [ -n "$details" ]; then
-      echo "$details" | head -10
-    fi
     VIOLATIONS_FOUND=$((VIOLATIONS_FOUND + 1))
   else
     echo -e "${GREEN}✅ OK: $description${NC}"
   fi
 }
 
+# count_matches: find files + grep pattern, returns integer (0 if no matches/no files)
+# Uses find|xargs for Alpine/BusyBox compatibility (no --include/--exclude-dir in BusyBox grep)
+# Uses set +o pipefail so grep exiting 1 (no matches) does not abort the pipeline
+count_matches() {
+  local result
+  result=$(set +o pipefail
+    find "$@" 2>/dev/null | xargs grep -E "$GREP_PATTERN" 2>/dev/null | grep -vE "$GREP_EXCLUDE" | wc -l
+  )
+  printf '%d' "${result:-0}" 2>/dev/null || echo 0
+}
+
 # =============================================================================
-# 1. Verificar HTML en archivos TypeScript puros (.ts, NO .astro)
-# EXCLUYE: archivos que generan XML/JSON (sitemap, robots), tests, y tipos
+# 1. HTML en archivos TypeScript puros (.ts, NO .astro)
 # =============================================================================
 echo ""
 echo "1. Verificando HTML en archivos TypeScript puros..."
 
-HTML_IN_TS=$(grep -rE '<[a-z][a-z0-9]*[^>]*>|</[a-z][a-z0-9]*>' \
-  src/apps/ src/supabase/functions/ \
-  --include="*.ts" \
-  --exclude="*.d.ts" \
-  --exclude-dir="__tests__" \
-  --exclude-dir=".astro" \
-  --exclude-dir="send-order-email" \
-  --exclude-dir="send-shipping-email" \
-  --exclude-dir="send-delivery-email" \
-  --exclude-dir="send-status-email" \
-  --exclude="*.test.ts" \
-  --exclude="sitemap.xml.ts" \
-  --exclude="robots.txt.ts" \
-  | grep -v "node_modules" \
-  | grep -v "export type\|interface\|Promise<\|Record<\|z\.infer\|Omit<\|Array<" \
-  | wc -l || true)
+GREP_PATTERN='<[a-z][a-z0-9]*[^>]*>|</[a-z][a-z0-9]*>'
+GREP_EXCLUDE='export type|interface|Promise<|Record<|z\.infer|Omit<|Array<'
 
-check_violation "HTML real en archivos .ts puros" "$HTML_IN_TS" ""
+HTML_IN_TS=$(count_matches \
+  src/apps/ src/supabase/functions/ \
+  -type f \
+  -name "*.ts" \
+  -not -name "*.d.ts" \
+  -not -name "*.test.ts" \
+  -not -name "sitemap.xml.ts" \
+  -not -name "robots.txt.ts" \
+  -not -path "*/.astro/*" \
+  -not -path "*/__tests__/*" \
+  -not -path "*/node_modules/*" \
+  -not -path "*/send-order-email/*" \
+  -not -path "*/send-shipping-email/*" \
+  -not -path "*/send-delivery-email/*" \
+  -not -path "*/send-status-email/*")
+
+check_violation "HTML real en archivos .ts puros" "$HTML_IN_TS"
 
 # =============================================================================
-# 2. Verificar estilos inline en .astro
+# 2. Estilos inline en .astro
 # =============================================================================
 echo ""
 echo "2. Verificando estilos inline en .astro..."
 
-INLINE_STYLES=$(grep -rE 'style="[^"]*"' \
-  src/apps/ --include="*.astro" \
-  --exclude-dir=".astro" \
-  | grep -v "node_modules" \
-  | wc -l || true)
+GREP_PATTERN='style="[^"]*"'
+GREP_EXCLUDE='^$'
 
-check_violation "Estilos inline (style=\"...\") en .astro" "$INLINE_STYLES" ""
+INLINE_STYLES=$(count_matches \
+  src/apps/ \
+  -type f \
+  -name "*.astro" \
+  -not -path "*/.astro/*" \
+  -not -path "*/node_modules/*")
+
+check_violation "Estilos inline (style=\"...\") en .astro" "$INLINE_STYLES"
 
 # =============================================================================
-# 3. Verificar magic strings para estados de orden
-# EXCLUYE: tests, definiciones de enums, tipos, y comparaciones legítimas
+# 3. Magic strings para estados de orden
 # =============================================================================
 echo ""
 echo "3. Verificando magic strings para estados de orden..."
 
-# Buscar strings literales de estados que NO estén:
-# - En archivos de test
-# - En definiciones de enums
-# - En imports/exports de enums
-# - En tipos TypeScript (string literals en interfaces)
-# - En comparaciones con variables (order.status !== 'pending' es OK si viene de BD)
+GREP_PATTERN="(^|[^a-zA-Z_])'(pending|paid|in_production|shipped|delivered|cancelled|refunded)'"
+GREP_EXCLUDE='enum OrderStatus|export enum|from.*enums|import.*OrderStatus|type.*=.*'"'"'|z\.enum|nativeEnum|status:.*'"'"'|fulfillmentStatus:.*'"'"'|: OrderStatus|: ItemFulfillmentStatus|OrderStatus\.|ItemFulfillmentStatus\.'
 
-MAGIC_STRINGS=$(grep -rnE "(^|[^a-zA-Z_])'(pending|paid|in_production|shipped|delivered|cancelled|refunded)'" \
+MAGIC_STRINGS=$(count_matches \
   src/apps/ src/packages/core/src/ \
-  --include="*.ts" --include="*.astro" \
-  --exclude-dir="__tests__" \
-  --exclude="*.test.ts" \
-  | grep -v "enum OrderStatus\|export enum\|from.*enums\|import.*OrderStatus" \
-  | grep -v "type.*=.*'\|interface.*:\s*'\|z\.enum\|nativeEnum" \
-  | grep -v "status:\s*'\|fulfillmentStatus:\s*'\|: OrderStatus\|: ItemFulfillmentStatus" \
-  | grep -v "OrderStatus\.\|ItemFulfillmentStatus\." \
-  | grep -v "packages/core/src/enums/" \
-  | wc -l || true)
+  -type f \
+  \( -name "*.ts" -o -name "*.astro" \) \
+  -not -name "*.test.ts" \
+  -not -path "*/__tests__/*" \
+  -not -path "*/node_modules/*" \
+  -not -path "*/enums/*")
 
 if [ "$MAGIC_STRINGS" -gt 0 ]; then
   echo -e "${YELLOW}⚠️  Posibles magic strings encontrados ($MAGIC_STRINGS ocurrencias)${NC}"
-  echo "Revisa que no sean usos legítimos (tests, tipos, imports):"
-  grep -rnE "(^|[^a-zA-Z_])'(pending|paid|shipped|delivered|cancelled)'" \
-    src/apps/ src/packages/core/src/ \
-    --include="*.ts" --include="*.astro" \
-    --exclude-dir="__tests__" \
-    --exclude="*.test.ts" \
-    | grep -v "enum OrderStatus\|from.*enums\|import.*OrderStatus" \
-    | grep -v "type.*=.*'\|interface.*:\s*'\|z\.enum" \
-    | grep -v "packages/core/src/enums/" \
-    | head -5
-  # No fallar el build por esto, solo advertir
-  # VIOLATIONS_FOUND=$((VIOLATIONS_FOUND + 1))
 else
   echo -e "${GREEN}✅ OK: No se encontraron magic strings problemáticas${NC}"
 fi
 
 # =============================================================================
-# 4. Verificar acceso directo a Supabase en frontend para escritura
+# 4. Escritura directa a Supabase en frontend
 # =============================================================================
 echo ""
 echo "4. Verificando acceso directo a Supabase para escritura..."
 
-# Permitir createClient en supabase-client.ts, pero no en otras ubicaciones
-# Solo verificar operaciones de escritura reales (.from() se usa también para lecturas con .select())
-DIRECT_SUPABASE_WRITE=$(grep -rE "\.insert\(|\.update\(|\.delete\(|\.upsert\(" \
-  src/apps/*/src/ \
-  --include="*.ts" \
-  | grep -v "supabase-client\.ts" \
-  | grep -v "node_modules" \
-  | grep -v "\.test\.ts\|__tests__" \
-  | wc -l || true)
+GREP_PATTERN='\.insert\(|\.update\(|\.delete\(|\.upsert\('
+GREP_EXCLUDE='^$'
 
-check_violation "Escritura directa a BD fuera de Edge Functions" "$DIRECT_SUPABASE_WRITE" ""
+DIRECT_SUPABASE_WRITE=$(count_matches \
+  src/apps/ \
+  -type f \
+  -name "*.ts" \
+  -not -name "supabase-client.ts" \
+  -not -name "*.test.ts" \
+  -not -path "*/__tests__/*" \
+  -not -path "*/node_modules/*")
+
+check_violation "Escritura directa a BD fuera de Edge Functions" "$DIRECT_SUPABASE_WRITE"
 
 # =============================================================================
-# 5. Verificar integridad del core (sin dependencias de frontend/backend)
+# 5. Core purity — sin dependencias de frontend/backend
 # =============================================================================
 echo ""
 echo "5. Verificando que @micro-store/core sea puro..."
